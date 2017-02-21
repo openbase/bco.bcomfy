@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BComfy</string>
+    <string name="tango_out_of_date_exception">Tango Service outdated!</string>
+    <string name="tango_error">Tango Exception! Try again!</string>
+    <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
+    <string name="no_permissions">Permission not granted!</string>
+    <string name="gui_connect_bco">Connecting to BCO...</string>
+    <string name="gui_cancel">Cancel</string>
+</resources>
