@@ -1,18 +1,29 @@
 package org.openbase.bco.bcomfy;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
+import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.rajawali3d.Object3D;
+import org.rajawali3d.lights.PointLight;
 import org.rajawali3d.materials.Material;
+import org.rajawali3d.materials.methods.DiffuseMethod;
+import org.rajawali3d.materials.methods.SpecularMethod;
 import org.rajawali3d.materials.textures.ATexture;
+import org.rajawali3d.materials.textures.SphereMapTexture;
 import org.rajawali3d.materials.textures.StreamingTexture;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
+import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.primitives.ScreenQuad;
+import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
 public class InitRenderer extends Renderer {
@@ -53,6 +64,12 @@ public class InitRenderer extends Renderer {
             Log.e(TAG, "Exception creating texture for RGB camera contents", e);
         }
         getCurrentScene().addChildAt(backgroundQuad, 0);
+
+        PointLight pointLight = new PointLight();
+        pointLight.setColor(Color.WHITE);
+        pointLight.setPower(0.8f);
+        pointLight.setPosition(0, 0, 0);
+        getCurrentScene().addLight(pointLight);
     }
 
     @Override
@@ -61,7 +78,7 @@ public class InitRenderer extends Renderer {
     }
 
     @Override
-    public void onTouchEvent(MotionEvent event) {
+    public void onTouchEvent(MotionEvent motionEvent) {
 
     }
 
@@ -122,5 +139,36 @@ public class InitRenderer extends Renderer {
      */
     public void setProjectionMatrix(float[] matrixFloats) {
         getCurrentCamera().setProjectionMatrix(new Matrix4(matrixFloats));
+    }
+
+    public void insertSphereOnCurrentPosition() {
+        Material debugSphereMaterial = new Material();
+        debugSphereMaterial.setColor(Color.GRAY);
+        debugSphereMaterial.enableLighting(true);
+        debugSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        debugSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
+
+        Object3D debugSphere = new Sphere(0.2f, 20, 20);
+        debugSphere.setMaterial(debugSphereMaterial);
+        debugSphere.setPosition(getCurrentCamera().getPosition());
+        getCurrentScene().addChild(debugSphere);
+    }
+
+    public void insertPlane(float[] planeFitTransform) {
+        Log.e(TAG, "inserting plane");
+
+        Material planeMaterial = new Material();
+        planeMaterial.setColor(Color.BLUE);
+        planeMaterial.enableLighting(true);
+        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+
+        Matrix4 planeMatrix = new Matrix4(planeFitTransform);
+
+        Object3D plane = new Plane(1, 1, 10, 10);
+        plane.setMaterial(planeMaterial);
+        plane.setPosition(planeMatrix.getTranslation());
+        plane.setOrientation(new Quaternion().fromMatrix(planeMatrix));
+        getCurrentScene().addChild(plane);
     }
 }

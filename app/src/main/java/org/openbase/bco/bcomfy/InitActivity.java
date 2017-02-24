@@ -13,19 +13,24 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.Tango.TangoUpdateCallback;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
 import com.google.atap.tangoservice.TangoEvent;
+import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
+import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.rajawali3d.scene.ASceneFrameCallback;
@@ -34,8 +39,9 @@ import org.rajawali3d.view.SurfaceView;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class InitActivity extends Activity {
+public class InitActivity extends Activity implements View.OnTouchListener{
     private static final String TAG = InitActivity.class.getSimpleName();
+    private static final int INVALID_TEXTURE_ID = 0;
 
     private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
     private static final int CAMERA_PERMISSION_CODE = 0;
@@ -44,6 +50,7 @@ public class InitActivity extends Activity {
     private InitRenderer initRenderer;
     private Tango tango;
     private TangoConfig tangoConfig;
+    private TangoPointCloudManager tangoPointCloudManager;
     private boolean isConnected = false;
     private double cameraPoseTimestamp = 0;
 
@@ -60,7 +67,9 @@ public class InitActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
         surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
+        surfaceView.setOnTouchListener(this);
         initRenderer = new InitRenderer(this);
+        tangoPointCloudManager = new TangoPointCloudManager();
 
         DisplayManager displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
         if (displayManager != null) {
@@ -99,6 +108,69 @@ public class InitActivity extends Activity {
         if (checkAndRequestPermissions()) {
             bindTangoService();
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        surfaceView.onPause();
+        // Synchronize against disconnecting while the service is being used in the OpenGL thread or
+        // in the UI thread.
+        // NOTE: DO NOT lock against this same object in the Tango callback thread. Tango.disconnect
+        // will block here until all Tango callback calls are finished. If you lock against this
+        // object in a Tango callback thread it will cause a deadlock.
+        synchronized (this) {
+            if (isConnected) {
+                try {
+                    isConnected = false;
+                    tango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                    // We need to invalidate the connected texture ID so that we cause a
+                    // re-connection in the OpenGL thread after resume.
+                    connectedTextureIdGlThread = INVALID_TEXTURE_ID;
+                    tango.disconnect();
+                    tango = null;
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, getString(R.string.tango_error), e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            // Calculate click location in u,v (0;1) coordinates.
+            float u = motionEvent.getX() / view.getWidth();
+            float v = motionEvent.getY() / view.getHeight();
+
+            Log.e(TAG, "u: " + u + ", v: " + v);
+
+            try {
+                // Fit a plane on the clicked point using the latest point cloud data
+                // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
+                // and a possible service disconnection due to an onPause event.
+                float[] planeFitTransform;
+                synchronized (this) {
+                    planeFitTransform = doFitPlane(u, v, rgbTimestampGlThread);
+                }
+
+                if (planeFitTransform != null) {
+                    initRenderer.insertPlane(planeFitTransform);
+                }
+
+            } catch (TangoException t) {
+                Toast.makeText(getApplicationContext(),
+                        R.string.tango_error,
+                        Toast.LENGTH_SHORT).show();
+                Log.e(TAG, getString(R.string.tango_error), t);
+            } catch (SecurityException t) {
+                Toast.makeText(getApplicationContext(),
+                        R.string.no_permissions,
+                        Toast.LENGTH_SHORT).show();
+                Log.e(TAG, getString(R.string.no_permissions), t);
+            }
+        }
+        return true;
     }
 
     /**
@@ -155,6 +227,8 @@ public class InitActivity extends Activity {
         // The drift corrected pose is is available through the frame pair with
         // base frame AREA_DESCRIPTION and target frame DEVICE.
         config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
         return config;
     }
 
@@ -189,6 +263,12 @@ public class InitActivity extends Activity {
                     // Trigger an Rajawali render to update the scene with the new RGB data.
                     surfaceView.requestRender();
                 }
+            }
+
+            @Override
+            public void onPointCloudAvailable(TangoPointCloudData pointCloud) {
+                // Save the cloud and point data for later use.
+                tangoPointCloudManager.updatePointCloud(pointCloud);
             }
         });
     }
@@ -356,6 +436,124 @@ public class InitActivity extends Activity {
     }
 
     /**
+     * Use the TangoSupport library with point cloud data to calculate the plane
+     * of the world feature pointed at the location the camera is looking.
+     * It returns the transform of the fitted plane in a double array.
+     */
+    private float[] doFitPlane(float u, float v, double rgbTimestamp) {
+        TangoPointCloudData pointCloud = tangoPointCloudManager.getLatestPointCloud();
+
+        if (pointCloud == null) {
+            Log.e(TAG, "PointCloud == null");
+            return null;
+        }
+
+        // We need to calculate the transform between the color camera at the
+        // time the user clicked and the depth camera at the time the depth
+        // cloud was acquired.
+        TangoPoseData depthTcolorPose = TangoSupport.calculateRelativePose(
+                pointCloud.timestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                rgbTimestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR);
+
+        // Perform plane fitting with the latest available point cloud data.
+        double[] identityTranslation = {0.0, 0.0, 0.0};
+        double[] identityRotation = {0.0, 0.0, 0.0, 1.0};
+        TangoSupport.IntersectionPointPlaneModelPair intersectionPointPlaneModelPair =
+                TangoSupport.fitPlaneModelNearPoint(pointCloud,
+                        identityTranslation, identityRotation, u, v, displayRotation,
+                        depthTcolorPose.translation, depthTcolorPose.rotation);
+
+        // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
+        TangoSupport.TangoMatrixTransformData transform =
+                TangoSupport.getMatrixTransformAtTime(pointCloud.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                        TangoSupport.ROTATION_IGNORED);
+        if (transform.statusCode == TangoPoseData.POSE_VALID) {
+            float[] openGlTPlane = calculatePlaneTransform(
+                    intersectionPointPlaneModelPair.intersectionPoint,
+                    intersectionPointPlaneModelPair.planeModel, transform.matrix);
+
+            return openGlTPlane;
+        } else {
+            Log.w(TAG, "Can't get depth camera transform at time " + pointCloud.timestamp);
+            return null;
+        }
+    }
+
+    /**
+     * Calculate the pose of the plane based on the position and normal orientation of the plane
+     * and align it with gravity.
+     */
+    private float[] calculatePlaneTransform(double[] point, double normal[],
+                                            float[] openGlTdepth) {
+        // Vector aligned to gravity.
+        float[] openGlUp = new float[]{0, 1, 0, 0};
+        float[] depthTOpenGl = new float[16];
+        Matrix.invertM(depthTOpenGl, 0, openGlTdepth, 0);
+        float[] depthUp = new float[4];
+        Matrix.multiplyMV(depthUp, 0, depthTOpenGl, 0, openGlUp, 0);
+        // Create the plane matrix transform in depth frame from a point, the plane normal and the
+        // up vector.
+        float[] depthTplane = matrixFromPointNormalUp(point, normal, depthUp);
+        float[] openGlTplane = new float[16];
+        Matrix.multiplyMM(openGlTplane, 0, openGlTdepth, 0, depthTplane, 0);
+        return openGlTplane;
+    }
+
+    /**
+     * Calculates a transformation matrix based on a point, a normal and the up gravity vector.
+     * The coordinate frame of the target transformation will a right handed system with Z+ in
+     * the direction of the normal and Y+ up.
+     */
+    private float[] matrixFromPointNormalUp(double[] point, double[] normal, float[] up) {
+        float[] zAxis = new float[]{(float) normal[0], (float) normal[1], (float) normal[2]};
+        normalize(zAxis);
+        float[] xAxis = crossProduct(up, zAxis);
+        normalize(xAxis);
+        float[] yAxis = crossProduct(zAxis, xAxis);
+        normalize(yAxis);
+        float[] m = new float[16];
+        Matrix.setIdentityM(m, 0);
+        m[0] = xAxis[0];
+        m[1] = xAxis[1];
+        m[2] = xAxis[2];
+        m[4] = yAxis[0];
+        m[5] = yAxis[1];
+        m[6] = yAxis[2];
+        m[8] = zAxis[0];
+        m[9] = zAxis[1];
+        m[10] = zAxis[2];
+        m[12] = (float) point[0];
+        m[13] = (float) point[1];
+        m[14] = (float) point[2];
+        return m;
+    }
+
+    /**
+     * Normalize a vector.
+     */
+    private void normalize(float[] v) {
+        double norm = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        v[0] /= norm;
+        v[1] /= norm;
+        v[2] /= norm;
+    }
+
+    /**
+     * Cross product between two vectors following the right hand rule.
+     */
+    private float[] crossProduct(float[] v1, float[] v2) {
+        float[] result = new float[3];
+        result[0] = v1[1] * v2[2] - v2[1] * v1[2];
+        result[1] = v1[2] * v2[0] - v2[2] * v1[0];
+        result[2] = v1[0] * v2[1] - v2[0] * v1[1];
+        return result;
+    }
+
+    /**
      * Check we have the necessary permissions for this app, and ask for them if we haven't.
      *
      * @return True if we have the necessary permissions, false if we haven't.
@@ -434,5 +632,9 @@ public class InitActivity extends Activity {
                 finish();
             }
         });
+    }
+
+    public void onDebugButtonClicked(View v) {
+        initRenderer.insertSphereOnCurrentPosition();
     }
 }
