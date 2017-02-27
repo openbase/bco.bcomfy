@@ -107,8 +107,15 @@ public class StartActivity extends Activity {
 //        }
     }
 
-    public void onButtonCancelClicked(View v) {
+    public void onButtonRecordClicked(View v) {
         Intent intent = new Intent(this, InitActivity.class);
+        intent.putExtra("load", false);
+        startActivity(intent);
+    }
+
+    public void onButtonLoadClicked(View v) {
+        Intent intent = new Intent(this, InitActivity.class);
+        intent.putExtra("load", true);
         startActivity(intent);
     }
 

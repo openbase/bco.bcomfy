@@ -46,14 +46,23 @@
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25" />
+        android:layout_weight="0.09" />
 
     <Button
-        android:text="@android:string/cancel"
+        android:text="@string/record_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button"
+        android:id="@+id/button_record"
         android:textAlignment="center"
         android:layout_gravity="center_horizontal"
-        android:onClick="onButtonCancelClicked" />
+        android:onClick="onButtonRecordClicked" />
+
+    <Button
+        android:text="@string/load_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_load"
+        android:textAlignment="center"
+        android:layout_gravity="center_horizontal"
+        android:onClick="onButtonLoadClicked" />
 </LinearLayout>

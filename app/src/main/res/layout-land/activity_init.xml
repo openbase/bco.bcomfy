@@ -13,14 +13,38 @@
         android:layout_gravity="top" />
 
     <Button
-        android:text="@android:string/untitled"
-        android:layout_width="wrap_content"
+        android:text="@string/gui_save_location"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="50dp"
-        android:layout_marginTop="50dp"
+        android:layout_below="@+id/button2"
+        android:layout_alignStart="@+id/button2"
+        android:layout_marginTop="21dp"
+        android:id="@+id/button3"
+        android:drawableLeft="@android:drawable/ic_menu_save"
+        android:onClick="onSaveLocationClicked"
+        android:layout_width="150dp" />
+
+    <Button
+        android:text="@string/gui_place_sphere"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="34dp"
+        android:layout_marginTop="34dp"
         android:id="@+id/button2"
+        android:onClick="onPlaceSphereClicked"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:onClick="onDebugButtonClicked" />
+        android:drawableLeft="@android:drawable/ic_menu_add"
+        android:layout_width="150dp" />
+
+    <ToggleButton
+        android:text="ToggleButton"
+        android:layout_height="wrap_content"
+        android:id="@+id/toggleButton"
+        android:layout_width="150dp"
+        android:checked="false"
+        android:textOn="Localized"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/button3"
+        android:layout_marginBottom="30dp"
+        android:clickable="false" />
 
 </RelativeLayout>

@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
@@ -16,6 +17,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.TangoUpdateCallback;
@@ -36,7 +38,14 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.TooManyListenersException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InitActivity extends Activity implements View.OnTouchListener{
@@ -51,8 +60,12 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     private Tango tango;
     private TangoConfig tangoConfig;
     private TangoPointCloudManager tangoPointCloudManager;
+    private boolean isLoadingLocation;
     private boolean isConnected = false;
     private double cameraPoseTimestamp = 0;
+
+    private ArrayList<float[]> planeList;
+    private boolean planesDrawn = false;
 
     // Texture rendering related fields.
     // NOTE: Naming indicates which thread is in charge of updating this variable.
@@ -62,10 +75,14 @@ public class InitActivity extends Activity implements View.OnTouchListener{
 
     private int displayRotation = 0;
 
+    private ToggleButton localized;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
+        isLoadingLocation = getIntent().getBooleanExtra("load", false);
+        localized = (ToggleButton) findViewById(R.id.toggleButton);
         surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         surfaceView.setOnTouchListener(this);
         initRenderer = new InitRenderer(this);
@@ -94,6 +111,23 @@ public class InitActivity extends Activity implements View.OnTouchListener{
         }
 
         setupRenderer();
+
+        if (isLoadingLocation) {
+            try {
+                FileInputStream fis = openFileInput("planeList.tmp");
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                planeList = (ArrayList<float[]>) ois.readObject();
+                ois.close();
+                Log.e(TAG, "planeList loaded. Contains " + planeList.size() + " planes!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            planeList = new ArrayList<>();
+        }
     }
 
     @Override
@@ -155,6 +189,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                 }
 
                 if (planeFitTransform != null) {
+                    planeList.add(planeFitTransform);
                     initRenderer.insertPlane(planeFitTransform);
                 }
 
@@ -226,9 +261,25 @@ public class InitActivity extends Activity implements View.OnTouchListener{
         // Drift correction allows motion tracking to recover after it loses tracking.
         // The drift corrected pose is is available through the frame pair with
         // base frame AREA_DESCRIPTION and target frame DEVICE.
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+        //config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
         config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
         config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+
+        if (isLoadingLocation) {
+            ArrayList<String> fullUUIDList;
+            // Returns a list of ADFs with their UUIDs
+            fullUUIDList = tango.listAreaDescriptions();
+
+            // Load the latest ADF if ADFs are found.
+            if (fullUUIDList.size() > 0) {
+                config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION,
+                        fullUUIDList.get(fullUUIDList.size() - 1));
+            }
+        }
+        else {
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, true);
+        }
+
         return config;
     }
 
@@ -239,7 +290,16 @@ public class InitActivity extends Activity implements View.OnTouchListener{
      */
     private void startupTango() {
         // No need to add any coordinate frame pairs since we aren't using pose data from callbacks.
-        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<>();
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                TangoPoseData.COORDINATE_FRAME_DEVICE));
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                TangoPoseData.COORDINATE_FRAME_DEVICE));
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
 
         tango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
             @Override
@@ -258,10 +318,46 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     }
 
+                    if (!planesDrawn && localized.isChecked()) {
+                        Log.e(TAG, "Inserting planes...");
+                        for (float[] plane : planeList) {
+                            initRenderer.insertPlane(plane);
+                        }
+                        planesDrawn = true;
+                        Log.e(TAG, "Planes inserted.");
+                    }
+
                     // Mark a camera frame is available for rendering in the OpenGL thread.
                     isFrameAvailableTangoThread.set(true);
                     // Trigger an Rajawali render to update the scene with the new RGB data.
                     surfaceView.requestRender();
+                }
+            }
+
+
+            public void onPoseAvailable(TangoPoseData pose) {
+                synchronized (this) {
+                    if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION
+                            && pose.targetFrame == TangoPoseData
+                            .COORDINATE_FRAME_START_OF_SERVICE) {
+                        if (pose.statusCode == TangoPoseData.POSE_VALID) {
+                            Log.e(TAG, "YES");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    localized.setChecked(true);
+                                }
+                            });
+                        } else {
+                            Log.e(TAG, "no");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    localized.setChecked(false);
+                                }
+                            });
+                        }
+                    }
                 }
             }
 
@@ -619,7 +715,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     }
 
     /**
-     * Display toast on UI thread.
+     * Display toast on UI thread and finishes activity.
      *
      * @param resId The resource id of the string resource to use. Can be formatted text.
      */
@@ -634,7 +730,49 @@ public class InitActivity extends Activity implements View.OnTouchListener{
         });
     }
 
-    public void onDebugButtonClicked(View v) {
+    /**
+     * Display toast on UI thread.
+     *
+     * @param resId The resource id of the string resource to use. Can be formatted text.
+     */
+    private void showsToastOnUiThread(final int resId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(InitActivity.this,
+                        getString(resId), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+
+    public void onPlaceSphereClicked(View v) {
         initRenderer.insertSphereOnCurrentPosition();
+    }
+
+    public void onSaveLocationClicked(View v) {
+        Log.e(TAG, "savingLocation...1");
+        new Runnable() {
+
+            @Override
+            public void run() {
+                Log.e(TAG, "savingLocation...3");
+                tango.saveAreaDescription();
+
+                try {
+                    FileOutputStream fos = openFileOutput("planeList.tmp", Context.MODE_PRIVATE);
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    oos.writeObject(planeList);
+                    oos.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                showsToastAndFinishOnUiThread(R.string.toast_location_saved);
+            }
+        }.run();
     }
 }
