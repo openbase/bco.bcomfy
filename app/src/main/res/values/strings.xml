@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">BComfy</string>
+    <string name="no_text">NO TEXT</string>
     <string name="tango_out_of_date_exception">Tango Service outdated!</string>
     <string name="tango_error">Tango Exception! Try again!</string>
     <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
@@ -9,8 +10,14 @@
     <string name="gui_place_sphere">Place Sphere</string>
     <string name="gui_save_location">Save Location</string>
     <string name="gui_load_location">Load Location</string>
+    <string name="gui_add_ground">Add Ground</string>
+    <string name="gui_add_room">Add Room</string>
+    <string name="gui_finish_room">Finish Room</string>
     <string name="toast_location_saved">Location saved.</string>
     <string name="toast_location_loaded">Location loaded.</string>
     <string name="record_location">Record</string>
     <string name="load_location">Load</string>
+    <string name="init_mark_ground">Please mark the ground</string>
+    <string name="init_mark_ceiling">Please mark the ceiling</string>
+    <string name="init_mark_walls">Please mark the walls clockwise</string>
 </resources>

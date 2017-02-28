@@ -4,7 +4,7 @@
     android:id="@+id/activity_init"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.openbase.bco.bcomfy.InitActivity">
+    tools:context="org.openbase.bco.bcomfy.activityInit.InitActivity">
 
     <org.rajawali3d.view.SurfaceView
         android:id="@+id/surfaceview"
@@ -21,19 +21,20 @@
         android:id="@+id/button3"
         android:drawableLeft="@android:drawable/ic_menu_save"
         android:onClick="onSaveLocationClicked"
-        android:layout_width="150dp" />
+        android:layout_width="150dp"
+        android:visibility="invisible" />
 
     <Button
-        android:text="@string/gui_place_sphere"
+        android:text="@string/gui_add_room"
         android:layout_height="wrap_content"
         android:layout_marginEnd="34dp"
         android:layout_marginTop="34dp"
         android:id="@+id/button2"
-        android:onClick="onPlaceSphereClicked"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:drawableLeft="@android:drawable/ic_menu_add"
-        android:layout_width="150dp" />
+        android:layout_width="150dp"
+        android:onClick="onAddRoomClicked" />
 
     <ToggleButton
         android:text="ToggleButton"
@@ -46,5 +47,17 @@
         android:layout_alignStart="@+id/button3"
         android:layout_marginBottom="30dp"
         android:clickable="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/toggleButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="14dp"
+        android:id="@+id/instructionTextView"
+        android:text="@android:string/untitled"
+        android:background="@color/background_gray_slightly_transparent"
+        android:padding="5dp"
+        android:visibility="invisible" />
 
 </RelativeLayout>

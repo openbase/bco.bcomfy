@@ -4,7 +4,7 @@
     android:id="@+id/activity_start"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.openbase.bco.bcomfy.StartActivity"
+    tools:context="org.openbase.bco.bcomfy.activityStart.StartActivity"
     android:orientation="vertical"
     android:weightSum="1"
     android:layout_weight="1">

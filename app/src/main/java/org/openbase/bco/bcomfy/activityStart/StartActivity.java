@@ -1,25 +1,17 @@
-package org.openbase.bco.bcomfy;
+package org.openbase.bco.bcomfy.activityStart;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
-import com.google.atap.tangoservice.TangoCoordinateFramePair;
-import com.google.atap.tangoservice.TangoErrorException;
-import com.google.atap.tangoservice.TangoEvent;
-import com.google.atap.tangoservice.TangoInvalidException;
-import com.google.atap.tangoservice.TangoOutOfDateException;
-import com.google.atap.tangoservice.TangoPointCloudData;
-import com.google.atap.tangoservice.TangoPoseData;
-import com.google.atap.tangoservice.TangoXyzIjData;
 
-import java.util.ArrayList;
+import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityInit.InitActivity;
 
 public class StartActivity extends Activity {
 

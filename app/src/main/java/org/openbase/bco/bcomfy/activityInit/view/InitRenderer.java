@@ -1,13 +1,10 @@
-package org.openbase.bco.bcomfy;
+package org.openbase.bco.bcomfy.activityInit.view;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
-import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -17,7 +14,6 @@ import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.methods.SpecularMethod;
 import org.rajawali3d.materials.textures.ATexture;
-import org.rajawali3d.materials.textures.SphereMapTexture;
 import org.rajawali3d.materials.textures.StreamingTexture;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
@@ -25,6 +21,8 @@ import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.primitives.ScreenQuad;
 import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
+
+import java.util.ArrayList;
 
 public class InitRenderer extends Renderer {
     private static final String TAG = InitRenderer.class.getSimpleName();
@@ -35,11 +33,14 @@ public class InitRenderer extends Renderer {
 
     private ScreenQuad backgroundQuad;
 
+    private ArrayList<Object3D> roomPlanes;
+
     // Keeps track of whether the scene camera has been configured.
     private boolean sceneCameraConfigured;
 
     public InitRenderer(Context context) {
         super(context);
+        roomPlanes = new ArrayList<>();
     }
 
     @Override
@@ -141,34 +142,45 @@ public class InitRenderer extends Renderer {
         getCurrentCamera().setProjectionMatrix(new Matrix4(matrixFloats));
     }
 
-    public void insertSphereOnCurrentPosition() {
-        Material debugSphereMaterial = new Material();
-        debugSphereMaterial.setColor(Color.GRAY);
-        debugSphereMaterial.enableLighting(true);
-        debugSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        debugSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
-
-        Object3D debugSphere = new Sphere(0.2f, 20, 20);
-        debugSphere.setMaterial(debugSphereMaterial);
-        debugSphere.setPosition(getCurrentCamera().getPosition());
-        getCurrentScene().addChild(debugSphere);
-    }
-
-    public void insertPlane(float[] planeFitTransform) {
-        Log.e(TAG, "inserting plane");
-
+    public void addGroundPlane(Matrix4 plane) {
         Material planeMaterial = new Material();
-        planeMaterial.setColor(Color.BLUE);
+        planeMaterial.setColor(0x330000ff);
         planeMaterial.enableLighting(true);
         planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        Matrix4 planeMatrix = new Matrix4(planeFitTransform);
+        addPlane(plane, planeMaterial);
+    }
 
-        Object3D plane = new Plane(1, 1, 10, 10);
-        plane.setMaterial(planeMaterial);
-        plane.setPosition(planeMatrix.getTranslation());
-        plane.setOrientation(new Quaternion().fromMatrix(planeMatrix));
-        getCurrentScene().addChild(plane);
+    public void addCeilingPlane(Matrix4 plane) {
+        Material planeMaterial = new Material();
+        planeMaterial.setColor(0x33ff0000);
+        planeMaterial.enableLighting(true);
+        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+
+        addPlane(plane, planeMaterial);
+    }
+
+    public void addWallPlane(Matrix4 plane) {
+        Material planeMaterial = new Material();
+        planeMaterial.setColor(0x3300ff00);
+        planeMaterial.enableLighting(true);
+        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+
+        addPlane(plane, planeMaterial);
+    }
+
+    public void addPlane(Matrix4 plane, Material material) {
+        Object3D planeObject = new Plane(0.5f, 0.5f, 10, 10);
+        planeObject.setMaterial(material);
+        planeObject.setTransparent(true);
+        planeObject.setPosition(plane.getTranslation());
+        planeObject.setOrientation(new Quaternion().fromMatrix(plane));
+
+        roomPlanes.add(planeObject);
+
+        getCurrentScene().addChild(planeObject);
     }
 }

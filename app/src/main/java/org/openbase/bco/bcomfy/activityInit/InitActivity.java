@@ -1,4 +1,4 @@
-package org.openbase.bco.bcomfy;
+package org.openbase.bco.bcomfy.activityInit;
 
 import android.Manifest;
 import android.app.Activity;
@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,36 +15,39 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.atap.tangoservice.Tango;
-import com.google.atap.tangoservice.Tango.TangoUpdateCallback;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
-import com.google.atap.tangoservice.TangoEvent;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
-import com.google.atap.tangoservice.TangoXyzIjData;
 import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
+import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
+import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
+import org.openbase.bco.bcomfy.utils.MathUtils;
+import org.openbase.bco.bcomfy.utils.TangoUtils;
+import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.TooManyListenersException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InitActivity extends Activity implements View.OnTouchListener{
@@ -76,13 +78,21 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     private int displayRotation = 0;
 
     private ToggleButton localized;
+    private InstructionTextView instructionTextView;
+
+    private Measurer measurer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
+
+        measurer = new Measurer();
+
         isLoadingLocation = getIntent().getBooleanExtra("load", false);
         localized = (ToggleButton) findViewById(R.id.toggleButton);
+        instructionTextView = new InstructionTextView((TextView) findViewById(R.id.instructionTextView));
+
         surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         surfaceView.setOnTouchListener(this);
         initRenderer = new InitRenderer(this);
@@ -119,9 +129,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                 planeList = (ArrayList<float[]>) ois.readObject();
                 ois.close();
                 Log.e(TAG, "planeList loaded. Contains " + planeList.size() + " planes!");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -172,12 +180,15 @@ public class InitActivity extends Activity implements View.OnTouchListener{
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+        // Ignore onTouch Event if we don't want to measure something
+        if (measurer.getMeasurerState() == Measurer.MeasurerState.INIT) {
+            return true;
+        }
+
         if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
             // Calculate click location in u,v (0;1) coordinates.
             float u = motionEvent.getX() / view.getWidth();
             float v = motionEvent.getY() / view.getHeight();
-
-            Log.e(TAG, "u: " + u + ", v: " + v);
 
             try {
                 // Fit a plane on the clicked point using the latest point cloud data
@@ -189,8 +200,9 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                 }
 
                 if (planeFitTransform != null) {
-                    planeList.add(planeFitTransform);
-                    initRenderer.insertPlane(planeFitTransform);
+                    Matrix4 planeMatrix = new Matrix4(planeFitTransform);
+                    Measurer.Measurement latestMeasurement = measurer.addPlaneMeasurement(planeMatrix);
+                    updateGuiAfterPlaneMeasurement(planeMatrix, latestMeasurement);
                 }
 
             } catch (TangoException t) {
@@ -206,6 +218,27 @@ public class InitActivity extends Activity implements View.OnTouchListener{
             }
         }
         return true;
+    }
+
+    /**
+     * Handle a successful plane measurement
+     */
+    private void updateGuiAfterPlaneMeasurement(Matrix4 plane, Measurer.Measurement type) {
+        switch (type) {
+            case INVALID:
+                return;
+            case GROUND:
+                initRenderer.addGroundPlane(plane);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
+                break;
+            case CEILING:
+                initRenderer.addCeilingPlane(plane);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
+                break;
+            case WALL:
+                initRenderer.addWallPlane(plane);
+                break;
+        }
     }
 
     /**
@@ -318,14 +351,14 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     }
 
-                    if (!planesDrawn && localized.isChecked()) {
-                        Log.e(TAG, "Inserting planes...");
-                        for (float[] plane : planeList) {
-                            initRenderer.insertPlane(plane);
-                        }
-                        planesDrawn = true;
-                        Log.e(TAG, "Planes inserted.");
-                    }
+//                    if (!planesDrawn && localized.isChecked()) {
+//                        Log.e(TAG, "Inserting planes...");
+//                        for (float[] plane : planeList) {
+//                            initRenderer.insertPlane(plane);
+//                        }
+//                        planesDrawn = true;
+//                        Log.e(TAG, "Planes inserted.");
+//                    }
 
                     // Mark a camera frame is available for rendering in the OpenGL thread.
                     isFrameAvailableTangoThread.set(true);
@@ -399,7 +432,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                                             TangoCameraIntrinsics.TANGO_CAMERA_COLOR,
                                             displayRotation);
                             initRenderer.setProjectionMatrix(
-                                    projectionMatrixFromCameraIntrinsics(intrinsics));
+                                    TangoUtils.projectionMatrixFromCameraIntrinsics(intrinsics));
                         }
                         // Connect the camera texture to the OpenGL Texture if necessary
                         // NOTE: When the OpenGL context is recycled, Rajawali may re-generate the
@@ -478,41 +511,6 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     }
 
     /**
-     * Use Tango camera intrinsics to calculate the projection Matrix for the Rajawali scene.
-     *
-     * @param intrinsics camera instrinsics for computing the project matrix.
-     */
-    private static float[] projectionMatrixFromCameraIntrinsics(TangoCameraIntrinsics intrinsics) {
-        float cx = (float) intrinsics.cx;
-        float cy = (float) intrinsics.cy;
-        float width = (float) intrinsics.width;
-        float height = (float) intrinsics.height;
-        float fx = (float) intrinsics.fx;
-        float fy = (float) intrinsics.fy;
-
-        // Uses frustumM to create a projection matrix taking into account calibrated camera
-        // intrinsic parameter.
-        // Reference: http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/
-        float near = 0.1f;
-        float far = 100;
-
-        float xScale = near / fx;
-        float yScale = near / fy;
-        float xOffset = (cx - (width / 2.0f)) * xScale;
-        // Color camera's coordinates has y pointing downwards so we negate this term.
-        float yOffset = -(cy - (height / 2.0f)) * yScale;
-
-        float m[] = new float[16];
-        Matrix.frustumM(m, 0,
-                xScale * (float) -width / 2.0f - xOffset,
-                xScale * (float) width / 2.0f - xOffset,
-                yScale * (float) -height / 2.0f - yOffset,
-                yScale * (float) height / 2.0f - yOffset,
-                near, far);
-        return m;
-    }
-
-    /**
      * Set the color camera background texture rotation and save the camera to display rotation.
      */
     private void setDisplayRotation() {
@@ -568,7 +566,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                         TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
                         TangoSupport.ROTATION_IGNORED);
         if (transform.statusCode == TangoPoseData.POSE_VALID) {
-            float[] openGlTPlane = calculatePlaneTransform(
+            float[] openGlTPlane = MathUtils.calculatePlaneTransform(
                     intersectionPointPlaneModelPair.intersectionPoint,
                     intersectionPointPlaneModelPair.planeModel, transform.matrix);
 
@@ -577,76 +575,6 @@ public class InitActivity extends Activity implements View.OnTouchListener{
             Log.w(TAG, "Can't get depth camera transform at time " + pointCloud.timestamp);
             return null;
         }
-    }
-
-    /**
-     * Calculate the pose of the plane based on the position and normal orientation of the plane
-     * and align it with gravity.
-     */
-    private float[] calculatePlaneTransform(double[] point, double normal[],
-                                            float[] openGlTdepth) {
-        // Vector aligned to gravity.
-        float[] openGlUp = new float[]{0, 1, 0, 0};
-        float[] depthTOpenGl = new float[16];
-        Matrix.invertM(depthTOpenGl, 0, openGlTdepth, 0);
-        float[] depthUp = new float[4];
-        Matrix.multiplyMV(depthUp, 0, depthTOpenGl, 0, openGlUp, 0);
-        // Create the plane matrix transform in depth frame from a point, the plane normal and the
-        // up vector.
-        float[] depthTplane = matrixFromPointNormalUp(point, normal, depthUp);
-        float[] openGlTplane = new float[16];
-        Matrix.multiplyMM(openGlTplane, 0, openGlTdepth, 0, depthTplane, 0);
-        return openGlTplane;
-    }
-
-    /**
-     * Calculates a transformation matrix based on a point, a normal and the up gravity vector.
-     * The coordinate frame of the target transformation will a right handed system with Z+ in
-     * the direction of the normal and Y+ up.
-     */
-    private float[] matrixFromPointNormalUp(double[] point, double[] normal, float[] up) {
-        float[] zAxis = new float[]{(float) normal[0], (float) normal[1], (float) normal[2]};
-        normalize(zAxis);
-        float[] xAxis = crossProduct(up, zAxis);
-        normalize(xAxis);
-        float[] yAxis = crossProduct(zAxis, xAxis);
-        normalize(yAxis);
-        float[] m = new float[16];
-        Matrix.setIdentityM(m, 0);
-        m[0] = xAxis[0];
-        m[1] = xAxis[1];
-        m[2] = xAxis[2];
-        m[4] = yAxis[0];
-        m[5] = yAxis[1];
-        m[6] = yAxis[2];
-        m[8] = zAxis[0];
-        m[9] = zAxis[1];
-        m[10] = zAxis[2];
-        m[12] = (float) point[0];
-        m[13] = (float) point[1];
-        m[14] = (float) point[2];
-        return m;
-    }
-
-    /**
-     * Normalize a vector.
-     */
-    private void normalize(float[] v) {
-        double norm = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        v[0] /= norm;
-        v[1] /= norm;
-        v[2] /= norm;
-    }
-
-    /**
-     * Cross product between two vectors following the right hand rule.
-     */
-    private float[] crossProduct(float[] v1, float[] v2) {
-        float[] result = new float[3];
-        result[0] = v1[1] * v2[2] - v2[1] * v1[2];
-        result[1] = v1[2] * v2[0] - v2[2] * v1[0];
-        result[2] = v1[0] * v2[1] - v2[0] * v1[1];
-        return result;
     }
 
     /**
@@ -730,49 +658,32 @@ public class InitActivity extends Activity implements View.OnTouchListener{
         });
     }
 
-    /**
-     * Display toast on UI thread.
-     *
-     * @param resId The resource id of the string resource to use. Can be formatted text.
-     */
-    private void showsToastOnUiThread(final int resId) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(InitActivity.this,
-                        getString(resId), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-
-
-    public void onPlaceSphereClicked(View v) {
-        initRenderer.insertSphereOnCurrentPosition();
+    public void onAddRoomClicked(View v) {
+        findViewById(R.id.button2).setEnabled(false);
+        measurer.startNewRoom();
+        instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
     }
 
     public void onSaveLocationClicked(View v) {
-        Log.e(TAG, "savingLocation...1");
-        new Runnable() {
-
-            @Override
-            public void run() {
-                Log.e(TAG, "savingLocation...3");
-                tango.saveAreaDescription();
-
-                try {
-                    FileOutputStream fos = openFileOutput("planeList.tmp", Context.MODE_PRIVATE);
-                    ObjectOutputStream oos = new ObjectOutputStream(fos);
-                    oos.writeObject(planeList);
-                    oos.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                showsToastAndFinishOnUiThread(R.string.toast_location_saved);
-            }
-        }.run();
+//        Log.e(TAG, "savingLocation...1");
+//        new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                Log.e(TAG, "savingLocation...3");
+//                tango.saveAreaDescription();
+//
+//                try {
+//                    FileOutputStream fos = openFileOutput("planeList.tmp", Context.MODE_PRIVATE);
+//                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+//                    oos.writeObject(planeList);
+//                    oos.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                showsToastAndFinishOnUiThread(R.string.toast_location_saved);
+//            }
+//        }.run();
     }
 }
