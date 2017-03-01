@@ -17,6 +17,7 @@ import org.rajawali3d.materials.textures.ATexture;
 import org.rajawali3d.materials.textures.StreamingTexture;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
+import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.primitives.ScreenQuad;
 import org.rajawali3d.primitives.Sphere;
@@ -182,5 +183,18 @@ public class InitRenderer extends Renderer {
         roomPlanes.add(planeObject);
 
         getCurrentScene().addChild(planeObject);
+    }
+
+    public void addSphere(Vector3 vector3, int color) {
+        Material debugSphereMaterial = new Material();
+        debugSphereMaterial.setColor(color);
+        debugSphereMaterial.enableLighting(true);
+        debugSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        debugSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
+
+        Object3D debugSphere = new Sphere(0.5f, 20, 20);
+        debugSphere.setMaterial(debugSphereMaterial);
+        debugSphere.setPosition(vector3);
+        getCurrentScene().addChild(debugSphere);
     }
 }

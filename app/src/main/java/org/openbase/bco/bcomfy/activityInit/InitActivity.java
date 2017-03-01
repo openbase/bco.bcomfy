@@ -42,6 +42,7 @@ import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.Matrix4;
+import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
@@ -727,6 +728,19 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     public void onFinishRoomClicked(View v) {
         measurer.finishRoom();
         updateGuiButtons();
+
+        ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();
+        ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
+
+        for (Vector3 vertex : ground) {
+            Log.e(TAG, "Placing ground vertex sphere at: " + vertex.toString());
+            initRenderer.addSphere(vertex, Color.BLUE);
+        }
+
+        for (Vector3 vertex : ceiling) {
+            Log.e(TAG, "Placing ceiling vertex sphere at: " + vertex.toString());
+            initRenderer.addSphere(vertex, Color.RED);
+        }
     }
 
     public void onFinishMeasurementClicked(View v) {

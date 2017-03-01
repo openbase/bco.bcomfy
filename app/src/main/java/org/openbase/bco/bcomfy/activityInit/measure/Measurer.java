@@ -1,6 +1,8 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
 import org.rajawali3d.math.Matrix4;
+import org.rajawali3d.math.Quaternion;
+import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
 
@@ -29,23 +31,37 @@ public class Measurer {
     }
 
     public void finishRoom() {
+        currentRoom.finish();
         roomList.add(currentRoom);
+        currentRoom = null;
         measurerState = MeasurerState.INIT;
     }
 
     public Measurement addPlaneMeasurement(Matrix4 measurement) {
+        Vector3 translation = measurement.getTranslation();
+        Vector3 normal = new Vector3(1, 0, 0);
+        measurement.rotateVector(normal);
+
+        Plane plane = new Plane(translation, normal);
+
         switch (measurerState) {
             case INIT:
                 return Measurement.INVALID;
             case MARK_GROUND:
+                currentRoom.setGround(plane);
                 measurerState = MeasurerState.MARK_CEILING;
                 return Measurement.GROUND;
             case MARK_CEILING:
+                currentRoom.setCeiling(plane);
                 measurerState = MeasurerState.MARK_WALLS;
                 return Measurement.CEILING;
             case MARK_WALLS:
+                currentRoom.addWall(plane);
+                if (currentRoom.hasEnoughWalls())
+                    measurerState = MeasurerState.ENOUGH_WALLS;
                 return Measurement.WALL;
             case ENOUGH_WALLS:
+                currentRoom.addWall(plane);
                 return Measurement.WALL;
         }
 
@@ -58,6 +74,14 @@ public class Measurer {
 
     public boolean hasFinishedRoom() {
         return roomList.size() > 0;
+    }
+
+    public ArrayList<Vector3> getLatestGroundVertices() {
+        return roomList.get(0).getGroundVertices();
+    }
+
+    public ArrayList<Vector3> getLatestCeilingVertices() {
+        return roomList.get(0).getCeilingVertices();
     }
 
 }

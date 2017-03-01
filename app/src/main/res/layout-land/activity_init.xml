@@ -30,7 +30,7 @@
         android:layout_alignStart="@+id/buttonAddRoom"
         android:layout_marginTop="21dp"
         android:id="@+id/buttonFinishRoom"
-        android:onClick="onSaveLocationClicked"
+        android:onClick="onFinishRoomClicked"
         android:layout_width="160dp"
         android:enabled="false" />
 
@@ -41,7 +41,7 @@
         android:layout_alignStart="@+id/buttonAddRoom"
         android:layout_marginTop="21dp"
         android:id="@+id/buttonFinishMeasurement"
-        android:onClick="onSaveLocationClicked"
+        android:onClick="onFinishMeasurementClicked"
         android:layout_width="160dp"
         android:enabled="false" />
 
