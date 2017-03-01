@@ -13,38 +13,47 @@
         android:layout_gravity="top" />
 
     <Button
-        android:text="@string/gui_save_location"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button2"
-        android:layout_alignStart="@+id/button2"
-        android:layout_marginTop="21dp"
-        android:id="@+id/button3"
-        android:drawableLeft="@android:drawable/ic_menu_save"
-        android:onClick="onSaveLocationClicked"
-        android:layout_width="150dp"
-        android:visibility="invisible" />
-
-    <Button
         android:text="@string/gui_add_room"
         android:layout_height="wrap_content"
         android:layout_marginEnd="34dp"
         android:layout_marginTop="34dp"
-        android:id="@+id/button2"
+        android:id="@+id/buttonAddRoom"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:drawableLeft="@android:drawable/ic_menu_add"
-        android:layout_width="150dp"
-        android:onClick="onAddRoomClicked" />
+        android:layout_width="160dp"
+        android:onClick="onAddRoomClicked"/>
+
+    <Button
+        android:text="@string/gui_finish_room"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonAddRoom"
+        android:layout_alignStart="@+id/buttonAddRoom"
+        android:layout_marginTop="21dp"
+        android:id="@+id/buttonFinishRoom"
+        android:onClick="onSaveLocationClicked"
+        android:layout_width="160dp"
+        android:enabled="false" />
+
+    <Button
+        android:text="@string/gui_finish_measurement"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonFinishRoom"
+        android:layout_alignStart="@+id/buttonAddRoom"
+        android:layout_marginTop="21dp"
+        android:id="@+id/buttonFinishMeasurement"
+        android:onClick="onSaveLocationClicked"
+        android:layout_width="160dp"
+        android:enabled="false" />
 
     <ToggleButton
         android:text="ToggleButton"
         android:layout_height="wrap_content"
         android:id="@+id/toggleButton"
-        android:layout_width="150dp"
+        android:layout_width="160dp"
         android:checked="false"
         android:textOn="Localized"
         android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/button3"
+        android:layout_alignStart="@+id/buttonFinishRoom"
         android:layout_marginBottom="30dp"
         android:clickable="false" />
 
@@ -58,6 +67,7 @@
         android:text="@android:string/untitled"
         android:background="@color/background_gray_slightly_transparent"
         android:padding="5dp"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:textColor="?android:attr/textColorSecondary" />
 
 </RelativeLayout>

@@ -11,8 +11,9 @@
     <string name="gui_save_location">Save Location</string>
     <string name="gui_load_location">Load Location</string>
     <string name="gui_add_ground">Add Ground</string>
-    <string name="gui_add_room">Add Room</string>
-    <string name="gui_finish_room">Finish Room</string>
+    <string name="gui_add_room">Add\nRoom</string>
+    <string name="gui_finish_room">Finish\nRoom</string>
+    <string name="gui_finish_measurement">Finish\nMeasurement</string>
     <string name="toast_location_saved">Location saved.</string>
     <string name="toast_location_loaded">Location loaded.</string>
     <string name="record_location">Record</string>

@@ -3,9 +3,9 @@ package org.openbase.bco.bcomfy.activityInit;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -29,6 +30,8 @@ import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -43,10 +46,8 @@ import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -78,6 +79,9 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     private int displayRotation = 0;
 
     private ToggleButton localized;
+    private Button buttonAddRoom;
+    private Button buttonFinishRoom;
+    private Button buttonFinishMeasurement;
     private InstructionTextView instructionTextView;
 
     private Measurer measurer;
@@ -92,6 +96,27 @@ public class InitActivity extends Activity implements View.OnTouchListener{
         isLoadingLocation = getIntent().getBooleanExtra("load", false);
         localized = (ToggleButton) findViewById(R.id.toggleButton);
         instructionTextView = new InstructionTextView((TextView) findViewById(R.id.instructionTextView));
+
+        buttonAddRoom = (Button) findViewById(R.id.buttonAddRoom);
+        buttonAddRoom.setCompoundDrawables(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_add_circle_outline)
+                .color(Color.BLACK)
+                .sizePx((int) buttonAddRoom.getTextSize())
+                , null, null, null);
+
+        buttonFinishRoom = (Button) findViewById(R.id.buttonFinishRoom);
+        buttonFinishRoom.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_done)
+                        .color(Color.BLACK)
+                        .sizePx((int) buttonFinishRoom.getTextSize())
+                , null, null, null);
+
+        buttonFinishMeasurement = (Button) findViewById(R.id.buttonFinishMeasurement);
+        buttonFinishMeasurement.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_done_all)
+                        .color(Color.BLACK)
+                        .sizePx((int) buttonFinishMeasurement.getTextSize())
+                , null, null, null);
 
         surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
         surfaceView.setOnTouchListener(this);
@@ -201,8 +226,8 @@ public class InitActivity extends Activity implements View.OnTouchListener{
 
                 if (planeFitTransform != null) {
                     Matrix4 planeMatrix = new Matrix4(planeFitTransform);
-                    Measurer.Measurement latestMeasurement = measurer.addPlaneMeasurement(planeMatrix);
-                    updateGuiAfterPlaneMeasurement(planeMatrix, latestMeasurement);
+                    Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(planeMatrix);
+                    updateGuiAfterPlaneMeasurement(planeMatrix, lastMeasurement);
                 }
 
             } catch (TangoException t) {
@@ -223,20 +248,56 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     /**
      * Handle a successful plane measurement
      */
-    private void updateGuiAfterPlaneMeasurement(Matrix4 plane, Measurer.Measurement type) {
-        switch (type) {
+    private void updateGuiAfterPlaneMeasurement(Matrix4 plane, Measurer.Measurement lastMeasurement) {
+        switch (lastMeasurement) {
             case INVALID:
                 return;
             case GROUND:
                 initRenderer.addGroundPlane(plane);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
                 break;
             case CEILING:
                 initRenderer.addCeilingPlane(plane);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
                 break;
             case WALL:
                 initRenderer.addWallPlane(plane);
+                break;
+        }
+
+        updateGuiButtons();
+    }
+
+    /**
+     * Update Buttons and InstructionTextView based on the current state of the {@link Measurer}
+     */
+    private void updateGuiButtons() {
+        switch (measurer.getMeasurerState()) {
+            case INIT:
+                buttonAddRoom.setEnabled(true);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(measurer.hasFinishedRoom());
+                break;
+            case MARK_GROUND:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
+                break;
+            case MARK_CEILING:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
+                break;
+            case MARK_WALLS:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
+                break;
+            case ENOUGH_WALLS:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(true);
+                buttonFinishMeasurement.setEnabled(false);
                 break;
         }
     }
@@ -659,9 +720,17 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     }
 
     public void onAddRoomClicked(View v) {
-        findViewById(R.id.button2).setEnabled(false);
         measurer.startNewRoom();
-        instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
+        updateGuiButtons();
+    }
+
+    public void onFinishRoomClicked(View v) {
+        measurer.finishRoom();
+        updateGuiButtons();
+    }
+
+    public void onFinishMeasurementClicked(View v) {
+        updateGuiButtons();
     }
 
     public void onSaveLocationClicked(View v) {

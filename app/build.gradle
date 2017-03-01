@@ -32,6 +32,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'org.rajawali3d:rajawali:1.1.777'
     compile 'com.android.support:appcompat-v7:25.2.0'
+    compile "com.mikepenz:iconics-core:2.8.2@aar"
+    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
 }
 
 repositories {

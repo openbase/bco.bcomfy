@@ -56,4 +56,8 @@ public class Measurer {
         return measurerState;
     }
 
+    public boolean hasFinishedRoom() {
+        return roomList.size() > 0;
+    }
+
 }
