@@ -36,6 +36,7 @@ import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
+import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
@@ -86,6 +87,7 @@ public class InitActivity extends Activity implements View.OnTouchListener{
     private InstructionTextView instructionTextView;
 
     private Measurer measurer;
+    private Plane lastMeasuredPlane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -227,7 +229,8 @@ public class InitActivity extends Activity implements View.OnTouchListener{
 
                 if (planeFitTransform != null) {
                     Matrix4 planeMatrix = new Matrix4(planeFitTransform);
-                    Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(planeMatrix);
+                    //Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(planeMatrix);
+                    Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(lastMeasuredPlane);
                     updateGuiAfterPlaneMeasurement(planeMatrix, lastMeasurement);
                 }
 
@@ -627,10 +630,32 @@ public class InitActivity extends Activity implements View.OnTouchListener{
                         TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                         TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
                         TangoSupport.ROTATION_IGNORED);
+
+        // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
+        TangoSupport.TangoDoubleMatrixTransformData doubleTransform =
+                TangoSupport.getDoubleMatrixTransformAtTime(pointCloud.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                        TangoSupport.ROTATION_IGNORED);
+
         if (transform.statusCode == TangoPoseData.POSE_VALID) {
             float[] openGlTPlane = MathUtils.calculatePlaneTransform(
                     intersectionPointPlaneModelPair.intersectionPoint,
                     intersectionPointPlaneModelPair.planeModel, transform.matrix);
+
+            double[] transformedPlanePosition = TangoSupport.doubleTransformPoint(doubleTransform.matrix, intersectionPointPlaneModelPair.intersectionPoint);
+            double[] planeNormal = {intersectionPointPlaneModelPair.planeModel[0], intersectionPointPlaneModelPair.planeModel[1], intersectionPointPlaneModelPair.planeModel[2]};
+            double[] transformedPlaneNormal = TangoSupport.doubleTransformPoint(doubleTransform.matrix, planeNormal);
+
+//            Log.e(TAG, "lastMeasuredPlane - position: " + intersectionPointPlaneModelPair.intersectionPoint[0] + "; " + intersectionPointPlaneModelPair.intersectionPoint[1] + "; " + intersectionPointPlaneModelPair.intersectionPoint[2] +
+//                    " ~ normal: " + intersectionPointPlaneModelPair.planeModel[0] + "; " + intersectionPointPlaneModelPair.planeModel[1] + "; " + intersectionPointPlaneModelPair.planeModel[2]);
+//
+//            Log.e(TAG, "lastMeasuredPlaneTransformed - position: " + transformedPlanePosition[0] + "; " + transformedPlanePosition[1] + "; " + transformedPlanePosition[2] +
+//                    " ~ normal: " + transformedPlaneNormal[0] + "; " + transformedPlaneNormal[1] + "; " + transformedPlaneNormal[2]);
+
+            lastMeasuredPlane = new Plane(transformedPlanePosition, transformedPlaneNormal);
 
             return openGlTPlane;
         } else {

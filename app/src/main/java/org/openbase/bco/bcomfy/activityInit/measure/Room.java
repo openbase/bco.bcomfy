@@ -1,11 +1,7 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
-import android.os.Build;
-import android.renderscript.Matrix3f;
 import android.util.Log;
 
-import org.rajawali3d.math.Matrix;
-import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -74,15 +70,15 @@ public class Room {
     }
 
     private Vector3 calcGroundIntersection(Plane wall0, Plane wall1) {
-        return calc3PlaneIntersection(wall0.getTranslation(), wall0.getNormal(),
-                wall1.getTranslation(), wall1.getNormal(),
-                ground.getTranslation(), ground.getNormal());
+        return calc3PlaneIntersection(wall0.getPosition(), wall0.getNormal(),
+                wall1.getPosition(), wall1.getNormal(),
+                ground.getPosition(), ground.getNormal());
     }
 
     private Vector3 calcCeilingIntersection(Plane wall0, Plane wall1) {
-        return calc3PlaneIntersection(wall0.getTranslation(), wall0.getNormal(),
-                wall1.getTranslation(), wall1.getNormal(),
-                ceiling.getTranslation(), ceiling.getNormal());
+        return calc3PlaneIntersection(wall0.getPosition(), wall0.getNormal(),
+                wall1.getPosition(), wall1.getNormal(),
+                ceiling.getPosition(), ceiling.getNormal());
     }
 
 
@@ -97,9 +93,12 @@ public class Room {
         double det = (n0.x * n1.y * n2.z) + (n1.x * n2.y * n0.z) + (n2.x * n0.y * n1.z) -
                      (n0.z * n1.y * n2.x) - (n1.z * n2.y * n0.x) - (n2.z * n0.y * n1.x);
 
-        Vector3 v0 = n1.cross(n2).multiply(x0.dot(n0));
-        Vector3 v1 = n2.cross(n0).multiply(x1.dot(n1));
-        Vector3 v2 = n0.cross(n1).multiply(x2.dot(n2));
+        Vector3 v0 = new Vector3(n1);
+        v0.cross(n2).multiply(x0.dot(n0));
+        Vector3 v1 = new Vector3(n2);
+        v1.cross(n0).multiply(x1.dot(n1));
+        Vector3 v2 = new Vector3(n0);
+        v2.cross(n1).multiply(x2.dot(n2));
 
         Vector3 result = v0.add(v1).add(v2).multiply(1/det);
 

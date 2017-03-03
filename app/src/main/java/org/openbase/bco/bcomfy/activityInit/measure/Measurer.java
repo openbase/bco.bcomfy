@@ -1,5 +1,7 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
+import android.util.Log;
+
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
@@ -7,6 +9,7 @@ import org.rajawali3d.math.vector.Vector3;
 import java.util.ArrayList;
 
 public class Measurer {
+    private static final String TAG = Measurer.class.getSimpleName();
 
     private MeasurerState measurerState;
     private Room currentRoom;
@@ -43,6 +46,33 @@ public class Measurer {
         measurement.rotateVector(normal);
 
         Plane plane = new Plane(translation, normal);
+
+        switch (measurerState) {
+            case INIT:
+                return Measurement.INVALID;
+            case MARK_GROUND:
+                currentRoom.setGround(plane);
+                measurerState = MeasurerState.MARK_CEILING;
+                return Measurement.GROUND;
+            case MARK_CEILING:
+                currentRoom.setCeiling(plane);
+                measurerState = MeasurerState.MARK_WALLS;
+                return Measurement.CEILING;
+            case MARK_WALLS:
+                currentRoom.addWall(plane);
+                if (currentRoom.hasEnoughWalls())
+                    measurerState = MeasurerState.ENOUGH_WALLS;
+                return Measurement.WALL;
+            case ENOUGH_WALLS:
+                currentRoom.addWall(plane);
+                return Measurement.WALL;
+        }
+
+        return Measurement.INVALID;
+    }
+
+    public Measurement addPlaneMeasurement(Plane plane) {
+        Log.e(TAG, "Adding Plane: \nPosition: " + plane.getPosition().toString() + "\nNormal: " + plane.getNormal().toString());
 
         switch (measurerState) {
             case INIT:

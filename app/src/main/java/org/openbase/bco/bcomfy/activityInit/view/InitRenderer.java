@@ -192,7 +192,7 @@ public class InitRenderer extends Renderer {
         debugSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         debugSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        Object3D debugSphere = new Sphere(0.5f, 20, 20);
+        Object3D debugSphere = new Sphere(0.1f, 20, 20);
         debugSphere.setMaterial(debugSphereMaterial);
         debugSphere.setPosition(vector3);
         getCurrentScene().addChild(debugSphere);
