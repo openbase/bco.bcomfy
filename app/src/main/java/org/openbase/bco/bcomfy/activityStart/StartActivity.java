@@ -40,6 +40,7 @@ public class StartActivity extends Activity {
     private TangoConfig tangoConfig;
 
     private CheckBox relocationCheckBox;
+    private CheckBox useLatestAdfCheckBox;
 
     private double previousPoseTimeStamp;
     private double timeToNextUpdate = UPDATE_INTERVAL_MS;
@@ -54,6 +55,7 @@ public class StartActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        useLatestAdfCheckBox = (CheckBox) findViewById(R.id.checkBox);
 
         startActivityForResult(
                 Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
@@ -116,13 +118,7 @@ public class StartActivity extends Activity {
 
     public void onButtonRecordClicked(View v) {
         Intent intent = new Intent(this, InitActivity.class);
-        intent.putExtra("load", false);
-        startActivity(intent);
-    }
-
-    public void onButtonLoadClicked(View v) {
-        Intent intent = new Intent(this, InitActivity.class);
-        intent.putExtra("load", true);
+        intent.putExtra("useADF", useLatestAdfCheckBox.isChecked());
         startActivity(intent);
     }
 

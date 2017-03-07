@@ -48,6 +48,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.09" />
 
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="0.16"
+        android:text="Use latest ADF" />
+
     <Button
         android:text="@string/record_location"
         android:layout_width="wrap_content"

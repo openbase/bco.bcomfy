@@ -124,7 +124,8 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
 
         measurer = new Measurer();
 
-        isLoadingLocation = getIntent().getBooleanExtra("load", false);
+        isLoadingLocation = getIntent().getBooleanExtra("useADF", false);
+
         localized = (ToggleButton) findViewById(R.id.toggleButton);
         instructionTextView = new InstructionTextView((TextView) findViewById(R.id.instructionTextView));
 
@@ -178,20 +179,20 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
 
         setupRenderer();
 
-        if (isLoadingLocation) {
-            try {
-                FileInputStream fis = openFileInput("planeList.tmp");
-                ObjectInputStream ois = new ObjectInputStream(fis);
-                planeList = (ArrayList<float[]>) ois.readObject();
-                ois.close();
-                Log.e(TAG, "planeList loaded. Contains " + planeList.size() + " planes!");
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            planeList = new ArrayList<>();
-        }
+//        if (isLoadingLocation) {
+//            try {
+//                FileInputStream fis = openFileInput("planeList.tmp");
+//                ObjectInputStream ois = new ObjectInputStream(fis);
+//                planeList = (ArrayList<float[]>) ois.readObject();
+//                ois.close();
+//                Log.e(TAG, "planeList loaded. Contains " + planeList.size() + " planes!");
+//            } catch (IOException | ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        else {
+//            planeList = new ArrayList<>();
+//        }
 
         fetchLocations();
     }
@@ -402,7 +403,11 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
             if (fullUUIDList.size() > 0) {
                 config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION,
                         fullUUIDList.get(fullUUIDList.size() - 1));
+
+                Log.e(TAG, "using ADF: " + fullUUIDList.get(fullUUIDList.size() - 1));
             }
+
+            config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, false);
         }
         else {
             config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, true);
@@ -469,7 +474,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                             && pose.targetFrame == TangoPoseData
                             .COORDINATE_FRAME_START_OF_SERVICE) {
                         if (pose.statusCode == TangoPoseData.POSE_VALID) {
-                            Log.e(TAG, "YES");
+                            //Log.e(TAG, "YES");
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -477,7 +482,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                                 }
                             });
                         } else {
-                            Log.e(TAG, "no");
+                            //Log.e(TAG, "no");
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
