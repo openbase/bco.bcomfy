@@ -107,11 +107,11 @@ public class Measurer {
     }
 
     public ArrayList<Vector3> getLatestGroundVertices() {
-        return roomList.get(0).getGroundVertices();
+        return roomList.get(roomList.size()-1).getGroundVertices();
     }
 
     public ArrayList<Vector3> getLatestCeilingVertices() {
-        return roomList.get(0).getCeilingVertices();
+        return roomList.get(roomList.size()-1).getCeilingVertices();
     }
 
 }

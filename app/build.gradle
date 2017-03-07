@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'maven'
+//apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 25
@@ -6,11 +8,21 @@ android {
     defaultConfig {
         applicationId "org.openbase.bco.bcomfy"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -21,6 +33,16 @@ android {
         abortOnError false
     }
 }
+
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//    }
+//
+//    dependencies {
+//        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
+//    }
+//}
 
 dependencies {
     compile fileTree(dir: 'libs/jar', include: ['*.jar'])
@@ -34,10 +56,28 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile "com.mikepenz:iconics-core:2.8.2@aar"
     compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
+    //compile group: 'org.openbase', name: 'jul.extension.rct', version:'1.3-SNAPSHOT'
+    //compile group: 'org.openbase.bco', name: 'dal.remote', version:'1.3-SNAPSHOT'
+    compile 'rsb:rsb:[0.12,0.13-SNAPSHOT)'
+    compile 'rsb:rst:[0.15,0.16-SNAPSHOT)'
+    compile 'rsb:rst-experimental:[0.15,0.16-SNAPSHOT)'
+    compile 'rsb:rst-sandbox:[0.15,0.16-SNAPSHOT)'
 }
 
 repositories {
     flatDir {
         dirs 'libs/aar'
     }
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/groups/public/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://mvn.cit-ec.de/nexus/content/repositories/releases"}
+    maven { url "https://mvn.cit-ec.de/nexus/content/repositories/snapshots"}
+
 }
+
+//retrolambda {
+//    javaVersion JavaVersion.VERSION_1_7
+//    defaultMethods true
+//    incremental false
+//}

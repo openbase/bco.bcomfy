@@ -2,8 +2,10 @@ package org.openbase.bco.bcomfy.activityStart;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.usage.UsageEvents;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
@@ -12,6 +14,19 @@ import com.google.atap.tangoservice.TangoConfig;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
+import org.openbase.bco.bcomfy.utils.RSBDefaultConfig;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import rsb.Event;
+import rsb.Factory;
+import rsb.RSBException;
+import rsb.converter.DefaultConverterRepository;
+import rsb.converter.ProtocolBufferConverter;
+import rsb.patterns.RemoteServer;
+import rst.domotic.registry.LocationRegistryDataType;
+import rst.domotic.unit.UnitConfigType;
 
 public class StartActivity extends Activity {
 
@@ -109,6 +124,50 @@ public class StartActivity extends Activity {
         Intent intent = new Intent(this, InitActivity.class);
         intent.putExtra("load", true);
         startActivity(intent);
+    }
+
+    public void onDebugButtonClicked(View v) {
+
+        new Thread() {
+
+            @Override
+            public void run() {
+                RemoteServer locationRegistry = Factory.getInstance().createRemoteServer("/registry/location/ctrl", RSBDefaultConfig.getDefaultParticipantConfig());
+                DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(LocationRegistryDataType.LocationRegistryData.getDefaultInstance()));
+                DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(UnitConfigType.UnitConfig.getDefaultInstance()));
+
+                try {
+                    locationRegistry.activate();
+                    LocationRegistryDataType.LocationRegistryData lrd = (LocationRegistryDataType.LocationRegistryData) (locationRegistry.call("requestStatus").getData());
+                    for(UnitConfigType.UnitConfig locationUnitConfig : lrd.getLocationUnitConfigList()) {
+                        Log.e(TAG, "location:"+ locationUnitConfig.getLabel());
+                        //UnitConfigType.UnitConfig.Builder builder = locationUnitConfig.toBuilder();
+                        //Registries.getLocationRegistry().updateLocationConfig();
+                    }
+                    //Event event = new Event(UnitConfigType.UnitConfig.class, );
+
+                    locationRegistry.call("updateLocationConfig", UnitConfigType.UnitConfig.getDefaultInstance());
+                    locationRegistry.deactivate();
+
+                } catch (RSBException | TimeoutException | ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+
+
+
+//        try {
+//            Registries.getLocationRegistry().waitForData();
+//            //Registries.getLocationRegistry().getRootLocationConfig().getLabel();
+//            for(UnitConfigType.UnitConfig locationUnitConfig : Registries.getLocationRegistry().getLocationConfigs()) {
+//                Log.e(TAG, "location:"+ locationUnitConfig.getLabel());
+//                //UnitConfigType.UnitConfig.Builder builder = locationUnitConfig.toBuilder();
+//                //Registries.getLocationRegistry().updateLocationConfig();
+//            }
+//        } catch (CouldNotPerformException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void startRelocationClicked(View v) {

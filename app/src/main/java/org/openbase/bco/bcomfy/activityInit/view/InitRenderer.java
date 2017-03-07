@@ -197,4 +197,12 @@ public class InitRenderer extends Renderer {
         debugSphere.setPosition(vector3);
         getCurrentScene().addChild(debugSphere);
     }
+
+    public void clearPlanes() {
+        for (Object3D plane : roomPlanes) {
+            getCurrentScene().removeChild(plane);
+        }
+
+        roomPlanes.clear();
+    }
 }
