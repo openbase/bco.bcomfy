@@ -1,0 +1,56 @@
+language: java
+
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    # - platform-tools
+    # - tools
+
+    # The BuildTools version used by your project
+    - build-tools-19.1.0
+
+    # The SDK version used to compile your project
+    - android-22
+
+    # Additional components
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+    - addon-google_apis-google-19
+
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    - sys-img-armeabi-v7a-android-22
+    - sys-img-armeabi-v7a-android-17
+
+branches:
+  except:
+  - /^(?i:feature)-.*$/
+  - /^(?i:release)-.*$/
+
+notifications:
+  slack: openbase-org:vGz7LO4CvGoGMneYkEm3ON7E
+  on_failure: change
+  on_success: change	
+
+install:
+  - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V -q
+
+before_install:
+  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
+deploy:
+  - provider: script
+    script: .travis/deploy.sh
+    on:
+        repo: openbase/bco.bcozy
+        branch: master
+        jdk: oraclejdk8
+  - provider: script
+    script: .travis/deploy.sh
+    on:
+        repo: openbase/bco.bcozy
+        tags: true
+        jdk: oraclejdk8
