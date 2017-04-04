@@ -34,8 +34,9 @@ notifications:
   on_failure: change
   on_success: change	
 
-install:
-  - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V -q
+# disabled because this is a gradle project 
+# install:
+#  - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V -q
 
 # before_install:
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
