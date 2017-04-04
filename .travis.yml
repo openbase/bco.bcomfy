@@ -37,20 +37,20 @@ notifications:
 install:
   - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V -q
 
-before_install:
-  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+# before_install:
+#  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+#  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
 deploy:
   - provider: script
     script: .travis/deploy.sh
     on:
-        repo: openbase/bco.bcozy
+        repo: openbase/bco.bcomfy
         branch: master
         jdk: oraclejdk8
   - provider: script
     script: .travis/deploy.sh
     on:
-        repo: openbase/bco.bcozy
+        repo: openbase/bco.bcomfy
         tags: true
         jdk: oraclejdk8
