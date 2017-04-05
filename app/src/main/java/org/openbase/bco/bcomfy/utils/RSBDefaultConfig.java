@@ -21,7 +21,9 @@ public class RSBDefaultConfig {
 
         enableTransport(participantConfig);
         //setupHost(participantConfig, "129.70.148.46");
-        setupHost(participantConfig, "129.70.135.69");
+//        setupHost(participantConfig, "129.70.135.69");
+        setupHost(participantConfig, "192.168.90.67");
+//        setupHost(participantConfig, "192.168.80.25");
         setupPort(participantConfig, 4803);
 
         init = true;
