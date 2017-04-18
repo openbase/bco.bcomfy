@@ -561,7 +561,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                                     rgbTimestampGlThread,
                                     TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                                     TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR,
-                                    TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                                    TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                                     TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                                     displayRotation);
                             if (lastFramePose.statusCode == TangoPoseData.POSE_VALID) {
