@@ -48,10 +48,8 @@ deploy:
     on:
         repo: openbase/bco.bcomfy
         branch: master
-        jdk: oraclejdk8
   - provider: script
     script: .travis/deploy.sh
     on:
         repo: openbase/bco.bcomfy
         tags: true
-        jdk: oraclejdk8

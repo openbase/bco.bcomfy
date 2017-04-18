@@ -1,9 +1,9 @@
 package org.openbase.bco.bcomfy.activityInit;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -37,26 +37,20 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.projecttango.tangosupport.TangoPointCloudManager;
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
-import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.openbase.bco.bcomfy.utils.RSBDefaultConfig;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
-//import org.openbase.bco.registry.remote.Registries;
-//import org.openbase.jul.exception.CouldNotPerformException;
-//import org.openbase.jul.exception.NotAvailableException;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -76,7 +70,9 @@ import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 import rst.spatial.ShapeType;
 
-//import rst.domotic.unit.UnitConfigType;
+//import org.openbase.bco.registry.remote.Registries;
+//import org.openbase.jul.exception.CouldNotPerformException;
+//import org.openbase.jul.exception.NotAvailableException;
 
 public class InitActivity extends Activity implements View.OnTouchListener, LocationChooser.LocationChooserListener{
     private static final String TAG = InitActivity.class.getSimpleName();
@@ -565,6 +561,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                                     rgbTimestampGlThread,
                                     TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                                     TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR,
+                                    TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
                                     TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                                     displayRotation);
                             if (lastFramePose.statusCode == TangoPoseData.POSE_VALID) {
@@ -613,6 +610,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
     /**
      * Set the color camera background texture rotation and save the camera to display rotation.
      */
+    @SuppressLint("WrongConstant")
     private void setDisplayRotation() {
         Display display = getWindowManager().getDefaultDisplay();
         displayRotation = display.getRotation();

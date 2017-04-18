@@ -1,6 +1,5 @@
 package org.openbase.bco.bcomfy.activityInit.view;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
