@@ -20,6 +20,7 @@ public class RSBDefaultConfig {
         participantConfig = Factory.getInstance().getDefaultParticipantConfig();
 
         enableTransport(participantConfig);
+
         setupHost(participantConfig, "129.70.135.69");
         setupPort(participantConfig, 4803);
 

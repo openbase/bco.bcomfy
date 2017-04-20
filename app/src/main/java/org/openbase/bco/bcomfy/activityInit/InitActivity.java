@@ -43,8 +43,9 @@ import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
+import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
+import org.openbase.bco.bcomfy.utils.LocationUtils;
 import org.openbase.bco.bcomfy.utils.MathUtils;
-import org.openbase.bco.bcomfy.utils.RSBDefaultConfig;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
@@ -52,29 +53,12 @@ import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.view.SurfaceView;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import rsb.Factory;
 import rsb.RSBException;
-import rsb.converter.DefaultConverterRepository;
-import rsb.converter.ProtocolBufferConverter;
-import rsb.introspection.LacksOsInformationException;
 import rsb.patterns.RemoteServer;
-import rsb.util.os.RuntimeOsUtilities;
-import rst.domotic.registry.LocationRegistryDataType;
-import rst.domotic.unit.UnitConfigType;
-import rst.math.Vec3DDoubleType;
-import rst.spatial.PlacementConfigType;
-import rst.spatial.ShapeType;
 
-//import org.openbase.bco.registry.remote.Registries;
-//import org.openbase.jul.exception.CouldNotPerformException;
-//import org.openbase.jul.exception.NotAvailableException;
-
-public class InitActivity extends Activity implements View.OnTouchListener, LocationChooser.LocationChooserListener{
+public class InitActivity extends Activity implements View.OnTouchListener, LocationChooser.LocationChooserListener {
     private static final String TAG = InitActivity.class.getSimpleName();
     private static final int INVALID_TEXTURE_ID = 0;
 
@@ -190,7 +174,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
 //            planeList = new ArrayList<>();
 //        }
 
-        fetchLocations();
+        initLocations();
     }
 
     @Override
@@ -230,6 +214,13 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                     Log.e(TAG, getString(R.string.tango_error), e);
                 }
             }
+        }
+
+        try {
+            locationRegistry.deactivate();
+        } catch (RSBException | InterruptedException e) {
+            Log.e(TAG, "Failed to deactivate locationRegistry!");
+            e.printStackTrace();
         }
     }
 
@@ -830,96 +821,41 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
         final ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
 
         for (Vector3 vertex : ground) {
-            Log.e(TAG, "Placing ground vertex sphere at: " + vertex.toString());
+//            Log.e(TAG, "Placing ground vertex sphere at: " + vertex.toString());
             initRenderer.addSphere(vertex, Color.BLUE);
         }
 
         for (Vector3 vertex : ceiling) {
-            Log.e(TAG, "Placing ceiling vertex sphere at: " + vertex.toString());
+//            Log.e(TAG, "Placing ceiling vertex sphere at: " + vertex.toString());
             initRenderer.addSphere(vertex, Color.RED);
         }
 
         initRenderer.clearPlanes();
 
-        new Thread() {
+        LocationUtils.updateLocationShape(locationRegistry, location, ground, new OnTaskFinishedListener<Void>() {
             @Override
-            public void run() {
-                try {
-                    //RemoteServer locationRegistry = Factory.getInstance().createRemoteServer("/registry/location/ctrl", RSBDefaultConfig.getDefaultParticipantConfig());
-                    //DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(LocationRegistryDataType.LocationRegistryData.getDefaultInstance()));
-                    //DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(UnitConfigType.UnitConfig.getDefaultInstance()));
-
-                    //locationRegistry.activate();
-
-
-                    LocationRegistryDataType.LocationRegistryData lrd = (LocationRegistryDataType.LocationRegistryData) (locationRegistry.call("requestStatus").getData());
-                    List<UnitConfigType.UnitConfig> locationList = lrd.getLocationUnitConfigList();
-                    UnitConfigType.UnitConfig locationConfig = UnitConfigType.UnitConfig.getDefaultInstance();
-
-                    for (UnitConfigType.UnitConfig current : locationList) {
-                        if (current.getLabel().equals(location)) {
-                            locationConfig = current;
-                            break;
-                        }
-                    }
-
-                    List<Vec3DDoubleType.Vec3DDouble> floorList = locationConfig.getPlacementConfig().getShape().getFloorList();
-
-                    Log.e(TAG, "Vertices: ");
-                    for (Vec3DDoubleType.Vec3DDouble vertex : floorList) {
-                        Log.e(TAG, "X: " + vertex.getX() + " Y: " + vertex.getY() + " Z: " + vertex.getZ());
-                    }
-
-                    ShapeType.Shape.Builder shapeBuilder = ShapeType.Shape.getDefaultInstance().toBuilder();
-
-                    for (Vector3 vector3 : ground) {
-                        shapeBuilder.addFloor(Vec3DDoubleType.Vec3DDouble.getDefaultInstance().toBuilder().setX(vector3.x).setY(vector3.z).setZ(vector3.y).build());
-                    }
-
-                    PlacementConfigType.PlacementConfig placementConfig = locationConfig.getPlacementConfig().toBuilder().clearShape().setShape(shapeBuilder.build()).build();
-                    UnitConfigType.UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
-
-                    locationRegistry.call("updateLocationConfig", newLocationConfig);
-
-                    //locationRegistry.deactivate();
-
-                } catch (RSBException | TimeoutException | ExecutionException e) {
-                    e.printStackTrace();
-                } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
-                    Log.w(TAG, "No PID information available.");
-                }
+            public void onTaskFinished(Void result) {
+                Log.i(TAG, "Updated shape of location: " + location);
             }
-        }.start();
-
+        });
     }
 
-    private void fetchLocations() {
-        locations = new ArrayList<>();
-
-        new Thread() {
+    private void initLocations() {
+        LocationUtils.initLocationRegistry(new OnTaskFinishedListener<RemoteServer>() {
             @Override
-            public void run() {
-                try {
-                    locationRegistry = Factory.getInstance().createRemoteServer("/registry/location/ctrl", RSBDefaultConfig.getDefaultParticipantConfig());
-                    DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(LocationRegistryDataType.LocationRegistryData.getDefaultInstance()));
-                    DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(UnitConfigType.UnitConfig.getDefaultInstance()));
+            public void onTaskFinished(RemoteServer result) {
+                locationRegistry = result;
+                Log.i(TAG, "Initialized locationRegistry");
 
-                    locationRegistry.activate();
-                    LocationRegistryDataType.LocationRegistryData lrd = (LocationRegistryDataType.LocationRegistryData) (locationRegistry.call("requestStatus").getData());
-
-                    for(UnitConfigType.UnitConfig locationUnitConfig : lrd.getLocationUnitConfigList()) {
-                        locations.add(locationUnitConfig.getLabel());
+                LocationUtils.fetchLocationList(locationRegistry, new OnTaskFinishedListener<ArrayList<CharSequence>>() {
+                    @Override
+                    public void onTaskFinished(ArrayList<CharSequence> result) {
+                        locations = result;
+                        Log.i(TAG, "Fetched list of locations");
                     }
-
-                    //locationRegistry.deactivate();
-
-                } catch (RSBException | TimeoutException | ExecutionException e) {
-                    e.printStackTrace();
-                } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
-                    Log.w(TAG, "No PID information available.");
-                }
+                });
             }
-        }.start();
+        });
     }
 
 }
