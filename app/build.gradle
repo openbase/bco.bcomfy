@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "26.0.0-rc1"
     defaultConfig {
         applicationId "org.openbase.bco.bcomfy"
         minSdkVersion 23
@@ -61,4 +61,5 @@ dependencies {
 //    compile 'rsb:rst:[0.15,0.16-SNAPSHOT)'
 //    compile 'rsb:rst-experimental:[0.15,0.16-SNAPSHOT)'
 //    compile 'rsb:rst-sandbox:[0.15,0.16-SNAPSHOT)'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }

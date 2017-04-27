@@ -6,6 +6,9 @@
     <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
     <string name="no_permissions">Permission not granted!</string>
     <string name="gui_connect_bco">Connecting to BCO...</string>
+    <string name="gui_update_adf">Updating Area Description...</string>
+    <string name="gui_init_tango">Initializing Tango Service...\nPlease hold the device upright!</string>
+    <string name="gui_update_adf_failed">Location not initialized!</string>
     <string name="gui_cancel">Cancel</string>
     <string name="gui_place_sphere">Place Sphere</string>
     <string name="gui_save_location">Save Location</string>
@@ -22,4 +25,10 @@
     <string name="init_mark_ceiling">Please mark the ceiling</string>
     <string name="init_mark_walls">Please mark the walls clockwise</string>
     <string name="choose_location">Select the location</string>
+    <string name="gui_initialize">Initialize</string>
+    <string name="gui_retry">Retry</string>
+    <string name="gui_settings">Settings</string>
+    <string name="gui_publish_depth">Publish depth data</string>
+    <string name="gui_record_adf">Record Local Area</string>
+    <string name="gui_manage_adf">Manage Local Area</string>
 </resources>

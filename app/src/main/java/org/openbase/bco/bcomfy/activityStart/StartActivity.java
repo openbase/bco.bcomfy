@@ -2,31 +2,28 @@ package org.openbase.bco.bcomfy.activityStart;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.usage.UsageEvents;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
-import org.openbase.bco.bcomfy.utils.RSBDefaultConfig;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import rsb.Event;
-import rsb.Factory;
-import rsb.RSBException;
-import rsb.converter.DefaultConverterRepository;
-import rsb.converter.ProtocolBufferConverter;
-import rsb.patterns.RemoteServer;
-import rst.domotic.registry.LocationRegistryDataType;
-import rst.domotic.unit.UnitConfigType;
+import org.openbase.bco.registry.lib.BCO;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jps.core.JPService;
+import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
+import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
 
 public class StartActivity extends Activity {
 
@@ -36,11 +33,20 @@ public class StartActivity extends Activity {
     private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
     private static final int CAMERA_PERMISSION_CODE = 0;
 
+    private StartActivityState state = StartActivityState.INIT_BCO;
+
+    private ProgressBar progressBar;
+    private TextView infoMessage;
+    private Button buttonInitialize;
+    private Button buttonCancel;
+    private Button buttonRetry;
+    private Button buttonSettings;
+    private Button buttonPublish;
+    private Button buttonRecord;
+    private Button buttonManage;
+
     private Tango tango;
     private TangoConfig tangoConfig;
-
-    private CheckBox relocationCheckBox;
-    private CheckBox useLatestAdfCheckBox;
 
     private double previousPoseTimeStamp;
     private double timeToNextUpdate = UPDATE_INTERVAL_MS;
@@ -55,13 +61,21 @@ public class StartActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        initGui();
 
+        // Set JPS default values
+        JPService.registerProperty(JPRSBHost.class, "129.70.135.69");
+        JPService.registerProperty(JPRSBPort.class, 4803);
+        JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
+
+        // Set system property. This workaround is needed for RSB.
         System.setProperty("sun.arch.data.model", "32");
 
-        useLatestAdfCheckBox = (CheckBox) findViewById(R.id.checkBox);
-
+        // Ask for ADF loading and saving permissions.
         startActivityForResult(
                 Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
+
+        initBco();
     }
 
     @Override
@@ -119,62 +133,77 @@ public class StartActivity extends Activity {
 //        }
     }
 
-    public void onButtonRecordClicked(View v) {
+    private void changeState(StartActivityState startActivityState) {
+        state = startActivityState;
+
+        switch (state) {
+            case INIT_BCO:
+                infoMessage.setText(R.string.gui_connect_bco);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                break;
+            case GET_ADF:
+//                infoMessage.setText(R.string.gui_update_adf);
+//                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+//                TODO: implement ADF fetching
+                changeState(StartActivityState.GET_ADF_FAILED);
+                break;
+            case GET_ADF_FAILED:
+                infoMessage.setText(R.string.gui_update_adf_failed);
+                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                break;
+            case INIT_TANGO:
+                infoMessage.setText(R.string.gui_init_tango);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                break;
+            case SETTINGS:
+                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void onButtonInitializeClicked(View view) {
         Intent intent = new Intent(this, InitActivity.class);
-        intent.putExtra("useADF", useLatestAdfCheckBox.isChecked());
+        intent.putExtra("useADF", true);
         startActivity(intent);
     }
 
-    public void onDebugButtonClicked(View v) {
-
-        new Thread() {
-
-            @Override
-            public void run() {
-                RemoteServer locationRegistry = Factory.getInstance().createRemoteServer("/registry/location/ctrl", RSBDefaultConfig.getDefaultParticipantConfig());
-                DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(LocationRegistryDataType.LocationRegistryData.getDefaultInstance()));
-                DefaultConverterRepository.getDefaultConverterRepository().addConverter(new ProtocolBufferConverter<>(UnitConfigType.UnitConfig.getDefaultInstance()));
-
-                try {
-                    locationRegistry.activate();
-                    LocationRegistryDataType.LocationRegistryData lrd = (LocationRegistryDataType.LocationRegistryData) (locationRegistry.call("requestStatus").getData());
-                    for(UnitConfigType.UnitConfig locationUnitConfig : lrd.getLocationUnitConfigList()) {
-                        Log.e(TAG, "location:"+ locationUnitConfig.getLabel());
-                        //UnitConfigType.UnitConfig.Builder builder = locationUnitConfig.toBuilder();
-                        //Registries.getLocationRegistry().updateLocationConfig();
-                    }
-                    //Event event = new Event(UnitConfigType.UnitConfig.class, );
-
-                    locationRegistry.call("updateLocationConfig", UnitConfigType.UnitConfig.getDefaultInstance());
-                    locationRegistry.deactivate();
-
-                } catch (RSBException | TimeoutException | ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-
-
-
-//        try {
-//            Registries.getLocationRegistry().waitForData();
-//            //Registries.getLocationRegistry().getRootLocationConfig().getLabel();
-//            for(UnitConfigType.UnitConfig locationUnitConfig : Registries.getLocationRegistry().getLocationConfigs()) {
-//                Log.e(TAG, "location:"+ locationUnitConfig.getLabel());
-//                //UnitConfigType.UnitConfig.Builder builder = locationUnitConfig.toBuilder();
-//                //Registries.getLocationRegistry().updateLocationConfig();
-//            }
-//        } catch (CouldNotPerformException | InterruptedException e) {
-//            e.printStackTrace();
-//        }
+    public void onButtonCancelClicked(View view) {
+        Registries.shutdown();
+        changeState(StartActivityState.SETTINGS);
     }
 
-    public void startRelocationClicked(View v) {
-        System.out.println("startRelocationClicked");
+    public void onButtonRetryClicked(View view) {
+        initBco();
     }
 
-    private void setupTextViewsAndButtons(Tango tango) {
-        //relocationCheckBox = (CheckBox) findViewById(R.id.checkBox);
+    public void onButtonSettingsClicked(View view) {
+        Log.e(TAG, "Operation not implemented: onButtonSettingsClicked");
+    }
+
+    public void onButtonPublishClicked(View view) {
+        Log.e(TAG, "Operation not implemented: onButtonPublishClicked");
+    }
+
+    public void onButtonRecordClicked(View v) {
+        Log.e(TAG, "Operation not implemented: onButtonRecordClicked");
+    }
+
+    public void onButtonManageClicked(View view) {
+        Log.e(TAG, "Operation not implemented: onButtonManageClicked");
+    }
+
+    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage) {
+        progressBar.setVisibility(progress);
+        infoMessage.setVisibility(info);
+        buttonInitialize.setVisibility(init);
+        buttonCancel.setVisibility(cancel);
+        buttonRetry.setVisibility(retry);
+        buttonSettings.setVisibility(settings);
+        buttonPublish.setVisibility(publish);
+        buttonRecord.setVisibility(record);
+        buttonManage.setVisibility(manage);
     }
 
     /**
@@ -251,5 +280,40 @@ public class StartActivity extends Activity {
 //                }
 //            }
 //        });
+    }
+    private void initBco() {
+        changeState(StartActivityState.INIT_BCO);
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Registries.waitForData();
+                } catch (CouldNotPerformException | InterruptedException ex) {
+                    Log.e(TAG, "Error while initializing BCO!");
+                    ex.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void v) {
+                Log.i(TAG, "Connection to BCO initialized.");
+                Log.i(TAG, BCO.BCO_LOGO_ASCI_ARTS);
+                changeState(StartActivityState.GET_ADF);
+            }
+        }.execute((Void) null);
+    }
+
+    private void initGui() {
+        progressBar      = (ProgressBar) findViewById(R.id.progressBar);
+        infoMessage      = (TextView) findViewById(R.id.infoMessage);
+        buttonInitialize = (Button) findViewById(R.id.button_initialize);
+        buttonCancel     = (Button) findViewById(R.id.button_cancel);
+        buttonRetry      = (Button) findViewById(R.id.button_retry);
+        buttonSettings   = (Button) findViewById(R.id.button_settings);
+        buttonPublish    = (Button) findViewById(R.id.button_publish);
+        buttonRecord     = (Button) findViewById(R.id.button_record);
+        buttonManage     = (Button) findViewById(R.id.button_manage);
     }
 }
