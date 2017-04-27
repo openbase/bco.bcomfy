@@ -1,11 +1,13 @@
 package org.openbase.bco.bcomfy.activityStart;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -14,6 +16,10 @@ import android.widget.TextView;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoInvalidException;
+import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
@@ -24,6 +30,9 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
+
+import java.util.ArrayList;
+import java.util.concurrent.CancellationException;
 
 public class StartActivity extends Activity {
 
@@ -45,8 +54,10 @@ public class StartActivity extends Activity {
     private Button buttonRecord;
     private Button buttonManage;
 
-    private Tango tango;
+    public static Tango tango;
     private TangoConfig tangoConfig;
+    private boolean isConnected = false;
+    private int displayRotation = 0;
 
     private double previousPoseTimeStamp;
     private double timeToNextUpdate = UPDATE_INTERVAL_MS;
@@ -81,56 +92,85 @@ public class StartActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-
-//        tango = new Tango(StartActivity.this, new Runnable() {
-//            // Pass in a Runnable to be called from UI thread when Tango is ready, this Runnable
-//            // will be running on a new thread.
-//            // When Tango is ready, we can call Tango functions safely here only when there is no UI
-//            // thread changes involved.
-//            @Override
-//            public void run() {
-//                synchronized (StartActivity.this) {
-//                    try {
-//                        tangoConfig = setTangoConfig(tango);
-//                        tango.connect(tangoConfig);
-//                        startupTango();
-//                    } catch (TangoOutOfDateException e) {
-//                        Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
-//                    } catch (TangoErrorException e) {
-//                        Log.e(TAG, getString(R.string.tango_error), e);
-//                    } catch (TangoInvalidException e) {
-//                        Log.e(TAG, getString(R.string.tango_invalid), e);
-//                    } catch (SecurityException e) {
-//                        // Area Learning permissions are required. If they are not available,
-//                        // SecurityException is thrown.
-//                        Log.e(TAG, getString(R.string.no_permissions), e);
-//                    }
-//                }
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        synchronized (StartActivity.this) {
-//                            setupTextViewsAndButtons(tango);
-//                        }
-//                    }
-//                });
-//            }
-//        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//
-//        isRelocalized = false;
-//        synchronized (this) {
-//            try {
-//                tango.disconnect();
-//            } catch (TangoErrorException e) {
-//                Log.e(TAG, getString(R.string.tango_error), e);
-//            }
-//        }
+    }
+
+    /**
+     * Initialize Tango Service as a normal Android Service.
+     */
+    private void bindTangoService() {
+        // Since we call mTango.disconnect() in onStop, this will unbind Tango Service, so every
+        // time when onStart gets called, we should create a new Tango object.
+        tango = new Tango(StartActivity.this, new Runnable() {
+            // Pass in a Runnable to be called from UI thread when Tango is ready, this Runnable
+            // will be running on a new thread.
+            // When Tango is ready, we can call Tango functions safely here only when there
+            // is no UI thread changes involved.
+            @Override
+            public void run() {
+                // Synchronize against disconnecting while the service is being used in the
+                // OpenGL thread or in the UI thread.
+                synchronized (StartActivity.this) {
+                    try {
+                        TangoSupport.initialize();
+                        tangoConfig = setupTangoConfig(tango);
+                        tango.connect(tangoConfig);
+//                        startupTango();
+                        isConnected = true;
+//                        setDisplayRotation();
+                        runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
+                        startInitActivity();
+                    } catch (TangoOutOfDateException e) {
+                        Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
+                        changeState(StartActivityState.INIT_TANGO_FAILED);
+                    } catch (TangoErrorException e) {
+                        Log.e(TAG, getString(R.string.tango_error), e);
+                        changeState(StartActivityState.INIT_TANGO_FAILED);
+                    } catch (TangoInvalidException e) {
+                        Log.e(TAG, getString(R.string.tango_invalid), e);
+                        changeState(StartActivityState.INIT_TANGO_FAILED);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Sets up the tango configuration object. Make sure mTango object is initialized before
+     * making this call.
+     */
+    private TangoConfig setupTangoConfig(Tango tango) {
+        // Use default configuration for Tango Service, plus color camera, low latency
+        // IMU integration and drift correction.
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+        // NOTE: Low latency integration is necessary to achieve a precise alignment of
+        // virtual objects with the RBG image and produce a good AR effect.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+        // Drift correction allows motion tracking to recover after it loses tracking.
+        // The drift corrected pose is is available through the frame pair with
+        // base frame AREA_DESCRIPTION and target frame DEVICE.
+        //config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+        config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+
+        ArrayList<String> fullUUIDList;
+        // Returns a list of ADFs with their UUIDs
+        fullUUIDList = tango.listAreaDescriptions();
+        // Load the latest ADF if ADFs are found.
+        if (fullUUIDList.size() > 0) {
+            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION,
+                    fullUUIDList.get(fullUUIDList.size() - 1));
+
+            Log.i(TAG, "using ADF: " + fullUUIDList.get(fullUUIDList.size() - 1));
+        }
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, false);
+
+        return config;
     }
 
     private void changeState(StartActivityState startActivityState) {
@@ -155,6 +195,10 @@ public class StartActivity extends Activity {
                 infoMessage.setText(R.string.gui_init_tango);
                 setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
+            case INIT_TANGO_FAILED:
+                infoMessage.setText(R.string.gui_init_tango_failed);
+                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE);
+                break;
             case SETTINGS:
                 setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE);
                 break;
@@ -164,14 +208,18 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonInitializeClicked(View view) {
-        Intent intent = new Intent(this, InitActivity.class);
-        intent.putExtra("useADF", true);
-        startActivity(intent);
+        changeState(StartActivityState.INIT_TANGO);
+        bindTangoService();
     }
 
     public void onButtonCancelClicked(View view) {
-        Registries.shutdown();
         changeState(StartActivityState.SETTINGS);
+        try {
+            Registries.shutdown();
+        } catch (CancellationException ex) {
+            Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
+        }
+
     }
 
     public void onButtonRetryClicked(View view) {
@@ -206,81 +254,6 @@ public class StartActivity extends Activity {
         buttonManage.setVisibility(manage);
     }
 
-    /**
-     * Sets up the tango configuration object. Make sure mTango object is initialized before
-     * making this call.
-     */
-//    private TangoConfig setTangoConfig(Tango tango) {
-//        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
-//        config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, false);
-//
-//        ArrayList<String> fullUuidList;
-//        fullUuidList = tango.listAreaDescriptions();
-//        if (fullUuidList.size() > 0) {
-//            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION,
-//                    fullUuidList.get(fullUuidList.size() - 1));
-//        }
-//
-//        return config;
-//    }
-
-    private void startupTango() {
-        // Set Tango Listeners for Poses Device wrt Start of Service, Device wrt
-        // ADF and Start of Service wrt ADF.
-//        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
-//        framePairs.add(new TangoCoordinateFramePair(
-//                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
-//                TangoPoseData.COORDINATE_FRAME_DEVICE));
-//        framePairs.add(new TangoCoordinateFramePair(
-//                TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-//                TangoPoseData.COORDINATE_FRAME_DEVICE));
-//        framePairs.add(new TangoCoordinateFramePair(
-//                TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-//                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
-//
-//        tango.connectListener(framePairs, new Tango.TangoUpdateCallback() {
-//            @Override
-//            public void onPoseAvailable(TangoPoseData pose) {
-//                // Make sure to have atomic access to Tango Data so that UI loop doesn't interfere
-//                // while Pose call back is updating the data.
-//                synchronized (sharedLock) {
-//                    // Check for Device wrt ADF pose, Device wrt Start of Service pose, Start of
-//                    // Service wrt ADF pose (This pose determines if the device is relocalized or
-//                    // not).
-//                    if (pose.baseFrame == TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION
-//                            && pose.targetFrame == TangoPoseData
-//                            .COORDINATE_FRAME_START_OF_SERVICE) {
-//                        if (pose.statusCode == TangoPoseData.POSE_VALID) {
-//                            isRelocalized = true;
-//                        } else {
-//                            isRelocalized = false;
-//                        }
-//                    }
-//                }
-//
-//                final double deltaTime = (pose.timestamp - previousPoseTimeStamp) *
-//                        SECS_TO_MILLISECS;
-//                previousPoseTimeStamp = pose.timestamp;
-//                timeToNextUpdate -= deltaTime;
-//
-//                if (timeToNextUpdate < 0.0) {
-//                    timeToNextUpdate = UPDATE_INTERVAL_MS;
-//
-//                    Log.e(TAG, pose.toString());
-//                    Log.e(TAG, Boolean.toString(isRelocalized));
-//
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            synchronized (sharedLock) {
-////                                relocationCheckBox.setChecked(isRelocalized);
-//                            }
-//                        }
-//                    });
-//                }
-//            }
-//        });
-    }
     private void initBco() {
         changeState(StartActivityState.INIT_BCO);
 
@@ -315,5 +288,12 @@ public class StartActivity extends Activity {
         buttonPublish    = (Button) findViewById(R.id.button_publish);
         buttonRecord     = (Button) findViewById(R.id.button_record);
         buttonManage     = (Button) findViewById(R.id.button_manage);
+    }
+
+    private void startInitActivity() {
+        Intent intent = new Intent(this, InitActivity.class);
+        intent.putExtra("useADF", true);
+        intent.putExtra("displayRotation", displayRotation);
+        startActivity(intent);
     }
 }

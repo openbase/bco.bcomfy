@@ -8,6 +8,7 @@
     <string name="gui_connect_bco">Connecting to BCO...</string>
     <string name="gui_update_adf">Updating Area Description...</string>
     <string name="gui_init_tango">Initializing Tango Service...\nPlease hold the device upright!</string>
+    <string name="gui_init_tango_failed">Initializing of Tango Service failed!</string>
     <string name="gui_update_adf_failed">Location not initialized!</string>
     <string name="gui_cancel">Cancel</string>
     <string name="gui_place_sphere">Place Sphere</string>
