@@ -45,7 +45,6 @@ import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.LocationUtils;
-import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
@@ -92,7 +91,6 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
     private InstructionTextView instructionTextView;
 
     private Measurer measurer;
-    private Plane lastMeasuredPlane;
 
     private RemoteServer locationRegistry;
     private ArrayList<CharSequence> locations;
@@ -224,106 +222,6 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
         }
     }
 
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        // Ignore onTouch Event if we don't want to measure something
-        if (measurer.getMeasurerState() == Measurer.MeasurerState.INIT) {
-            return true;
-        }
-
-        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            // Calculate click location in u,v (0;1) coordinates.
-            float u = motionEvent.getX() / view.getWidth();
-            float v = motionEvent.getY() / view.getHeight();
-
-            try {
-                // Fit a plane on the clicked point using the latest point cloud data
-                // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
-                // and a possible service disconnection due to an onPause event.
-                float[] planeFitTransform;
-                synchronized (this) {
-                    planeFitTransform = doFitPlane(u, v, rgbTimestampGlThread);
-                }
-
-                if (planeFitTransform != null) {
-                    Matrix4 planeMatrix = new Matrix4(planeFitTransform);
-                    //Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(planeMatrix);
-                    Measurer.Measurement lastMeasurement = measurer.addPlaneMeasurement(lastMeasuredPlane);
-                    updateGuiAfterPlaneMeasurement(planeMatrix, lastMeasurement);
-                }
-
-            } catch (TangoException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.tango_error,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.tango_error), t);
-            } catch (SecurityException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.no_permissions,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.no_permissions), t);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Handle a successful plane measurement
-     */
-    private void updateGuiAfterPlaneMeasurement(Matrix4 plane, Measurer.Measurement lastMeasurement) {
-        switch (lastMeasurement) {
-            case INVALID:
-                return;
-            case GROUND:
-                initRenderer.addGroundPlane(plane);
-                break;
-            case CEILING:
-                initRenderer.addCeilingPlane(plane);
-                break;
-            case WALL:
-                initRenderer.addWallPlane(plane);
-                break;
-        }
-
-        updateGuiButtons();
-    }
-
-    /**
-     * Update Buttons and InstructionTextView based on the current state of the {@link Measurer}
-     */
-    private void updateGuiButtons() {
-        switch (measurer.getMeasurerState()) {
-            case INIT:
-                buttonAddRoom.setEnabled(true);
-                buttonFinishRoom.setEnabled(false);
-                buttonFinishMeasurement.setEnabled(measurer.hasFinishedRoom());
-                break;
-            case MARK_GROUND:
-                buttonAddRoom.setEnabled(false);
-                buttonFinishRoom.setEnabled(false);
-                buttonFinishMeasurement.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
-                break;
-            case MARK_CEILING:
-                buttonAddRoom.setEnabled(false);
-                buttonFinishRoom.setEnabled(false);
-                buttonFinishMeasurement.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
-                break;
-            case MARK_WALLS:
-                buttonAddRoom.setEnabled(false);
-                buttonFinishRoom.setEnabled(false);
-                buttonFinishMeasurement.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
-                break;
-            case ENOUGH_WALLS:
-                buttonAddRoom.setEnabled(false);
-                buttonFinishRoom.setEnabled(true);
-                buttonFinishMeasurement.setEnabled(false);
-                break;
-        }
-    }
-
     /**
      * Initialize Tango Service as a normal Android Service.
      */
@@ -437,15 +335,6 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                     if (surfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
                         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     }
-
-//                    if (!planesDrawn && localized.isChecked()) {
-//                        Log.e(TAG, "Inserting planes...");
-//                        for (float[] plane : planeList) {
-//                            initRenderer.insertPlane(plane);
-//                        }
-//                        planesDrawn = true;
-//                        Log.e(TAG, "Planes inserted.");
-//                    }
 
                     // Mark a camera frame is available for rendering in the OpenGL thread.
                     isFrameAvailableTangoThread.set(true);
@@ -618,12 +507,114 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
         });
     }
 
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        // Ignore onTouch Event if we don't want to measure something
+        if (measurer.getMeasurerState() == Measurer.MeasurerState.INIT) {
+            return true;
+        }
+
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            // Calculate click location in u,v (0;1) coordinates.
+            float u = motionEvent.getX() / view.getWidth();
+            float v = motionEvent.getY() / view.getHeight();
+
+            try {
+                // Fit a plane on the clicked point using the latest point cloud data
+                // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
+                // and a possible service disconnection due to an onPause event.
+                Plane planeFit;
+                synchronized (this) {
+                    planeFit = doFitPlane(u, v, rgbTimestampGlThread);
+                }
+
+                if (planeFit != null) {
+                    Measurer.MeasureType lastMeasureType = measurer.addPlaneMeasurement(planeFit);
+                    updateGuiAfterPlaneMeasurement(planeFit, lastMeasureType);
+                }
+
+            } catch (TangoException t) {
+                Toast.makeText(getApplicationContext(),
+                        R.string.tango_error,
+                        Toast.LENGTH_SHORT).show();
+                Log.e(TAG, getString(R.string.tango_error), t);
+            } catch (SecurityException t) {
+                Toast.makeText(getApplicationContext(),
+                        R.string.no_permissions,
+                        Toast.LENGTH_SHORT).show();
+                Log.e(TAG, getString(R.string.no_permissions), t);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Handle a successful plane measurement
+     */
+    private void updateGuiAfterPlaneMeasurement(Plane plane, Measurer.MeasureType lastMeasureType) {
+        switch (lastMeasureType) {
+            case INVALID:
+                return;
+            case GROUND:
+                Log.e(TAG, "Adding Plane: \nPosition: " + plane.getPosition().toString() + "\nNormal: " + plane.getNormal().toString());
+                initRenderer.addGroundPlane(plane.getPosition(), plane.getNormal());
+                break;
+            case CEILING:
+                Log.e(TAG, "Adding Plane: \nPosition: " + plane.getPosition().toString() + "\nNormal: " + plane.getNormal().toString());
+                initRenderer.addCeilingPlane(plane.getPosition(), plane.getNormal());
+                break;
+            case WALL:
+                Log.e(TAG, "Adding Plane: \nPosition: " + plane.getPosition().toString() + "\nNormal: " + plane.getNormal().toString());
+                initRenderer.addWallPlane(plane.getPosition(), plane.getNormal());
+                break;
+        }
+
+        updateGuiButtons();
+    }
+
+    /**
+     * Update Buttons and InstructionTextView based on the current state of the {@link Measurer}
+     */
+    private void updateGuiButtons() {
+        switch (measurer.getMeasurerState()) {
+            case INIT:
+                buttonAddRoom.setEnabled(true);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(measurer.hasFinishedRoom());
+                break;
+            case MARK_GROUND:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
+                break;
+            case MARK_CEILING:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
+                break;
+            case MARK_WALLS:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(false);
+                buttonFinishMeasurement.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
+                break;
+            case ENOUGH_WALLS:
+                buttonAddRoom.setEnabled(false);
+                buttonFinishRoom.setEnabled(true);
+                buttonFinishMeasurement.setEnabled(false);
+                break;
+        }
+    }
+
     /**
      * Use the TangoSupport library with point cloud data to calculate the plane
      * of the world feature pointed at the location the camera is looking.
      * It returns the transform of the fitted plane in a double array.
      */
-    private float[] doFitPlane(float u, float v, double rgbTimestamp) {
+    private Plane doFitPlane(float u, float v, double rgbTimestamp) {
         TangoPointCloudData pointCloud = tangoPointCloudManager.getLatestPointCloud();
 
         if (pointCloud == null) {
@@ -647,17 +638,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                         depthTcolorPose.translation, depthTcolorPose.rotation);
 
         // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
-        TangoSupport.TangoMatrixTransformData transform =
-                TangoSupport.getMatrixTransformAtTime(pointCloud.timestamp,
-                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
-                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
-                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
-                        TangoSupport.ROTATION_IGNORED);
-
-        // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
-        // But this time double based.
-        TangoSupport.TangoDoubleMatrixTransformData doubleTransform =
+        TangoSupport.TangoDoubleMatrixTransformData transform =
                 TangoSupport.getDoubleMatrixTransformAtTime(pointCloud.timestamp,
                         TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                         TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
@@ -666,23 +647,17 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
                         TangoSupport.ROTATION_IGNORED);
 
         if (transform.statusCode == TangoPoseData.POSE_VALID) {
-            float[] openGlTPlane = MathUtils.calculatePlaneTransform(
-                    intersectionPointPlaneModelPair.intersectionPoint,
-                    intersectionPointPlaneModelPair.planeModel, transform.matrix);
-
             // Get the transformed position of the plane
-            double[] transformedPlanePosition = TangoSupport.doubleTransformPoint(doubleTransform.matrix, intersectionPointPlaneModelPair.intersectionPoint);
+            double[] transformedPlanePosition = TangoSupport.doubleTransformPoint(transform.matrix, intersectionPointPlaneModelPair.intersectionPoint);
 
             // Get the transformed normal of the plane
-            // For this we the transposed inverse of the transformation matrix
-            double[] doubleNormalTransformMatrix = new double[16];
-            new Matrix4(doubleTransform.matrix).inverse().transpose().toArray(doubleNormalTransformMatrix);
+            // For this we first need the transposed inverse of the transformation matrix
+            double[] normalTransformMatrix = new double[16];
+            new Matrix4(transform.matrix).inverse().transpose().toArray(normalTransformMatrix);
             double[] planeNormal = {intersectionPointPlaneModelPair.planeModel[0], intersectionPointPlaneModelPair.planeModel[1], intersectionPointPlaneModelPair.planeModel[2]};
-            double[] transformedPlaneNormal = TangoSupport.doubleTransformPoint(doubleNormalTransformMatrix, planeNormal);
+            double[] transformedPlaneNormal = TangoSupport.doubleTransformPoint(normalTransformMatrix, planeNormal);
 
-            lastMeasuredPlane = new Plane(transformedPlanePosition, transformedPlaneNormal);
-
-            return openGlTPlane;
+            return new Plane(transformedPlanePosition, transformedPlaneNormal);
         } else {
             Log.w(TAG, "Can't get depth camera transform at time " + pointCloud.timestamp);
             return null;

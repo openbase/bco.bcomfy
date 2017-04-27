@@ -24,6 +24,7 @@ import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class InitRenderer extends Renderer {
     private static final String TAG = InitRenderer.class.getSimpleName();
@@ -143,42 +144,43 @@ public class InitRenderer extends Renderer {
         getCurrentCamera().setProjectionMatrix(new Matrix4(matrixFloats));
     }
 
-    public void addGroundPlane(Matrix4 plane) {
+    public void addGroundPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x330000ff);
         planeMaterial.enableLighting(true);
         planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        addPlane(plane, planeMaterial);
+        addPlane(position, normal, planeMaterial);
     }
 
-    public void addCeilingPlane(Matrix4 plane) {
+    public void addCeilingPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x33ff0000);
         planeMaterial.enableLighting(true);
         planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        addPlane(plane, planeMaterial);
+        addPlane(position, normal, planeMaterial);
     }
 
-    public void addWallPlane(Matrix4 plane) {
+    public void addWallPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x3300ff00);
         planeMaterial.enableLighting(true);
         planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
         planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        addPlane(plane, planeMaterial);
+        addPlane(position, normal, planeMaterial);
     }
 
-    public void addPlane(Matrix4 plane, Material material) {
+    public void addPlane(Vector3 position, Vector3 normal, Material material) {
         Object3D planeObject = new Plane(0.5f, 0.5f, 10, 10);
         planeObject.setMaterial(material);
+        planeObject.setDoubleSided(true);
         planeObject.setTransparent(true);
-        planeObject.setPosition(plane.getTranslation());
-        planeObject.setOrientation(new Quaternion().fromMatrix(plane));
+        planeObject.setPosition(position);
+        planeObject.setLookAt(new Vector3().addAndSet(position, normal));
 
         roomPlanes.add(planeObject);
 
