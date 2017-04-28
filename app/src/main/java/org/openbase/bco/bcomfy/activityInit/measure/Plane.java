@@ -1,7 +1,5 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
-import android.util.Log;
-
 import org.rajawali3d.math.vector.Vector3;
 
 public class Plane {

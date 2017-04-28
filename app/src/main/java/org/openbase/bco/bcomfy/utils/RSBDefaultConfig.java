@@ -8,6 +8,7 @@ import rsb.config.TransportConfig;
  *
  * @author <a href="mailto:divine@openbase.org">Divine Threepwood</a>
  */
+@Deprecated
 public class RSBDefaultConfig {
 
     private static boolean init = false;

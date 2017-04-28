@@ -24,7 +24,6 @@ import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class InitRenderer extends Renderer {
     private static final String TAG = InitRenderer.class.getSimpleName();

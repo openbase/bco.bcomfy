@@ -1,16 +1,12 @@
 package org.openbase.bco.bcomfy.activityStart;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -37,10 +33,6 @@ import java.util.concurrent.CancellationException;
 public class StartActivity extends Activity {
 
     private static final String TAG = StartActivity.class.getSimpleName();
-    private static final int SECS_TO_MILLISECS = 1000;
-
-    private static final String CAMERA_PERMISSION = Manifest.permission.CAMERA;
-    private static final int CAMERA_PERMISSION_CODE = 0;
 
     private StartActivityState state = StartActivityState.INIT_BCO;
 
@@ -56,17 +48,6 @@ public class StartActivity extends Activity {
 
     public static Tango tango;
     private TangoConfig tangoConfig;
-    private boolean isConnected = false;
-    private int displayRotation = 0;
-
-    private double previousPoseTimeStamp;
-    private double timeToNextUpdate = UPDATE_INTERVAL_MS;
-
-    private boolean isRelocalized;
-
-    private static final double UPDATE_INTERVAL_MS = 1000.0;
-
-    private final Object sharedLock = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,37 +84,25 @@ public class StartActivity extends Activity {
      * Initialize Tango Service as a normal Android Service.
      */
     private void bindTangoService() {
-        // Since we call mTango.disconnect() in onStop, this will unbind Tango Service, so every
-        // time when onStart gets called, we should create a new Tango object.
-        tango = new Tango(StartActivity.this, new Runnable() {
-            // Pass in a Runnable to be called from UI thread when Tango is ready, this Runnable
-            // will be running on a new thread.
-            // When Tango is ready, we can call Tango functions safely here only when there
-            // is no UI thread changes involved.
-            @Override
-            public void run() {
-                // Synchronize against disconnecting while the service is being used in the
-                // OpenGL thread or in the UI thread.
-                synchronized (StartActivity.this) {
-                    try {
-                        TangoSupport.initialize();
-                        tangoConfig = setupTangoConfig(tango);
-                        tango.connect(tangoConfig);
-//                        startupTango();
-                        isConnected = true;
-//                        setDisplayRotation();
-                        runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
-                        startInitActivity();
-                    } catch (TangoOutOfDateException e) {
-                        Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
-                        changeState(StartActivityState.INIT_TANGO_FAILED);
-                    } catch (TangoErrorException e) {
-                        Log.e(TAG, getString(R.string.tango_error), e);
-                        changeState(StartActivityState.INIT_TANGO_FAILED);
-                    } catch (TangoInvalidException e) {
-                        Log.e(TAG, getString(R.string.tango_invalid), e);
-                        changeState(StartActivityState.INIT_TANGO_FAILED);
-                    }
+        tango = new Tango(StartActivity.this, () -> {
+            // Synchronize against disconnecting while the service is being used in the
+            // OpenGL thread or in the UI thread.
+            synchronized (StartActivity.this) {
+                try {
+                    TangoSupport.initialize();
+                    tangoConfig = setupTangoConfig(tango);
+                    tango.connect(tangoConfig);
+                    runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
+                    startInitActivity();
+                } catch (TangoOutOfDateException e) {
+                    Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
+                    changeState(StartActivityState.INIT_TANGO_FAILED);
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, getString(R.string.tango_error), e);
+                    changeState(StartActivityState.INIT_TANGO_FAILED);
+                } catch (TangoInvalidException e) {
+                    Log.e(TAG, getString(R.string.tango_invalid), e);
+                    changeState(StartActivityState.INIT_TANGO_FAILED);
                 }
             }
         });
@@ -292,8 +261,6 @@ public class StartActivity extends Activity {
 
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
-        intent.putExtra("useADF", true);
-        intent.putExtra("displayRotation", displayRotation);
         startActivity(intent);
     }
 }

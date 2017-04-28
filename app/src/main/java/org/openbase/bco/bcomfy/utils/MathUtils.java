@@ -2,6 +2,7 @@ package org.openbase.bco.bcomfy.utils;
 
 import android.opengl.Matrix;
 
+@Deprecated
 public final class MathUtils {
 
     /**

@@ -36,7 +36,6 @@ import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activityStart.StartActivity;
-import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.LocationUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.Matrix4;
@@ -377,9 +376,7 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
         statusBarAnimator.setDuration(600);
         statusBarAnimator.setRepeatCount(ValueAnimator.INFINITE);
         statusBarAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        statusBarAnimator.addUpdateListener(animation -> {
-            runOnUiThread(() -> getWindow().setStatusBarColor((Integer) animation.getAnimatedValue()));
-        });
+        statusBarAnimator.addUpdateListener(animation -> runOnUiThread(() -> getWindow().setStatusBarColor((Integer) animation.getAnimatedValue())));
         runOnUiThread(() -> statusBarAnimator.start());
 
         buttonAddRoom = (Button) findViewById(R.id.buttonAddRoom);
@@ -514,35 +511,24 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
     }
 
     @Override
-    public CharSequence[] getLocations() {
-//        return locations.toArray(new CharSequence[locations.size()]);
-        return new CharSequence[10];
-    }
-
-    @Override
-    public void onLocationSelected(final String location) {
+    public void onLocationSelected(final String locationId) {
         measurer.finishRoom();
         updateGuiButtons();
 
-//        ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();
-//        final ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
-//
-//        for (Vector3 vertex : ground) {
-//            initRenderer.addSphere(vertex, Color.BLUE);
-//        }
-//
-//        for (Vector3 vertex : ceiling) {
-//            initRenderer.addSphere(vertex, Color.RED);
-//        }
-//
-//        initRenderer.clearPlanes();
-//
-//        LocationUtils.updateLocationShape(locationRegistry, location, ground, new OnTaskFinishedListener<Void>() {
-//            @Override
-//            public void onTaskFinished(Void result) {
-//                Log.i(TAG, "Updated shape of location: " + location);
-//            }
-//        });
+        ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();
+        final ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
+
+        for (Vector3 vertex : ground) {
+            initRenderer.addSphere(vertex, Color.BLUE);
+        }
+        for (Vector3 vertex : ceiling) {
+            initRenderer.addSphere(vertex, Color.RED);
+        }
+
+        initRenderer.clearPlanes();
+
+        LocationUtils.updateLocationShape(locationId, ground,
+                result -> Log.i(TAG, "Updated shape of location: " + locationId));
     }
 
 }

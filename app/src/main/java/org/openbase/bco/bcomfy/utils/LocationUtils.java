@@ -4,10 +4,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -31,7 +32,7 @@ public final class LocationUtils {
 
     private static final String TAG = LocationUtils.class.getSimpleName();
 
-    public static final void updateLocationShape(final RemoteServer locationRegistry, final String location, final ArrayList<Vector3> ground, final OnTaskFinishedListener<Void> listener) {
+    public static final void updateLocationShape(final String locationId, final ArrayList<Vector3> ground, final OnTaskFinishedListener<Void> listener) {
         new AsyncTask<Void, Void, Void>() {
             protected Void doInBackground(Void... voids) {
                 // Calculate the origin of the location (i.e. the most north western vertex)
@@ -48,22 +49,12 @@ public final class LocationUtils {
                 Vector3 originVertex = ground.get(originVertexIndex).clone();
 
                 // Align all the vertices according to the origin
-                for (Vector3 vertex : ground) {
-                    vertex.subtract(originVertex);
-                }
+                for (Vector3 vertex : ground) vertex.subtract(originVertex);
 
                 // Publish the result to the locationRegistry
                 try {
                     // Fetch the UnitConfig of the target location
-                    LocationRegistryDataType.LocationRegistryData lrd = (LocationRegistryDataType.LocationRegistryData) locationRegistry.call("requestStatus").getData();
-                    List<UnitConfigType.UnitConfig> locationList = lrd.getLocationUnitConfigList();
-                    UnitConfigType.UnitConfig locationConfig = UnitConfigType.UnitConfig.getDefaultInstance();
-                    for (UnitConfigType.UnitConfig current : locationList) {
-                        if (current.getLabel().equals(location)) {
-                            locationConfig = current;
-                            break;
-                        }
-                    }
+                    UnitConfigType.UnitConfig locationConfig = Registries.getLocationRegistry().getLocationConfigById(locationId);
 
                     // Build the pose
                     TranslationType.Translation.Builder translationBuilder = TranslationType.Translation.getDefaultInstance().toBuilder();
@@ -85,10 +76,10 @@ public final class LocationUtils {
                     PlacementConfigType.PlacementConfig placementConfig = locationConfig.getPlacementConfig().toBuilder().clearShape().setShape(shapeBuilder.build()).setPosition(pose).build();
                     UnitConfigType.UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
-                    // Call the RPC to update the locationConfig
-                    locationRegistry.call("updateLocationConfig", newLocationConfig);
-                } catch (RSBException | TimeoutException | ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    // Update the locationConfig
+                    Registries.getLocationRegistry().updateLocationConfig(newLocationConfig);
+                } catch (InterruptedException | CouldNotPerformException ex) {
+                    ex.printStackTrace();
                 } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
                     Log.w(TAG, "No PID information available.");
                 }
@@ -102,6 +93,7 @@ public final class LocationUtils {
         }.execute((Void) null);
     }
 
+    @Deprecated
     public static final void fetchLocationList(final RemoteServer locationRegistry, final OnTaskFinishedListener<ArrayList<CharSequence>> listener) {
         new AsyncTask<Void, Void, ArrayList<CharSequence>>() {
             protected ArrayList<CharSequence> doInBackground(Void... voids) {
@@ -128,6 +120,7 @@ public final class LocationUtils {
         }.execute((Void) null);
     }
 
+    @Deprecated
     public static final void initLocationRegistry(final OnTaskFinishedListener<RemoteServer> listener) {
         new AsyncTask<Void, Void, RemoteServer>() {
             protected RemoteServer doInBackground(Void... voids) {
