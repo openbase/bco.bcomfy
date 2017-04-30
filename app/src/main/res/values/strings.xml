@@ -5,9 +5,9 @@
     <string name="tango_error">Tango Exception! Try again!</string>
     <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
     <string name="no_permissions">Permission not granted!</string>
-    <string name="gui_connect_bco">Connecting to BCO...</string>
-    <string name="gui_update_adf">Updating Area Description...</string>
-    <string name="gui_init_tango">Initializing Tango Service...\nPlease hold the device upright!</string>
+    <string name="gui_connect_bco">Connecting to BCO…</string>
+    <string name="gui_update_adf">Updating Area Description…</string>
+    <string name="gui_init_tango">Initializing Tango Service…\nPlease hold the device upright!</string>
     <string name="gui_init_tango_failed">Initializing of Tango Service failed!</string>
     <string name="gui_update_adf_failed">Location not initialized!</string>
     <string name="gui_cancel">Cancel</string>
@@ -32,4 +32,8 @@
     <string name="gui_publish_depth">Publish depth data</string>
     <string name="gui_record_adf">Record Local Area</string>
     <string name="gui_manage_adf">Manage Local Area</string>
+    <string name="pref_group_bco">BCO Connection</string>
+    <string name="pref_ip">IP address</string>
+    <string name="pref_port">Port</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>

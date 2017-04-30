@@ -29,8 +29,10 @@
         </activity>
         <activity
             android:name=".activityInit.InitActivity"
-            android:screenOrientation="landscape">
-        </activity>
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activitySettings.SettingsActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +20,7 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
+import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jps.core.JPService;
@@ -55,10 +57,11 @@ public class StartActivity extends Activity {
         setContentView(R.layout.activity_start);
         initGui();
 
-        // Set JPS default values
-        JPService.registerProperty(JPRSBHost.class, "129.70.135.69");
-        JPService.registerProperty(JPRSBPort.class, 4803);
-        JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
+        // Set default preferences if not already set.
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        // Set JPS values used by BCO API.
+        SettingsActivity.updateJPServiceProperties(this);
 
         // Set system property. This workaround is needed for RSB.
         System.setProperty("sun.arch.data.model", "32");
@@ -184,7 +187,7 @@ public class StartActivity extends Activity {
     public void onButtonCancelClicked(View view) {
         changeState(StartActivityState.SETTINGS);
         try {
-            Registries.shutdown();
+            //Registries.shutdown(); TODO: why is this not working?
         } catch (CancellationException ex) {
             Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
         }
@@ -196,7 +199,8 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonSettingsClicked(View view) {
-        Log.e(TAG, "Operation not implemented: onButtonSettingsClicked");
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     public void onButtonPublishClicked(View view) {
