@@ -42,19 +42,19 @@ notifications:
 before_install:
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
   - cd jps
-  - mvn clean install
+  - mvn clean install -q
   - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jul.git
   - cd jul
-  - mvn clean install
+  - mvn clean install -q
   - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.registry.git
   - cd bco.registry
-  - mvn clean install
+  - mvn clean install -q
   - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.dal.git
   - cd bco.dal
-  - mvn clean install
+  - mvn clean install -q
   - cd ..
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
