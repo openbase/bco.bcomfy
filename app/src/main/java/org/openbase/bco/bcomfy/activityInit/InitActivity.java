@@ -36,6 +36,7 @@ import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activityStart.StartActivity;
+import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.LocationUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.Matrix4;
@@ -527,8 +528,11 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
 
         initRenderer.clearPlanes();
 
-        LocationUtils.updateLocationShape(locationId, ground,
-                result -> Log.i(TAG, "Updated shape of location: " + locationId));
+        LocationUtils.updateLocationShapeTaskParams params =
+                new LocationUtils.updateLocationShapeTaskParams(locationId, ground,
+                        () -> Log.i(TAG, "Updated shape of location: " + locationId));
+        LocationUtils.updateLocationShapeTask task = new LocationUtils.updateLocationShapeTask();
+        task.execute(params);
     }
 
 }

@@ -21,13 +21,10 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
+import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.lib.BCO;
 import org.openbase.bco.registry.remote.Registries;
-import org.openbase.jps.core.JPService;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
-import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
-import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
 
 import java.util.ArrayList;
 import java.util.concurrent.CancellationException;
@@ -37,6 +34,8 @@ public class StartActivity extends Activity {
     private static final String TAG = StartActivity.class.getSimpleName();
 
     private StartActivityState state = StartActivityState.INIT_BCO;
+
+    private InitBcoTask initBcoTask;
 
     private ProgressBar progressBar;
     private TextView infoMessage;
@@ -51,6 +50,7 @@ public class StartActivity extends Activity {
     public static Tango tango;
     private TangoConfig tangoConfig;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +70,8 @@ public class StartActivity extends Activity {
         startActivityForResult(
                 Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
 
-        initBco();
+        initBcoTask = new InitBcoTask();
+        initBcoTask.execute((OnTaskFinishedListener) () -> changeState(StartActivityState.GET_ADF));
     }
 
     @Override
@@ -186,16 +187,25 @@ public class StartActivity extends Activity {
 
     public void onButtonCancelClicked(View view) {
         changeState(StartActivityState.SETTINGS);
-        try {
-            //Registries.shutdown(); TODO: why is this not working?
-        } catch (CancellationException ex) {
-            Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
-        }
 
+        if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) {
+            initBcoTask.cancel(true);
+        } else {
+            try {
+                Registries.shutdown();
+            } catch (CancellationException ex) {
+                Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
+            }
+        }
     }
 
+    @SuppressWarnings("unchecked")
     public void onButtonRetryClicked(View view) {
-        initBco();
+        if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) {
+            initBcoTask.cancel(true);
+        }
+
+        initBcoTask.execute((OnTaskFinishedListener) () -> changeState(StartActivityState.GET_ADF));
     }
 
     public void onButtonSettingsClicked(View view) {
@@ -227,30 +237,6 @@ public class StartActivity extends Activity {
         buttonManage.setVisibility(manage);
     }
 
-    private void initBco() {
-        changeState(StartActivityState.INIT_BCO);
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    Registries.waitForData();
-                } catch (CouldNotPerformException | InterruptedException ex) {
-                    Log.e(TAG, "Error while initializing BCO!");
-                    ex.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void v) {
-                Log.i(TAG, "Connection to BCO initialized.");
-                Log.i(TAG, BCO.BCO_LOGO_ASCI_ARTS);
-                changeState(StartActivityState.GET_ADF);
-            }
-        }.execute((Void) null);
-    }
-
     private void initGui() {
         progressBar      = (ProgressBar) findViewById(R.id.progressBar);
         infoMessage      = (TextView) findViewById(R.id.infoMessage);
@@ -266,5 +252,35 @@ public class StartActivity extends Activity {
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
         startActivity(intent);
+    }
+
+    private static class InitBcoTask extends AsyncTask<OnTaskFinishedListener, Void, OnTaskFinishedListener> {
+        private static final String TAG = InitBcoTask.class.getSimpleName();
+
+        @Override
+        protected OnTaskFinishedListener doInBackground(OnTaskFinishedListener... listener) {
+            try {
+                Registries.waitForData();
+            } catch (CouldNotPerformException | InterruptedException ex) {
+                Log.e(TAG, "Error while initializing BCO!");
+                ex.printStackTrace();
+            }
+            return listener[0];
+        }
+
+        @Override
+        protected void onPostExecute(OnTaskFinishedListener listener) {
+            Log.i(TAG, "Connection to BCO initialized.");
+            Log.i(TAG, BCO.BCO_LOGO_ASCI_ARTS);
+
+            listener.taskFinishedCallback();
+        }
+
+//        @Override TODO: why is this not working?
+//        protected void onCancelled() {
+//            super.onCancelled();
+//
+//            Registries.shutdown();
+//        }
     }
 }
