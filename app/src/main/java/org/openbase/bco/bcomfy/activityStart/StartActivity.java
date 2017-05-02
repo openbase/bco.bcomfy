@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityStart;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import java.util.concurrent.CancellationException;
 public class StartActivity extends Activity {
 
     private static final String TAG = StartActivity.class.getSimpleName();
+    private static Context applicationContext;
 
     private StartActivityState state = StartActivityState.INIT_BCO;
 
@@ -55,13 +57,11 @@ public class StartActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        applicationContext = getApplicationContext();
         initGui();
 
         // Set default preferences if not already set.
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        // Set JPS values used by BCO API.
-        SettingsActivity.updateJPServiceProperties(this);
 
         // Set system property. This workaround is needed for RSB.
         System.setProperty("sun.arch.data.model", "32");
@@ -70,8 +70,8 @@ public class StartActivity extends Activity {
         startActivityForResult(
                 Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
 
-        initBcoTask = new InitBcoTask();
-        initBcoTask.execute((OnTaskFinishedListener) () -> changeState(StartActivityState.GET_ADF));
+        initBcoTask = new InitBcoTask(() -> changeState(StartActivityState.GET_ADF));
+        initBcoTask.execute();
     }
 
     @Override
@@ -205,7 +205,10 @@ public class StartActivity extends Activity {
             initBcoTask.cancel(true);
         }
 
-        initBcoTask.execute((OnTaskFinishedListener) () -> changeState(StartActivityState.GET_ADF));
+        initBcoTask = new InitBcoTask(() -> changeState(StartActivityState.GET_ADF));
+        initBcoTask.execute();
+
+        changeState(StartActivityState.INIT_BCO);
     }
 
     public void onButtonSettingsClicked(View view) {
@@ -254,33 +257,40 @@ public class StartActivity extends Activity {
         startActivity(intent);
     }
 
-    private static class InitBcoTask extends AsyncTask<OnTaskFinishedListener, Void, OnTaskFinishedListener> {
+    private static class InitBcoTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = InitBcoTask.class.getSimpleName();
+        private OnTaskFinishedListener listener;
+
+        InitBcoTask(OnTaskFinishedListener listener) {
+            this.listener = listener;
+        }
 
         @Override
-        protected OnTaskFinishedListener doInBackground(OnTaskFinishedListener... listener) {
+        protected Void doInBackground(Void... voids) {
             try {
+                // Set JPS values used by BCO API.
+                SettingsActivity.updateJPServiceProperties(applicationContext);
+
+                // Initiate registries
                 Registries.waitForData();
             } catch (CouldNotPerformException | InterruptedException ex) {
                 Log.e(TAG, "Error while initializing BCO!");
                 ex.printStackTrace();
             }
-            return listener[0];
+            return null;
         }
 
         @Override
-        protected void onPostExecute(OnTaskFinishedListener listener) {
+        protected void onPostExecute(Void v) {
             Log.i(TAG, "Connection to BCO initialized.");
             Log.i(TAG, BCO.BCO_LOGO_ASCI_ARTS);
 
             listener.taskFinishedCallback();
         }
 
-//        @Override TODO: why is this not working?
-//        protected void onCancelled() {
-//            super.onCancelled();
-//
-//            Registries.shutdown();
-//        }
+        @Override
+        protected void onCancelled() {
+            Registries.shutdown();
+        }
     }
 }

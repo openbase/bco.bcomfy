@@ -15,43 +15,40 @@ import android.widget.EditText;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.jps.core.JPService;
+import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
 
 public class SettingsActivity extends Activity {
 
+    private static final String TAG = SettingsActivity.class.getSimpleName();
+
     public static final String KEY_PREF_IP = "pref_ip";
     public static final String KEY_PREF_PORT = "pref_port";
 
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
+    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
+        String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                ListPreference listPreference = (ListPreference) preference;
-                int index = listPreference.findIndexOfValue(stringValue);
+        if (preference instanceof ListPreference) {
+            // For list preferences, look up the correct display value in
+            // the preference's 'entries' list.
+            ListPreference listPreference = (ListPreference) preference;
+            int index = listPreference.findIndexOfValue(stringValue);
 
-                // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+            // Set the summary to reflect the new value.
+            preference.setSummary(
+                    index >= 0
+                            ? listPreference.getEntries()[index]
+                            : null);
 
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
-            }
-
-            // Update the JPService properties in any case
-            updateJPServiceProperties(preference.getContext());
-
-            return true;
+        } else {
+            // For all other preferences, set the summary to the value's
+            // simple string representation.
+            preference.setSummary(stringValue);
         }
+
+        return true;
     };
 
     private static void bindPreferenceSummaryToValue(Preference preference) {
@@ -100,11 +97,15 @@ public class SettingsActivity extends Activity {
     }
 
     public static void updateJPServiceProperties(Context context) {
-        JPService.registerProperty(JPRSBHost.class,
-                PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, "129.70.135.69"));
-        JPService.registerProperty(JPRSBPort.class,
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, "4803")));
-        JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
+        try {
+            JPService.getProperty(JPRSBHost.class).update(
+                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, "0.0.0.0"));
+            JPService.getProperty(JPRSBPort.class).update(
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, "80")));
+            JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
+        } catch (JPNotAvailableException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

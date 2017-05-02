@@ -57,10 +57,11 @@ dependencies {
         exclude group: 'org.fusesource.jansi', module: 'jansi'
         exclude group: 'ch.qos.logback', module: 'logback-classic'
     }
+
+    compile group: 'org.slf4j', name: 'slf4j-android', version: '1.7.25'
+
 //    compile 'rsb:rsb:[0.15,0.16-SNAPSHOT)'
 //    compile 'rsb:rst:[0.15,0.16-SNAPSHOT)'
 //    compile 'rsb:rst-experimental:[0.15,0.16-SNAPSHOT)'
 //    compile 'rsb:rst-sandbox:[0.15,0.16-SNAPSHOT)'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-v4:25.3.1'
 }
