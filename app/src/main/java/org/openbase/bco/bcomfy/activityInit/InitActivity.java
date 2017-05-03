@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -35,6 +36,7 @@ import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InitRenderer;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
+import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.activityStart.StartActivity;
 import org.openbase.bco.bcomfy.utils.LocationUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
@@ -78,7 +80,10 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init);
 
-        measurer = new Measurer();
+        measurer = new Measurer(
+                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
+                PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.KEY_PREF_INIT_ALIGN, true),
+                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")));
         tango = StartActivity.tango;
         tangoPointCloudManager = new TangoPointCloudManager();
 

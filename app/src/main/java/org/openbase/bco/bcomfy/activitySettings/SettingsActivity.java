@@ -26,6 +26,9 @@ public class SettingsActivity extends Activity {
 
     public static final String KEY_PREF_IP = "pref_ip";
     public static final String KEY_PREF_PORT = "pref_port";
+    public static final String KEY_PREF_INIT_DEFAULT = "pref_init_default";
+    public static final String KEY_PREF_INIT_ALIGN = "pref_init_align";
+    public static final String KEY_PREF_INIT_ANCHOR = "pref_init_anchor";
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
         String stringValue = value.toString();
@@ -73,10 +76,52 @@ public class SettingsActivity extends Activity {
 
             bindPreferenceSummaryToValue(findPreference(KEY_PREF_IP));
             bindPreferenceSummaryToValue(findPreference(KEY_PREF_PORT));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_INIT_DEFAULT));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_INIT_ANCHOR));
 
             EditText portPreference = ((EditTextPreference)
                     findPreference(KEY_PREF_PORT)).getEditText();
             portPreference.setKeyListener(new NumberKeyListener() {
+                @Override
+                public int getInputType() {
+                    // The following shows the standard keyboard but switches to the view
+                    // with numbers on available on the top line of chars
+                    return InputType.TYPE_CLASS_NUMBER;
+                    // Return the following to show a dialpad as the one shown when entering phone
+                    // numbers.
+                    // return InputType.TYPE_CLASS_PHONE
+                }
+
+                @NonNull
+                @Override
+                protected char[] getAcceptedChars() {
+                    return "1234567890".toCharArray();
+                }
+            });
+
+            EditText initDefaultPreference = ((EditTextPreference)
+                    findPreference(KEY_PREF_INIT_DEFAULT)).getEditText();
+            initDefaultPreference.setKeyListener(new NumberKeyListener() {
+                @Override
+                public int getInputType() {
+                    // The following shows the standard keyboard but switches to the view
+                    // with numbers on available on the top line of chars
+                    return InputType.TYPE_CLASS_NUMBER;
+                    // Return the following to show a dialpad as the one shown when entering phone
+                    // numbers.
+                    // return InputType.TYPE_CLASS_PHONE
+                }
+
+                @NonNull
+                @Override
+                protected char[] getAcceptedChars() {
+                    return "1234567890".toCharArray();
+                }
+            });
+
+            EditText initAnchorPreference = ((EditTextPreference)
+                    findPreference(KEY_PREF_INIT_ANCHOR)).getEditText();
+            initAnchorPreference.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
                     // The following shows the standard keyboard but switches to the view

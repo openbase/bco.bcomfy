@@ -16,4 +16,26 @@
             android:singleLine="true"
             android:title="@string/pref_port" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="Location Initialization">
+        <EditTextPreference
+            android:defaultValue="1"
+            android:key="pref_init_default"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_init_default" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_init_align"
+            android:title="@string/pref_init_align" />
+
+        <EditTextPreference
+            android:defaultValue="3"
+            android:key="pref_init_anchor"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_init_anchor" />
+    </PreferenceCategory>
+
 </PreferenceScreen>
