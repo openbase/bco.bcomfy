@@ -1,8 +1,10 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
-import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.projecttango.tangosupport.TangoSupport;
+
+import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -11,6 +13,9 @@ import java8.util.stream.StreamSupport;
 
 public class Measurer {
     private static final String TAG = Measurer.class.getSimpleName();
+
+    private static final Vector3 GROUND_NORMAL  = new Vector3(0.0,  1.0, 0.0);
+    private static final Vector3 CEILING_NORMAL = new Vector3(0.0, -1.0, 0.0);
 
     private MeasurerState measurerState;
     private Room currentRoom;
@@ -22,6 +27,8 @@ public class Measurer {
     private int measurementsPerWallAnchor;
     private boolean alignToAnchor;
     private int currentWallMeasurements;
+    private double[] glToBcoTransform;
+    private double[] bcoToGlTransform;
 
     public enum MeasurerState {
         INIT, MARK_GROUND, MARK_CEILING, MARK_WALLS, ENOUGH_WALLS
@@ -56,6 +63,12 @@ public class Measurer {
         currentRoom.finish();
         roomList.add(currentRoom);
         currentRoom = null;
+
+        // Initiate calculation of glToBco transformation after finishing the first room.
+        if (roomList.size() == 1) {
+            initTransforms();
+        }
+
         measurerState = MeasurerState.INIT;
     }
 
@@ -64,12 +77,12 @@ public class Measurer {
             case INIT:
                 return MeasureType.INVALID;
             case MARK_GROUND:
-                plane.setNormal(new Vector3(0.0, 1.0, 0.0));
+                plane.setNormal(new Vector3(GROUND_NORMAL));
                 currentRoom.setGround(plane);
                 measurerState = MeasurerState.MARK_CEILING;
                 return MeasureType.GROUND;
             case MARK_CEILING:
-                plane.setNormal(new Vector3(0.0, -1.0, 0.0));
+                plane.setNormal(new Vector3(CEILING_NORMAL));
                 currentRoom.setCeiling(plane);
                 measurerState = MeasurerState.MARK_WALLS;
                 return MeasureType.CEILING;
@@ -170,7 +183,7 @@ public class Measurer {
         Vector3 firstWallNormal = currentRoom.getWalls()[0].getNormal();
         Vector3 secondWallNormal = currentRoom.getWalls()[1].getNormal();
 
-        double angle = clockwiseAngle(secondWallNormal, firstWallNormal);
+        double angle = MathUtils.clockwiseAngle(secondWallNormal, firstWallNormal);
         double angleDifference;
         if (angle > 0.0) {
             angleDifference = (Math.toRadians(90.0) - angle) / 2.0;
@@ -192,18 +205,28 @@ public class Measurer {
                 anchorNormals[3].toString());
     }
 
-    private double dotIgnoreY(Vector3 v1, Vector3 v2) {
-        return v1.x*v2.x + v1.z*v2.z;
+    private void initTransforms() {
+        Vector3 anchorPoint = roomList.get(0).getGroundVertices().get(0);
+
+        double[][] glPoints = { {anchorPoint.x, anchorPoint.y, anchorPoint.z} ,
+                {anchorPoint.x + anchorNormals[1].x, anchorPoint.y + anchorNormals[1].y, anchorPoint.z + anchorNormals[1].z} ,
+                {anchorPoint.x + anchorNormals[0].x, anchorPoint.y + anchorNormals[0].y, anchorPoint.z + anchorNormals[0].z} ,
+                {anchorPoint.x + GROUND_NORMAL.x, anchorPoint.y + GROUND_NORMAL.y, anchorPoint.z + GROUND_NORMAL.z} };
+
+        double[][] bcoPoints = { {0.0, 0.0, 0.0} ,
+                                {1.0, 0.0, 0.0} ,
+                                {0.0, 1.0, 0.0} ,
+                                {0.0, 0.0, 1.0} };
+
+        glToBcoTransform = TangoSupport.findCorrespondenceSimilarityTransform(glPoints,  bcoPoints);
+        bcoToGlTransform = TangoSupport.findCorrespondenceSimilarityTransform(bcoPoints, glPoints );
     }
 
-    private double detIgnoreY(Vector3 v1, Vector3 v2) {
-        return v1.x*v2.z - v1.z*v2.x;
+    public double[] getGlToBcoTransform() {
+        return glToBcoTransform;
     }
 
-    private double clockwiseAngle(Vector3 v1, Vector3 v2) {
-        double dot = dotIgnoreY(v1, v2);
-        double det = detIgnoreY(v1, v2);
-        return Math.atan2(det, dot);
+    public double[] getBcoToGlTransform() {
+        return bcoToGlTransform;
     }
-
 }

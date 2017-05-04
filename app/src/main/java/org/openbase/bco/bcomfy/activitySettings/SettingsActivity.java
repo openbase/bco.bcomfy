@@ -84,12 +84,7 @@ public class SettingsActivity extends Activity {
             portPreference.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
-                    // The following shows the standard keyboard but switches to the view
-                    // with numbers on available on the top line of chars
                     return InputType.TYPE_CLASS_NUMBER;
-                    // Return the following to show a dialpad as the one shown when entering phone
-                    // numbers.
-                    // return InputType.TYPE_CLASS_PHONE
                 }
 
                 @NonNull
@@ -104,12 +99,7 @@ public class SettingsActivity extends Activity {
             initDefaultPreference.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
-                    // The following shows the standard keyboard but switches to the view
-                    // with numbers on available on the top line of chars
                     return InputType.TYPE_CLASS_NUMBER;
-                    // Return the following to show a dialpad as the one shown when entering phone
-                    // numbers.
-                    // return InputType.TYPE_CLASS_PHONE
                 }
 
                 @NonNull
@@ -124,12 +114,7 @@ public class SettingsActivity extends Activity {
             initAnchorPreference.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
-                    // The following shows the standard keyboard but switches to the view
-                    // with numbers on available on the top line of chars
                     return InputType.TYPE_CLASS_NUMBER;
-                    // Return the following to show a dialpad as the one shown when entering phone
-                    // numbers.
-                    // return InputType.TYPE_CLASS_PHONE
                 }
 
                 @NonNull

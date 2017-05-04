@@ -532,11 +532,12 @@ public class InitActivity extends Activity implements View.OnTouchListener, Loca
 
         initRenderer.clearPlanes();
 
-        LocationUtils.updateLocationShapeTaskParams params =
-                new LocationUtils.updateLocationShapeTaskParams(locationId, ground,
-                        () -> Log.i(TAG, "Updated shape of location: " + locationId));
-        LocationUtils.updateLocationShapeTask task = new LocationUtils.updateLocationShapeTask();
-        task.execute(params);
+        new LocationUtils.updateLocationShapeTask(
+                locationId,
+                ground,
+                measurer.getGlToBcoTransform(),
+                () -> Log.i(TAG, "Updated shape of location: " + locationId))
+                .execute();
     }
 
 }
