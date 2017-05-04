@@ -33,11 +33,7 @@ branches:
 notifications:
   slack: openbase-org:vGz7LO4CvGoGMneYkEm3ON7E
   on_failure: change
-  on_success: change	
-
-# disabled because this is a gradle project
-# install:
-#  - mvn --settings .travis/settings.xml clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -V -q
+  on_success: change
 
 before_install:
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
@@ -58,6 +54,9 @@ before_install:
   - cd ..
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
+install:
+  - travis_wait 30 ./gradlew build connectedCheck
 
 deploy:
   - provider: script
