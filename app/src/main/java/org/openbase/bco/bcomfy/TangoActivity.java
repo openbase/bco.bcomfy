@@ -36,6 +36,7 @@ public abstract class TangoActivity extends Activity {
 
     private Tango tango;
     protected TangoPointCloudManager tangoPointCloudManager;
+    protected TangoPoseData currentPose;
     private boolean isConnected = true;
     private double cameraPoseTimestamp = 0;
 
@@ -227,17 +228,17 @@ public abstract class TangoActivity extends Activity {
                         if (rgbTimestampGlThread > cameraPoseTimestamp) {
                             // Calculate the camera color pose at the camera frame update time in
                             // OpenGL engine.
-                            TangoPoseData lastFramePose = TangoSupport.getPoseAtTime(
+                            currentPose = TangoSupport.getPoseAtTime(
                                     rgbTimestampGlThread,
                                     TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                                     TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR,
                                     TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                                     TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                                     displayRotation);
-                            if (lastFramePose.statusCode == TangoPoseData.POSE_VALID) {
+                            if (currentPose.statusCode == TangoPoseData.POSE_VALID) {
                                 // Update the camera pose from the renderer
-                                renderer.updateRenderCameraPose(lastFramePose);
-                                cameraPoseTimestamp = lastFramePose.timestamp;
+                                renderer.updateRenderCameraPose(currentPose);
+                                cameraPoseTimestamp = currentPose.timestamp;
                             }
                         }
                     }

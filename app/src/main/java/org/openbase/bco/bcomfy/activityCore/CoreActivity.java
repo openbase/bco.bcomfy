@@ -3,7 +3,6 @@ package org.openbase.bco.bcomfy.activityCore;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -13,17 +12,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.atap.tangoservice.TangoException;
+import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.location.LocationConfigType;
+import rst.math.Vec3DDoubleType;
 
 public class CoreActivity extends TangoActivity implements View.OnTouchListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
@@ -35,12 +46,18 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
     private double[] glToBcoTransform;
     private double[] bcoToGlTransform;
 
+    private ScheduledThreadPoolExecutor sch;
+    private Runnable fetchLocationLabelTask;
+
+    private TextView locationLabelView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_core);
         super.onCreate(savedInstanceState);
 
         loadTransformsLocally();
+        initFetchLocationLabelTask();
 
         Log.i(TAG, "Transform loaded:\n" + Arrays.toString(glToBcoTransform) + "\n" + Arrays.toString(bcoToGlTransform));
     }
@@ -96,11 +113,47 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
+        locationLabelView = (TextView) findViewById(R.id.locationLabelView);
+
         drawerLayout.setScrimColor(Color.TRANSPARENT);
 
         setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
+    }
+
+    private void initFetchLocationLabelTask() {
+        sch = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
+
+        fetchLocationLabelTask = () -> {
+            double[] bcoPosition = currentPose.translation.clone();
+            TangoSupport.doubleTransformPoint(glToBcoTransform, bcoPosition);
+
+            Log.e(TAG, "Checking position: " + Arrays.toString(bcoPosition) + "\nat time: " + currentPose.timestamp);
+
+            Vec3DDoubleType.Vec3DDouble vec3DDouble = Vec3DDoubleType.Vec3DDouble.newBuilder()
+                    .setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build();
+
+            try {
+                Log.e(TAG, "Fetching unitConfigs...");
+                List<UnitConfigType.UnitConfig> unitConfigs = Registries.getLocationRegistry()
+                        .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
+
+                Log.e(TAG, "unitConfigs: " + unitConfigs.size());
+                if (unitConfigs.size() > 0) {
+                    locationLabelView.setText(unitConfigs.get(0).getLabel());
+                    locationLabelView.setVisibility(View.VISIBLE);
+                }
+                else {
+                    locationLabelView.setVisibility(View.INVISIBLE);
+                }
+
+            } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        };
+
+        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
     }
 
     @Deprecated

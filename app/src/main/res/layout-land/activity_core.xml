@@ -18,18 +18,18 @@
         <!--android:layout_width="wrap_content"-->
         <!--android:layout_height="wrap_content"-->
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/locationLabelView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="29dp"
             android:background="@color/background_gray_slightly_transparent"
             android:padding="10dp"
             android:text="@android:string/untitled"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="24sp"
-            android:visibility="visible"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="29dp" />
+            android:visibility="invisible" />
 
         <TextView
             android:layout_width="match_parent"
