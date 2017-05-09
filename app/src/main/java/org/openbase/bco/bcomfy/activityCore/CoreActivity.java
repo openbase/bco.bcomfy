@@ -1,9 +1,15 @@
 package org.openbase.bco.bcomfy.activityCore;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.atap.tangoservice.TangoException;
@@ -21,6 +27,10 @@ import java.util.Arrays;
 
 public class CoreActivity extends TangoActivity implements View.OnTouchListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
+
+    private DrawerLayout drawerLayout;
+    private RecyclerView leftDrawer;
+    private LinearLayout rightDrawer;
 
     private double[] glToBcoTransform;
     private double[] bcoToGlTransform;
@@ -82,6 +92,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
 
     @Override
     protected void setupGui() {
+        drawerLayout = (DrawerLayout) findViewById(R.id.activity_core);
+        leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
+        rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
+
+        drawerLayout.setScrimColor(Color.TRANSPARENT);
+
         setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
