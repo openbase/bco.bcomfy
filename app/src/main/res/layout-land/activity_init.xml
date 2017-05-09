@@ -45,29 +45,17 @@
         android:layout_width="160dp"
         android:enabled="false" />
 
-    <ToggleButton
-        android:text="ToggleButton"
-        android:layout_height="wrap_content"
-        android:id="@+id/toggleButton"
-        android:layout_width="160dp"
-        android:checked="false"
-        android:textOn="Localized"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/buttonFinishRoom"
-        android:layout_marginBottom="30dp"
-        android:clickable="false" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/toggleButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="14dp"
+        android:layout_marginBottom="35dp"
         android:id="@+id/instructionTextView"
         android:text="@android:string/untitled"
         android:background="@color/background_gray_slightly_transparent"
         android:padding="5dp"
         android:visibility="invisible"
-        android:textColor="?android:attr/textColorSecondary" />
+        android:textColor="?android:attr/textColorSecondary"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

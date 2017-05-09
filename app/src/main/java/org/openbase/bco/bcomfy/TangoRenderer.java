@@ -1,4 +1,4 @@
-package org.openbase.bco.bcomfy.activityInit.view;
+package org.openbase.bco.bcomfy;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -25,8 +25,8 @@ import org.rajawali3d.renderer.Renderer;
 
 import java.util.ArrayList;
 
-public class InitRenderer extends Renderer {
-    private static final String TAG = InitRenderer.class.getSimpleName();
+public class TangoRenderer extends Renderer {
+    private static final String TAG = TangoRenderer.class.getSimpleName();
 
     // Rajawali texture used to render the Tango color camera.
     private ATexture tangoCameraTexture;
@@ -39,7 +39,7 @@ public class InitRenderer extends Renderer {
     // Keeps track of whether the scene camera has been configured.
     private boolean sceneCameraConfigured;
 
-    public InitRenderer(Context context) {
+    public TangoRenderer(Context context) {
         super(context);
         roomPlanes = new ArrayList<>();
     }
