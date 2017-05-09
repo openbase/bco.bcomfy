@@ -1,10 +1,19 @@
 package org.openbase.bco.bcomfy.utils;
 
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.TangoPoseData;
+import com.projecttango.tangosupport.TangoSupport;
+
+import org.openbase.bco.bcomfy.activityInit.measure.Plane;
+import org.rajawali3d.math.Matrix4;
 
 public final class TangoUtils {
+
+    private static final String TAG = TangoUtils.class.getSimpleName();
 
     /**
      * Use Tango camera intrinsics to calculate the projection Matrix for the Rajawali scene.
@@ -39,5 +48,60 @@ public final class TangoUtils {
                 yScale * (float) height / 2.0f - yOffset,
                 near, far);
         return m;
+    }
+
+
+
+    /**
+     * Use the TangoSupport library with point cloud data to calculate the plane
+     * of the world feature pointed at the location the camera is looking.
+     * It returns the transform of the fitted plane in a double array.
+     */
+    public static final Plane doFitPlane(float u, float v, double rgbTimestamp, TangoPointCloudData pointCloud, int displayRotation) {
+        if (pointCloud == null) {
+            Log.e(TAG, "PointCloud == null");
+            return null;
+        }
+
+        // We need to calculate the transform between the color camera at the
+        // time the user clicked and the depth camera at the time the depth
+        // cloud was acquired.
+        TangoPoseData depthTcolorPose = TangoSupport.calculateRelativePose(
+                pointCloud.timestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                rgbTimestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR);
+
+        // Perform plane fitting with the latest available point cloud data.
+        double[] identityTranslation = {0.0, 0.0, 0.0};
+        double[] identityRotation = {0.0, 0.0, 0.0, 1.0};
+        TangoSupport.IntersectionPointPlaneModelPair intersectionPointPlaneModelPair =
+                TangoSupport.fitPlaneModelNearPoint(pointCloud,
+                        identityTranslation, identityRotation, u, v, displayRotation,
+                        depthTcolorPose.translation, depthTcolorPose.rotation);
+
+        // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
+        TangoSupport.TangoDoubleMatrixTransformData transform =
+                TangoSupport.getDoubleMatrixTransformAtTime(pointCloud.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                        TangoSupport.ROTATION_IGNORED);
+
+        if (transform.statusCode == TangoPoseData.POSE_VALID) {
+            // Get the transformed position of the plane
+            double[] transformedPlanePosition = TangoSupport.doubleTransformPoint(transform.matrix, intersectionPointPlaneModelPair.intersectionPoint);
+
+            // Get the transformed normal of the plane
+            // For this we first need the transposed inverse of the transformation matrix
+            double[] normalTransformMatrix = new double[16];
+            new Matrix4(transform.matrix).inverse().transpose().toArray(normalTransformMatrix);
+            double[] planeNormal = {intersectionPointPlaneModelPair.planeModel[0], intersectionPointPlaneModelPair.planeModel[1], intersectionPointPlaneModelPair.planeModel[2]};
+            double[] transformedPlaneNormal = TangoSupport.doubleTransformPoint(normalTransformMatrix, planeNormal);
+
+            return new Plane(transformedPlanePosition, transformedPlaneNormal);
+        } else {
+            Log.w(TAG, "Can't get depth camera transform at time " + pointCloud.timestamp);
+            return null;
+        }
     }
 }

@@ -20,6 +20,7 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.CoreActivity;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
@@ -48,6 +49,7 @@ public class StartActivity extends Activity {
     private Button buttonPublish;
     private Button buttonRecord;
     private Button buttonManage;
+    private Button buttonDebugStart;
 
     public static Tango tango;
     private TangoConfig tangoConfig;
@@ -97,7 +99,12 @@ public class StartActivity extends Activity {
                     tangoConfig = setupTangoConfig(tango);
                     tango.connect(tangoConfig);
                     runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
-                    startInitActivity();
+                    if (state == StartActivityState.INIT_TANGO_TO_CORE) {
+                        startCoreActivity();
+                    }
+                    else {
+                        startInitActivity();
+                    }
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
                     changeState(StartActivityState.INIT_TANGO_FAILED);
@@ -152,28 +159,29 @@ public class StartActivity extends Activity {
         switch (state) {
             case INIT_BCO:
                 infoMessage.setText(R.string.gui_connect_bco);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case GET_ADF:
 //                infoMessage.setText(R.string.gui_update_adf);
-//                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+//                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
 //                TODO: implement ADF fetching
                 changeState(StartActivityState.GET_ADF_FAILED);
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE);
                 break;
-            case INIT_TANGO:
+            case INIT_TANGO_TO_INIT:
+            case INIT_TANGO_TO_CORE:
                 infoMessage.setText(R.string.gui_init_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO_FAILED:
                 infoMessage.setText(R.string.gui_init_tango_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case SETTINGS:
-                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE);
+                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE);
                 break;
             default:
                 break;
@@ -181,7 +189,7 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonInitializeClicked(View view) {
-        changeState(StartActivityState.INIT_TANGO);
+        changeState(StartActivityState.INIT_TANGO_TO_INIT);
         bindTangoService();
     }
 
@@ -212,8 +220,7 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonSettingsClicked(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        startSettingsActivity();
     }
 
     public void onButtonPublishClicked(View view) {
@@ -228,7 +235,12 @@ public class StartActivity extends Activity {
         Log.e(TAG, "Operation not implemented: onButtonManageClicked");
     }
 
-    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage) {
+    public void onButtonDebugStartClicked(View view) {
+        changeState(StartActivityState.INIT_TANGO_TO_CORE);
+        bindTangoService();
+    }
+
+    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart) {
         progressBar.setVisibility(progress);
         infoMessage.setVisibility(info);
         buttonInitialize.setVisibility(init);
@@ -238,6 +250,7 @@ public class StartActivity extends Activity {
         buttonPublish.setVisibility(publish);
         buttonRecord.setVisibility(record);
         buttonManage.setVisibility(manage);
+        buttonDebugStart.setVisibility(debugStart);
     }
 
     private void initGui() {
@@ -250,10 +263,21 @@ public class StartActivity extends Activity {
         buttonPublish    = (Button) findViewById(R.id.button_publish);
         buttonRecord     = (Button) findViewById(R.id.button_record);
         buttonManage     = (Button) findViewById(R.id.button_manage);
+        buttonDebugStart = (Button) findViewById(R.id.button_debug_start);
+    }
+
+    private void startSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
+        startActivity(intent);
+    }
+
+    private void startCoreActivity() {
+        Intent intent = new Intent(this, CoreActivity.class);
         startActivity(intent);
     }
 
