@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,6 +18,9 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
+import org.openbase.bco.bcomfy.activityCore.unitList.Device;
+import org.openbase.bco.bcomfy.activityCore.unitList.Location;
+import org.openbase.bco.bcomfy.activityCore.unitList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
@@ -74,17 +78,17 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         super.onStop();
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
+    @Override
+    public void onPause() {
+        super.onPause();
 //        sch.remove(fetchLocationLabelTask);
-//    }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 //        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
-//    }
+    }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -127,6 +131,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
+        setupLeftDrawer();
+
         locationLabelView = (TextView) findViewById(R.id.locationLabelView);
 
         drawerLayout.setScrimColor(Color.TRANSPARENT);
@@ -134,6 +140,23 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
+    }
+
+    private void setupLeftDrawer() {
+        Device light = new Device("Tolle Lampe");
+        Device light1 = new Device("Noch ne Lampe");
+        Device button = new Device("Toller Stuhl");
+        Device powerPlug = new Device("Steckdose");
+
+        Location kitchen = new Location("Küche", Arrays.asList(light, light1, button, powerPlug));
+        Location sports = new Location("Sport", Arrays.asList(light, light1, button, powerPlug));
+        Location living = new Location("Wohnzimmer", Arrays.asList(light, light1, button, powerPlug));
+        Location bath = new Location("Badezimmer", Arrays.asList(light, light1, button, powerPlug));
+        List<Location> locations = Arrays.asList(kitchen, sports, living, bath);
+
+        LocationAdapter locationAdapter = new LocationAdapter(this, locations);
+        leftDrawer.setAdapter(locationAdapter);
+        leftDrawer.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void initFetchLocationLabelTask() {
