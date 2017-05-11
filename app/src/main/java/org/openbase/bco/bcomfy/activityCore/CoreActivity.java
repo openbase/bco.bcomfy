@@ -26,6 +26,7 @@ import org.rajawali3d.view.SurfaceView;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -145,6 +146,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
                     .setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build();
 
             try {
+                Registries.waitForData();
                 List<UnitConfigType.UnitConfig> unitConfigs = Registries.getLocationRegistry()
                         .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
 
@@ -156,7 +158,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
                     runOnUiThread(() -> locationLabelView.setVisibility(View.INVISIBLE));
                 }
 
-            } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {
+            } catch (CouldNotPerformException | InterruptedException | ExecutionException | ConcurrentModificationException e) {
                 e.printStackTrace();
             }
         };
