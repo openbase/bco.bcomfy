@@ -65,12 +65,25 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
     @Override
     protected void onStart() {
         super.onStart();
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
     }
+
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        sch.remove(fetchLocationLabelTask);
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
+//    }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -126,26 +139,21 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         sch = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
 
         fetchLocationLabelTask = () -> {
-            double[] bcoPosition = currentPose.translation.clone();
-            TangoSupport.doubleTransformPoint(glToBcoTransform, bcoPosition);
-
-            Log.e(TAG, "Checking position: " + Arrays.toString(bcoPosition) + "\nat time: " + currentPose.timestamp);
+            double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentPose.translation);
 
             Vec3DDoubleType.Vec3DDouble vec3DDouble = Vec3DDoubleType.Vec3DDouble.newBuilder()
                     .setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build();
 
             try {
-                Log.e(TAG, "Fetching unitConfigs...");
                 List<UnitConfigType.UnitConfig> unitConfigs = Registries.getLocationRegistry()
                         .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
 
-                Log.e(TAG, "unitConfigs: " + unitConfigs.size());
                 if (unitConfigs.size() > 0) {
-                    locationLabelView.setText(unitConfigs.get(0).getLabel());
-                    locationLabelView.setVisibility(View.VISIBLE);
+                    runOnUiThread(() -> locationLabelView.setText(unitConfigs.get(0).getLabel()));
+                    runOnUiThread(() -> locationLabelView.setVisibility(View.VISIBLE));
                 }
                 else {
-                    locationLabelView.setVisibility(View.INVISIBLE);
+                    runOnUiThread(() -> locationLabelView.setVisibility(View.INVISIBLE));
                 }
 
             } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {

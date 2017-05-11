@@ -42,6 +42,7 @@ public class LocationChooser extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         try {
+            Registries.getLocationRegistry().waitForData();
             locations = StreamSupport.stream(Registries.getLocationRegistry().getLocationConfigs())
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
                     .toArray(UnitConfigType.UnitConfig[]::new);

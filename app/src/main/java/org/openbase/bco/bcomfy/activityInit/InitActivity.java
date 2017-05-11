@@ -255,6 +255,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
             objectOutputStream.writeObject(measurer.getGlToBcoTransform());
             objectOutputStream.writeObject(measurer.getBcoToGlTransform());
             objectOutputStream.close();
+            Log.i(TAG, "Transform saved:\n" + Arrays.toString(measurer.getGlToBcoTransform()) + "\n" + Arrays.toString(measurer.getBcoToGlTransform()));
         } catch (Exception e) {
             e.printStackTrace();
         }
