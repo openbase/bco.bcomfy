@@ -10,14 +10,19 @@ import org.openbase.bco.bcomfy.R;
 
 public class LocationViewHolder extends ParentViewHolder {
 
-    private TextView locationTextView;
+    private View divider;
+    private TextView label;
 
     public LocationViewHolder(View itemView) {
         super(itemView);
-        locationTextView = (TextView) itemView.findViewById(R.id.location_textview);
+        divider = itemView.findViewById(R.id.location_divider_top);
+        label = (TextView) itemView.findViewById(R.id.location_textview);
     }
 
     public void bind(Location location) {
-        locationTextView.setText(location.getLabel());
+        label.setText(location.getLabel());
+        if (getAdapterPosition() == 0) {
+            divider.setVisibility(View.INVISIBLE);
+        }
     }
 }
