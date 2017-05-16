@@ -39,7 +39,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile 'junit:junit:4.12'
+
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
 
     compile 'org.rajawali3d:rajawali:1.1.777'
@@ -48,9 +50,9 @@ dependencies {
     compile 'com.google.tango:support-base:1.52'
 
     compile "com.mikepenz:iconics-core:2.8.2@aar"
-    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
-
-//    compile group: 'org.openbase', name: 'jul.extension.rct', version: '1.4-SNAPSHOT'
+    compile 'com.mikepenz:google-material-typeface:3.0.1.0.original@aar'
+    compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
+    compile 'com.balysv:material-ripple:1.0.2'
 
     compile(group: 'org.openbase.bco', name: 'dal.remote', version: '1.4-SNAPSHOT') {
         exclude group: 'com.fasterxml.jackson.core'
@@ -59,14 +61,6 @@ dependencies {
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
     }
-
     compile group: 'org.slf4j', name: 'slf4j-android', version: '1.7.25'
 
-//    compile 'rsb:rsb:[0.15,0.16-SNAPSHOT)'
-//    compile 'rsb:rst:[0.15,0.16-SNAPSHOT)'
-//    compile 'rsb:rst-experimental:[0.15,0.16-SNAPSHOT)'
-//    compile 'rsb:rst-sandbox:[0.15,0.16-SNAPSHOT)'
-    compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
-    compile 'com.balysv:material-ripple:1.0.2'
-    compile 'com.android.support:cardview-v7:25.3.1'
 }

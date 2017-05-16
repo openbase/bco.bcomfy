@@ -1,5 +1,6 @@
 package org.openbase.bco.bcomfy.activityCore;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -13,40 +14,48 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.atap.tangoservice.TangoException;
+import com.mikepenz.iconics.context.IconicsContextWrapper;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
-import org.openbase.bco.bcomfy.activityCore.unitList.Device;
-import org.openbase.bco.bcomfy.activityCore.unitList.Location;
-import org.openbase.bco.bcomfy.activityCore.unitList.LocationAdapter;
+import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
+import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
+import org.openbase.bco.bcomfy.activityCore.serviceList.ServiceListHolder;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
+import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.location.LocationConfigType;
 import rst.math.Vec3DDoubleType;
 
-public class CoreActivity extends TangoActivity implements View.OnTouchListener {
+public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceClickedListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
+
+    private ServiceListHolder serviceListHolder;
 
     private double[] glToBcoTransform;
     private double[] bcoToGlTransform;
@@ -65,6 +74,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         initFetchLocationLabelTask();
 
         Log.i(TAG, "Transform loaded:\n" + Arrays.toString(glToBcoTransform) + "\n" + Arrays.toString(bcoToGlTransform));
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(IconicsContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -132,9 +146,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
         setupLeftDrawer();
+        setupRightDrawer();
 
         locationLabelView = (TextView) findViewById(R.id.locationLabelView);
-
         drawerLayout.setScrimColor(Color.TRANSPARENT);
 
         setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
@@ -143,20 +157,34 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
     }
 
     private void setupLeftDrawer() {
-        Device light = new Device("Tolle Lampe");
-        Device light1 = new Device("Noch ne Lampe");
-        Device button = new Device("Toller Stuhl");
-        Device powerPlug = new Device("Steckdose");
+        List<Location> locations = new ArrayList<>();
 
-        Location kitchen = new Location("Küche", Arrays.asList(light, light1, button, powerPlug));
-        Location sports = new Location("Sport", Arrays.asList(light, light1, button, powerPlug));
-        Location living = new Location("Wohnzimmer", Arrays.asList(light, light1, button, powerPlug));
-        Location bath = new Location("Badezimmer", Arrays.asList(light, light1, button, powerPlug));
-        List<Location> locations = Arrays.asList(kitchen, sports, living, bath);
+        try {
+            LocationRegistryRemote remote = Registries.getLocationRegistry();
+            remote.waitForData();
 
-        LocationAdapter locationAdapter = new LocationAdapter(this, locations);
+            StreamSupport.stream(remote.getLocationConfigs())
+                    .filter(locationConfig -> locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)
+                    .sorted((o1, o2) -> o1.getLabel().compareTo(o2.getLabel()))
+                    .forEach(locationConfig -> locations.add(new Location(locationConfig, remote)));
+        } catch (CouldNotPerformException | InterruptedException e) {
+            Log.e(TAG, "Could not fetch locations!\n" + Log.getStackTraceString(e));
+        }
+
+        for (Iterator<Location> it = locations.iterator(); it.hasNext();) {
+            Location location = it.next();
+            if (location.getChildList().size() == 0) {
+                it.remove();
+            }
+        }
+
+        LocationAdapter locationAdapter = new LocationAdapter(this, locations, this);
         leftDrawer.setAdapter(locationAdapter);
         leftDrawer.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void setupRightDrawer() {
+        serviceListHolder = new ServiceListHolder(rightDrawer);
     }
 
     private void initFetchLocationLabelTask() {
@@ -206,4 +234,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener 
         }
     }
 
+    @Override
+    public void onDeviceClicked(String id) {
+        drawerLayout.closeDrawer(leftDrawer);
+        serviceListHolder.displayDevice(id);
+        drawerLayout.openDrawer(rightDrawer);
+    }
 }

@@ -61,19 +61,21 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/device_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="DeviceName"
+                android:text="DeviceLabel"
+                android:textAlignment="center"
                 android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/device_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="DeviceType"
+                android:textAlignment="center"
                 android:textAppearance="@android:style/TextAppearance.Material.Medium"
                 android:textStyle="italic" />
         </LinearLayout>

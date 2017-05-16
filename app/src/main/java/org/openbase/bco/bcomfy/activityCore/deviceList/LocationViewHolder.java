@@ -1,4 +1,4 @@
-package org.openbase.bco.bcomfy.activityCore.unitList;
+package org.openbase.bco.bcomfy.activityCore.deviceList;
 
 import android.view.View;
 import android.widget.TextView;
