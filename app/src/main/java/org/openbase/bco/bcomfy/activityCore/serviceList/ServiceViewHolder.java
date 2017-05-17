@@ -23,14 +23,16 @@ public class ServiceViewHolder {
     private UnitConfigType.UnitConfig unitConfig;
     private ServiceConfigType.ServiceConfig serviceConfig;
 
-    public ServiceViewHolder (Context context, UnitConfigType.UnitConfig unitConfig, ServiceConfigType.ServiceConfig serviceConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
+    public ServiceViewHolder (Context context, ViewGroup parent, UnitConfigType.UnitConfig unitConfig, ServiceConfigType.ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
         unitRegistry = Registries.getUnitRegistry();
         this.unitConfig = unitConfig;
         this.serviceConfig = serviceConfig;
 
+
+
         switch (serviceConfig.getServiceTemplate().getType()) {
             case POWER_STATE_SERVICE:
-                serviceView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.service_power_state, parent, false);
+                initPowerStateService(context, parent);
                 break;
             default:
                 serviceView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.service_unknown, parent, false);
@@ -40,6 +42,12 @@ public class ServiceViewHolder {
 
     public View getServiceView() {
         return serviceView;
+    }
+
+    private void initPowerStateService(Context context, ViewGroup parent) {
+        serviceView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.service_power_state, parent, false);
+
+
     }
 
 }

@@ -15,8 +15,12 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import java.util.ArrayList;
 import java.util.List;
 
-import rst.domotic.service.ServiceConfigType;
+import java8.util.stream.Collectors;
+import java8.util.stream.StreamSupport;
+import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.unit.UnitConfigType;
+
+import static rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
 
 public class UnitCardViewHolder {
 
@@ -40,14 +44,62 @@ public class UnitCardViewHolder {
         servicePerUnitList = (LinearLayout) cardView.findViewById(R.id.service_per_unit_list);
         unitTitle.setText(unitConfig.getType().toString());
 
-        for (ServiceConfigType.ServiceConfig serviceConfig : unitConfig.getServiceConfigList()) {
-            LayoutInflater.from(context).inflate(R.layout.divider_service, servicePerUnitList, true);
-
-            ServiceViewHolder serviceViewHolder = new ServiceViewHolder(context, unitConfig, serviceConfig, servicePerUnitList);
-            serviceViewHolderList.add(serviceViewHolder);
-
-            servicePerUnitList.addView(serviceViewHolder.getServiceView());
+        // Only initialize Service if this units contains at least one
+        if (unitConfig.getServiceConfigCount() == 0) {
+            return;
         }
+
+        // Sort all the ServiceConfigs by type and place them into a new list
+        List<ServiceConfig> sortedServiceConfigs =
+                StreamSupport.stream(unitConfig.getServiceConfigList())
+                        .sorted((o1, o2) -> o1.getServiceTemplate().getType().compareTo(o2.getServiceTemplate().getType()))
+                        .collect(Collectors.toList());
+
+        // These booleans are used to determine what kind of patterns are associated to a single service
+        boolean operation = false;
+        boolean provider = false;
+        boolean consumer = false;
+        ServiceConfig previousServiceConfig = unitConfig.getServiceConfig(0);
+
+        // Compare every service config to the previous one. If they are the same,
+        // just set the corresponding pattern flag to true. If they are not, generate
+        // a new ServiceViewHolder based on the previous service and attach it to
+        // the servicePerUnitList.
+        for (ServiceConfig currentServiceConfig : sortedServiceConfigs) {
+            // Compare type to previous service
+            if (!currentServiceConfig.getServiceTemplate().getType().equals(previousServiceConfig.getServiceTemplate().getType())) {
+                LayoutInflater.from(context).inflate(R.layout.divider_service, servicePerUnitList, true);
+
+                ServiceViewHolder serviceViewHolder = new ServiceViewHolder(context, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
+                serviceViewHolderList.add(serviceViewHolder);
+
+                servicePerUnitList.addView(serviceViewHolder.getServiceView());
+
+                operation = false;
+                provider = false;
+                consumer = false;
+
+                previousServiceConfig = currentServiceConfig;
+            }
+
+            // Set the pattern flag
+            switch (currentServiceConfig.getServiceTemplate().getPattern()) {
+                case PROVIDER:
+                    provider = true;
+                case OPERATION:
+                    operation = true;
+                case CONSUMER:
+                    consumer = true;
+            }
+        }
+
+        // Since the last service is not added, do this now
+        LayoutInflater.from(context).inflate(R.layout.divider_service, servicePerUnitList, true);
+
+        ServiceViewHolder serviceViewHolder = new ServiceViewHolder(context, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
+        serviceViewHolderList.add(serviceViewHolder);
+
+        servicePerUnitList.addView(serviceViewHolder.getServiceView());
     }
 
     public View getCardView() {
