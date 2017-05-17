@@ -14,6 +14,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 
 public class UnitListViewHolder {
@@ -40,6 +41,7 @@ public class UnitListViewHolder {
 
     public void displayDevice(Activity activity, String id) {
         unitList.removeAllViews();
+        StreamSupport.stream(unitViewHolderList).forEach(UnitViewHolder::shutdownRemotes);
         unitViewHolderList.clear();
 
         try {

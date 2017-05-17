@@ -24,9 +24,9 @@ public class UnitViewHolder {
 
     private TextView unitTitle;
     private ViewGroup cardView;
+    private LinearLayout servicePerUnitList;
 
     private List<ServiceViewHolder> serviceViewHolderList;
-    private LinearLayout servicePerUnitList;
 
     private UnitRegistry unitRegistry;
     private UnitConfigType.UnitConfig unitConfig;
@@ -102,6 +102,10 @@ public class UnitViewHolder {
 
     public View getCardView() {
         return cardView;
+    }
+
+    public void shutdownRemotes() {
+        StreamSupport.stream(serviceViewHolderList).forEach(ServiceViewHolder::shutdownRemote);
     }
 
 }
