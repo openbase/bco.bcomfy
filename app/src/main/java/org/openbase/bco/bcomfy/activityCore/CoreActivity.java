@@ -55,6 +55,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
 
+    private View editLocationButton;
+    boolean inEditMode = false;
+
     private UnitListViewHolder unitListViewHolder;
 
     private double[] glToBcoTransform;
@@ -104,9 +107,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 //        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
     }
 
+
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP && inEditMode) {
             // Calculate click location in u,v (0;1) coordinates.
             float u = motionEvent.getX() / view.getWidth();
             float v = motionEvent.getY() / view.getHeight();
@@ -117,6 +122,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 // and a possible service disconnection due to an onPause event.
                 Plane planeFit;
                 synchronized (this) {
+                    //TODO: TangoSupport.getDepth...
                     planeFit = TangoUtils.doFitPlane(u, v, rgbTimestampGlThread, tangoPointCloudManager.getLatestPointCloud(), displayRotation);
                 }
 
@@ -185,6 +191,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void setupRightDrawer() {
         unitListViewHolder = new UnitListViewHolder(rightDrawer);
+        editLocationButton = findViewById(R.id.edit_location_button);
+        editLocationButton.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(rightDrawer);
+            enterEditMode();
+        });
     }
 
     private void initFetchLocationLabelTask() {
@@ -239,5 +250,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         drawerLayout.closeDrawer(leftDrawer);
         unitListViewHolder.displayDevice(this, id);
         drawerLayout.openDrawer(rightDrawer);
+    }
+
+    private void enterEditMode() {
+        inEditMode = true;
     }
 }
