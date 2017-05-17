@@ -45,19 +45,20 @@
         android:layout_width="240dp"
         android:layout_height="fill_parent"
         android:layout_gravity="start"
-        android:background="@color/cardview_dark_background" />
+        android:background="#303030" />
 
     <LinearLayout
         android:id="@+id/right_drawer"
         android:layout_width="240dp"
         android:layout_height="fill_parent"
         android:layout_gravity="end"
-        android:background="@color/cardview_dark_background"
-        android:orientation="vertical">
+        android:background="#303030"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#212121"
             android:orientation="vertical">
 
             <TextView
@@ -80,13 +81,17 @@
                 android:textStyle="italic" />
         </LinearLayout>
 
-        <include layout="@layout/test_card_view" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <include layout="@layout/test_card_view" />
-
-        <include layout="@layout/test_card_view" />
-
-        <include layout="@layout/test_card_view" />
+            <LinearLayout
+                android:id="@+id/unit_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#303030"
+                android:orientation="vertical" />
+        </ScrollView>
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

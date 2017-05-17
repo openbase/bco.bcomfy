@@ -166,7 +166,7 @@ public abstract class TangoActivity extends Activity {
                             if (statusBarAnimator.isRunning()) {
                                 runOnUiThread(() -> statusBarAnimator.end());
                             }
-                            runOnUiThread(() -> getWindow().setStatusBarColor(0xFF222222));
+                            runOnUiThread(() -> getWindow().setStatusBarColor(0xFF000000));
                         } else {
                             if (!statusBarAnimator.isRunning()) {
                                 runOnUiThread(() -> statusBarAnimator.start());

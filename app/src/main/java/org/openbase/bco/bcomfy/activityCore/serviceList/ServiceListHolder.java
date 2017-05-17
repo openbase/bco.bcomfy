@@ -1,7 +1,6 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList;
 
 
-import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,12 +13,12 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import java.util.ArrayList;
 import java.util.List;
 
-import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 
 public class ServiceListHolder {
 
     private LinearLayout serviceList;
+    private LinearLayout unitList;
     private TextView labelText;
     private TextView typeText;
 
@@ -31,6 +30,7 @@ public class ServiceListHolder {
 
     public ServiceListHolder(LinearLayout serviceList) {
         this.serviceList = serviceList;
+        unitList = (LinearLayout) serviceList.findViewById(R.id.unit_list);
         labelText = (TextView) serviceList.findViewById(R.id.device_label);
         typeText = (TextView) serviceList.findViewById(R.id.device_type);
 
@@ -38,7 +38,7 @@ public class ServiceListHolder {
     }
 
     public void displayDevice(String id) {
-        serviceList.removeViews(1, serviceList.getChildCount()-1);
+        unitList.removeAllViews();
         unitCardViewHolderList.clear();
 
         try {
@@ -51,9 +51,10 @@ public class ServiceListHolder {
             typeText.setText(deviceRegistry.getDeviceClassById(deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel());
 
             for (String unitId : deviceConfig.getDeviceConfig().getUnitIdList()) {
-                UnitCardViewHolder unitCardViewHolder = new UnitCardViewHolder(serviceList.getContext(), unitId, serviceList);
+                UnitCardViewHolder unitCardViewHolder = new UnitCardViewHolder(unitList.getContext(), unitId, unitList);
                 unitCardViewHolderList.add(unitCardViewHolder);
-                serviceList.addView(unitCardViewHolder.getCardView());
+
+                unitList.addView(unitCardViewHolder.getCardView());
             }
         } catch (CouldNotPerformException | InterruptedException e) {
             e.printStackTrace();
