@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList;
 
 
+import android.app.Activity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,31 +16,31 @@ import java.util.List;
 
 import rst.domotic.unit.UnitConfigType;
 
-public class ServiceListHolder {
+public class UnitListViewHolder {
 
     private LinearLayout serviceList;
     private LinearLayout unitList;
     private TextView labelText;
     private TextView typeText;
 
-    private List<UnitCardViewHolder> unitCardViewHolderList;
+    private List<UnitViewHolder> unitViewHolderList;
 
     private DeviceRegistry deviceRegistry;
     private UnitRegistry unitRegistry;
     private UnitConfigType.UnitConfig deviceConfig;
 
-    public ServiceListHolder(LinearLayout serviceList) {
+    public UnitListViewHolder(LinearLayout serviceList) {
         this.serviceList = serviceList;
         unitList = (LinearLayout) serviceList.findViewById(R.id.unit_list);
         labelText = (TextView) serviceList.findViewById(R.id.device_label);
         typeText = (TextView) serviceList.findViewById(R.id.device_type);
 
-        unitCardViewHolderList = new ArrayList<>();
+        unitViewHolderList = new ArrayList<>();
     }
 
-    public void displayDevice(String id) {
+    public void displayDevice(Activity activity, String id) {
         unitList.removeAllViews();
-        unitCardViewHolderList.clear();
+        unitViewHolderList.clear();
 
         try {
             deviceRegistry = Registries.getDeviceRegistry();
@@ -51,10 +52,10 @@ public class ServiceListHolder {
             typeText.setText(deviceRegistry.getDeviceClassById(deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel());
 
             for (String unitId : deviceConfig.getDeviceConfig().getUnitIdList()) {
-                UnitCardViewHolder unitCardViewHolder = new UnitCardViewHolder(unitList.getContext(), unitId, unitList);
-                unitCardViewHolderList.add(unitCardViewHolder);
+                UnitViewHolder unitViewHolder = new UnitViewHolder(activity, unitId, unitList);
+                unitViewHolderList.add(unitViewHolder);
 
-                unitList.addView(unitCardViewHolder.getCardView());
+                unitList.addView(unitViewHolder.getCardView());
             }
         } catch (CouldNotPerformException | InterruptedException e) {
             e.printStackTrace();

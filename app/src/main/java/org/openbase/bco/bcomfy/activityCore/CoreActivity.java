@@ -22,7 +22,7 @@ import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
-import org.openbase.bco.bcomfy.activityCore.serviceList.ServiceListHolder;
+import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
@@ -55,7 +55,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
 
-    private ServiceListHolder serviceListHolder;
+    private UnitListViewHolder unitListViewHolder;
 
     private double[] glToBcoTransform;
     private double[] bcoToGlTransform;
@@ -184,7 +184,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void setupRightDrawer() {
-        serviceListHolder = new ServiceListHolder(rightDrawer);
+        unitListViewHolder = new UnitListViewHolder(rightDrawer);
     }
 
     private void initFetchLocationLabelTask() {
@@ -237,7 +237,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     public void onDeviceClicked(String id) {
         drawerLayout.closeDrawer(leftDrawer);
-        serviceListHolder.displayDevice(id);
+        unitListViewHolder.displayDevice(this, id);
         drawerLayout.openDrawer(rightDrawer);
     }
 }

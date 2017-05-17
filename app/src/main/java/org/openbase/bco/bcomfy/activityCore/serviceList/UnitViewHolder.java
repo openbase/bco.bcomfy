@@ -1,6 +1,6 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList;
 
-import android.content.Context;
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +20,7 @@ import java8.util.stream.StreamSupport;
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.unit.UnitConfigType;
 
-import static rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-
-public class UnitCardViewHolder {
+public class UnitViewHolder {
 
     private TextView unitTitle;
     private ViewGroup cardView;
@@ -33,13 +31,13 @@ public class UnitCardViewHolder {
     private UnitRegistry unitRegistry;
     private UnitConfigType.UnitConfig unitConfig;
 
-    public UnitCardViewHolder(Context context, String id, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
+    public UnitViewHolder(Activity activity, String id, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
         serviceViewHolderList = new ArrayList<>();
 
         unitRegistry = Registries.getUnitRegistry();
         unitConfig = unitRegistry.getUnitConfigById(id);
 
-        cardView = (ViewGroup) LayoutInflater.from(context).inflate(R.layout.unit_card, parent, false);
+        cardView = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.unit_card, parent, false);
         unitTitle = (TextView) cardView.findViewById(R.id.unit_title);
         servicePerUnitList = (LinearLayout) cardView.findViewById(R.id.service_per_unit_list);
         unitTitle.setText(unitConfig.getType().toString());
@@ -68,9 +66,9 @@ public class UnitCardViewHolder {
         for (ServiceConfig currentServiceConfig : sortedServiceConfigs) {
             // Compare type to previous service
             if (!currentServiceConfig.getServiceTemplate().getType().equals(previousServiceConfig.getServiceTemplate().getType())) {
-                LayoutInflater.from(context).inflate(R.layout.divider_service, servicePerUnitList, true);
+                LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
 
-                ServiceViewHolder serviceViewHolder = new ServiceViewHolder(context, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
+                ServiceViewHolder serviceViewHolder = new ServiceViewHolder(activity, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
                 serviceViewHolderList.add(serviceViewHolder);
 
                 servicePerUnitList.addView(serviceViewHolder.getServiceView());
@@ -94,9 +92,9 @@ public class UnitCardViewHolder {
         }
 
         // Since the last service is not added, do this now
-        LayoutInflater.from(context).inflate(R.layout.divider_service, servicePerUnitList, true);
+        LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
 
-        ServiceViewHolder serviceViewHolder = new ServiceViewHolder(context, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
+        ServiceViewHolder serviceViewHolder = new ServiceViewHolder(activity, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
         serviceViewHolderList.add(serviceViewHolder);
 
         servicePerUnitList.addView(serviceViewHolder.getServiceView());
