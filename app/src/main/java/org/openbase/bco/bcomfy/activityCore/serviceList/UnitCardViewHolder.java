@@ -27,9 +27,8 @@ public class UnitCardViewHolder {
         unitRegistry = Registries.getUnitRegistry();
         unitConfig = unitRegistry.getUnitConfigById(id);
 
-        cardView = (ViewGroup) LayoutInflater.from(context).inflate(R.layout.test_card_view, null);
+        cardView = (ViewGroup) LayoutInflater.from(context).inflate(R.layout.test_card_view, parent, false);
         unitTitle = (TextView) cardView.findViewById(R.id.unit_title);
-//        unitTitle = (TextView) ((ViewGroup) cardView.getChildAt(0)).getChildAt(0);
         unitTitle.setText(unitConfig.getType().toString());
     }
 
