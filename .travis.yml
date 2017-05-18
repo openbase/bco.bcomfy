@@ -31,12 +31,6 @@ branches:
   - /^(?i:release)-.*$/
 
 notifications:
-  slack: openbase-org:vGz7LO4CvGoGMneYkEm3ON7E
-  on_failure: change
-  on_success: change
-
-
-notifications:
   slack:
     rooms:
       - openbase-org:vGz7LO4CvGoGMneYkEm3ON7E#bco-bcomfy
