@@ -39,4 +39,6 @@
     <string name="pref_init_default">Measurements per wall</string>
     <string name="pref_init_anchor">Measurements per wall (anchor point)</string>
     <string name="pref_init_align">Use anchor alignment</string>
+    <string name="button_apply">{gmd-check} Apply</string>
+    <string name="button_cancel">{gmd-close} Cancel</string>
 </resources>

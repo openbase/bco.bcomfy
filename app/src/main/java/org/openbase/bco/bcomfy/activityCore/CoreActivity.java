@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
+
+    private LinearLayout buttonsEdit;
+    private Button buttonEditApply;
+    private Button buttonEditCancel;
 
     private View editLocationButton;
     boolean inEditMode = false;
@@ -112,6 +117,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_UP && inEditMode) {
+            Log.i(TAG, "Calculating...");
             // Calculate click location in u,v (0;1) coordinates.
             float u = motionEvent.getX() / view.getWidth();
             float v = motionEvent.getY() / view.getHeight();
@@ -150,6 +156,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         drawerLayout = (DrawerLayout) findViewById(R.id.activity_core);
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
+
+        buttonsEdit = (LinearLayout) findViewById(R.id.buttons_edit);
+        buttonEditApply = (Button) findViewById(R.id.button_apply);
+        buttonEditCancel = (Button) findViewById(R.id.button_cancel);
+
+        buttonEditApply.setOnClickListener(v -> editApply());
+        buttonEditCancel.setOnClickListener(v -> leaveEditMode());
 
         setupLeftDrawer();
         setupRightDrawer();
@@ -192,10 +205,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private void setupRightDrawer() {
         unitListViewHolder = new UnitListViewHolder(rightDrawer);
         editLocationButton = findViewById(R.id.edit_location_button);
-        editLocationButton.setOnClickListener(v -> {
-            drawerLayout.closeDrawer(rightDrawer);
-            enterEditMode();
-        });
+        editLocationButton.setOnClickListener(v -> enterEditMode());
     }
 
     private void initFetchLocationLabelTask() {
@@ -254,5 +264,17 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void enterEditMode() {
         inEditMode = true;
+        drawerLayout.closeDrawers();
+        buttonsEdit.setVisibility(View.VISIBLE);
+    }
+
+    private void leaveEditMode() {
+        inEditMode = false;
+        drawerLayout.openDrawer(rightDrawer);
+        buttonsEdit.setVisibility(View.INVISIBLE);
+    }
+
+    private void editApply() {
+
     }
 }
