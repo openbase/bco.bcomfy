@@ -27,9 +27,12 @@ import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
+import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileInputStream;
@@ -44,10 +47,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.vecmath.Vector3d;
+
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.location.LocationConfigType;
+import rst.geometry.PoseType;
+import rst.geometry.TranslationType;
 import rst.math.Vec3DDoubleType;
+import rst.spatial.PlacementConfigType;
 
 public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceClickedListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
@@ -62,6 +70,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private View editLocationButton;
     boolean inEditMode = false;
+    Vector3 currentEditPosition;
+    private String currentDevice;
 
     private UnitListViewHolder unitListViewHolder;
 
@@ -126,14 +136,14 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 // Fit a plane on the clicked point using the latest point cloud data
                 // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
                 // and a possible service disconnection due to an onPause event.
-                Plane planeFit;
                 synchronized (this) {
-                    //TODO: TangoSupport.getDepth...
-                    planeFit = TangoUtils.doFitPlane(u, v, rgbTimestampGlThread, tangoPointCloudManager.getLatestPointCloud(), displayRotation);
+                    currentEditPosition = TangoUtils.doFitPoint(u, v, rgbTimestampGlThread, tangoPointCloudManager.getLatestPointCloud(), displayRotation);
                 }
 
-                if (planeFit != null) {
-                    //TODO: do something!
+                if (currentEditPosition != null) {
+                    getRenderer().clearSpheres();
+                    getRenderer().addSphere(currentEditPosition, Color.GRAY);
+                    buttonEditApply.setEnabled(true);
                 }
 
             } catch (TangoException t) {
@@ -258,7 +268,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     public void onDeviceClicked(String id) {
         drawerLayout.closeDrawer(leftDrawer);
+
+        currentDevice = id;
         unitListViewHolder.displayDevice(this, id);
+
         drawerLayout.openDrawer(rightDrawer);
     }
 
@@ -272,9 +285,39 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         inEditMode = false;
         drawerLayout.openDrawer(rightDrawer);
         buttonsEdit.setVisibility(View.INVISIBLE);
+
+        getRenderer().clearSpheres();
+        buttonEditApply.setEnabled(false);
     }
 
     private void editApply() {
+        try {
+            UnitConfigType.UnitConfig device = Registries.getUnitRegistry().getUnitConfigById(currentDevice);
 
+            // Transform OpenGL position to BCO Position
+            double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
+
+            // Transform BCO-Root position to BCO-Device-Location position
+            Vector3d transformedBcoPosition = new Vector3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
+            Registries.getLocationRegistry().getUnitTransformation(device).get().getTransform().transform(transformedBcoPosition);
+
+            // Generate new protobuf unitConfig
+            TranslationType.Translation translation =
+                    device.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
+            PoseType.Pose pose  =
+                    device.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).build();
+            PlacementConfigType.PlacementConfig placementConfig =
+                    device.getPlacementConfig().toBuilder().setPosition(pose).build();
+            UnitConfigType.UnitConfig unitConfig =
+                    device.toBuilder().setPlacementConfig(placementConfig).build();
+
+            // Update unitConfig
+            Registries.getUnitRegistry().updateUnitConfig(unitConfig);
+
+            leaveEditMode();
+        } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
+            e.printStackTrace();
+        }
     }
 }

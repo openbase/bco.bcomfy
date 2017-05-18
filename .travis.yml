@@ -56,7 +56,7 @@ before_install:
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
 install:
-  - travis_wait 30 ./gradlew build connectedCheck
+  - travis_wait 60 ./gradlew build connectedCheck
 
 deploy:
   - provider: script

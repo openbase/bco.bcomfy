@@ -24,6 +24,7 @@ import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TangoRenderer extends Renderer {
     private static final String TAG = TangoRenderer.class.getSimpleName();
@@ -34,14 +35,16 @@ public class TangoRenderer extends Renderer {
 
     private ScreenQuad backgroundQuad;
 
-    private ArrayList<Object3D> roomPlanes;
+    private List<Object3D> planes;
+    private List<Object3D> spheres;
 
     // Keeps track of whether the scene camera has been configured.
     private boolean sceneCameraConfigured;
 
     public TangoRenderer(Context context) {
         super(context);
-        roomPlanes = new ArrayList<>();
+        planes = new ArrayList<>();
+        spheres = new ArrayList<>();
     }
 
     @Override
@@ -181,29 +184,40 @@ public class TangoRenderer extends Renderer {
         planeObject.setPosition(position);
         planeObject.setLookAt(new Vector3().addAndSet(position, normal));
 
-        roomPlanes.add(planeObject);
+        planes.add(planeObject);
 
         getCurrentScene().addChild(planeObject);
     }
 
     public void addSphere(Vector3 vector3, int color) {
-        Material debugSphereMaterial = new Material();
-        debugSphereMaterial.setColor(color);
-        debugSphereMaterial.enableLighting(true);
-        debugSphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        debugSphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
+        Material sphereMaterial = new Material();
+        sphereMaterial.setColor(color);
+        sphereMaterial.enableLighting(true);
+        sphereMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
+        sphereMaterial.setSpecularMethod(new SpecularMethod.Phong());
 
-        Object3D debugSphere = new Sphere(0.1f, 20, 20);
-        debugSphere.setMaterial(debugSphereMaterial);
-        debugSphere.setPosition(vector3);
-        getCurrentScene().addChild(debugSphere);
+        Object3D sphereObject = new Sphere(0.1f, 20, 20);
+        sphereObject.setMaterial(sphereMaterial);
+        sphereObject.setPosition(vector3);
+
+        spheres.add(sphereObject);
+
+        getCurrentScene().addChild(sphereObject);
     }
 
     public void clearPlanes() {
-        for (Object3D plane : roomPlanes) {
+        for (Object3D plane : planes) {
             getCurrentScene().removeChild(plane);
         }
 
-        roomPlanes.clear();
+        planes.clear();
+    }
+
+    public void clearSpheres() {
+        for (Object3D sphere : spheres) {
+            getCurrentScene().removeChild(sphere);
+        }
+
+        spheres.clear();
     }
 }

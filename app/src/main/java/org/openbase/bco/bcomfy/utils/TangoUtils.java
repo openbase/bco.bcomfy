@@ -10,6 +10,7 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.rajawali3d.math.Matrix4;
+import org.rajawali3d.math.vector.Vector3;
 
 public final class TangoUtils {
 
@@ -104,4 +105,53 @@ public final class TangoUtils {
             return null;
         }
     }
+
+    /**
+     * Use the TangoSupport library with point cloud data to calculate the plane
+     * of the world feature pointed at the location the camera is looking.
+     * It returns the transform of the fitted plane in a double array.
+     */
+    public static final Vector3 doFitPoint(float u, float v, double rgbTimestamp, TangoPointCloudData pointCloud, int displayRotation) {
+        if (pointCloud == null) {
+            Log.e(TAG, "PointCloud == null");
+            return null;
+        }
+
+        // We need to calculate the transform between the color camera at the
+        // time the user clicked and the depth camera at the time the depth
+        // cloud was acquired.
+        TangoPoseData depthTcolorPose = TangoSupport.calculateRelativePose(
+                pointCloud.timestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                rgbTimestamp, TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR);
+
+        // Perform point intersection with the latest available point cloud data.
+        double[] identityTranslation = {0.0, 0.0, 0.0};
+        double[] identityRotation = {0.0, 0.0, 0.0, 1.0};
+
+        float[] intersectionPoint =
+                TangoSupport.getDepthAtPointNearestNeighbor(pointCloud,
+                        identityTranslation, identityRotation, u, v, displayRotation,
+                        depthTcolorPose.translation, depthTcolorPose.rotation);
+
+        // Get the transform from depth camera to OpenGL world at the timestamp of the cloud.
+        TangoSupport.TangoMatrixTransformData transform =
+                TangoSupport.getMatrixTransformAtTime(pointCloud.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
+                        TangoSupport.ROTATION_IGNORED);
+
+        if (transform.statusCode == TangoPoseData.POSE_VALID) {
+            // Get the transformed position of the plane
+            float[] transformedIntersectionPoint = TangoSupport.transformPoint(transform.matrix, intersectionPoint);
+
+            return new Vector3(transformedIntersectionPoint[0], transformedIntersectionPoint[1], transformedIntersectionPoint[2]);
+        } else {
+            Log.w(TAG, "Can't get depth camera transform at time " + pointCloud.timestamp);
+            return null;
+        }
+    }
+
+
 }
