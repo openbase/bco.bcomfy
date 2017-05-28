@@ -43,6 +43,7 @@ public abstract class TangoActivity extends Activity {
     private int connectedTextureIdGlThread = 0;
     private AtomicBoolean isFrameAvailableTangoThread = new AtomicBoolean(false);
     protected double rgbTimestampGlThread;
+    protected TangoCameraIntrinsics intrinsics;
 
     protected int displayRotation = 0;
 
@@ -202,12 +203,14 @@ public abstract class TangoActivity extends Activity {
 
                         // Set-up scene camera projection to match RGB camera intrinsics.
                         if (!renderer.isSceneCameraConfigured()) {
-                            TangoCameraIntrinsics intrinsics =
+                            intrinsics =
                                     TangoSupport.getCameraIntrinsicsBasedOnDisplayRotation(
                                             TangoCameraIntrinsics.TANGO_CAMERA_COLOR,
                                             displayRotation);
                             renderer.setProjectionMatrix(
                                     TangoUtils.projectionMatrixFromCameraIntrinsics(intrinsics));
+//                            projectionMatrix = TangoUtils.projectionMatrixFromCameraIntrinsics(intrinsics);
+//                            renderer.setProjectionMatrix(projectionMatrix);
                         }
 
                         // Connect the camera texture to the OpenGL Texture if necessary
@@ -239,6 +242,11 @@ public abstract class TangoActivity extends Activity {
                                 // Update the camera pose from the renderer
                                 renderer.updateRenderCameraPose(currentPose);
                                 cameraPoseTimestamp = currentPose.timestamp;
+
+                                // Call the method to do any additional stuff per frame
+                                if (callPostPreFrame()) {
+                                    onPostPreFrame();
+                                }
                             }
                         }
                     }
@@ -262,6 +270,11 @@ public abstract class TangoActivity extends Activity {
             @Override
             public boolean callPreFrame() {
                 return true;
+            }
+
+            @Override
+            public boolean callPostFrame() {
+                return false;
             }
         });
 
@@ -299,6 +312,14 @@ public abstract class TangoActivity extends Activity {
 
     public void setRenderer(TangoRenderer renderer) {
         this.renderer = renderer;
+    }
+
+    protected void onPostPreFrame() {
+
+    }
+
+    protected boolean callPostPreFrame() {
+        return false;
     }
 
 }

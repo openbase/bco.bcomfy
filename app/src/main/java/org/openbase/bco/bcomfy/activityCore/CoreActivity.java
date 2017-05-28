@@ -2,19 +2,25 @@ package org.openbase.bco.bcomfy.activityCore;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.atap.tangoservice.TangoException;
+import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.iconics.context.IconicsContextWrapper;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -24,13 +30,10 @@ import org.openbase.bco.bcomfy.TangoRenderer;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
-import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
-import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
-import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.view.SurfaceView;
@@ -47,6 +50,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import java8.util.stream.StreamSupport;
@@ -63,10 +67,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
+    private RelativeLayout uiContainer;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
     private Button buttonEditCancel;
+
+    private View pointZeroView;
 
     private View editLocationButton;
     boolean inEditMode = false;
@@ -167,6 +174,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
+        uiContainer  = (RelativeLayout) findViewById(R.id.ui_container);
+
         buttonsEdit = (LinearLayout) findViewById(R.id.buttons_edit);
         buttonEditApply = (Button) findViewById(R.id.button_apply);
         buttonEditCancel = (Button) findViewById(R.id.button_cancel);
@@ -183,6 +192,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
+
+        pointZeroView = LayoutInflater.from(this).inflate(R.layout.core_selector, uiContainer, true);
+        pointZeroView.setVisibility(View.INVISIBLE);
     }
 
     private void setupLeftDrawer() {
@@ -319,5 +331,52 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onPostPreFrame() {
+        TangoSupport.TangoDoubleMatrixTransformData glToCameraTransform =
+                TangoSupport.getDoubleMatrixTransformAtTime(
+                        currentPose.timestamp,
+                        TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                        TangoSupport.ROTATION_IGNORED);
+
+        double[] transformedPoint;
+
+        transformedPoint = TangoSupport.doubleTransformPoint(glToCameraTransform.matrix, TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0}));
+//        Log.i(TAG, transformedPoint[0] + "\t" + transformedPoint[1] + "\t" + transformedPoint[2]);
+
+        Matrix3d vectorToPixelMatrix = new Matrix3d(intrinsics.fx, 0, intrinsics.cx,
+                                                    0, intrinsics.fy, intrinsics.cy,
+                                                    0, 0, 1);
+
+        Vector3d vector3d = new Vector3d(transformedPoint[0], transformedPoint[1], transformedPoint[2]);
+        vectorToPixelMatrix.transform(vector3d);
+
+        int x = (int) (vector3d.x/vector3d.z);
+        int y = (int) (vector3d.y/vector3d.z);
+
+//        Log.i(TAG, "X: " + x + "\tY: " + y);
+
+        if (x > 0 && x < getSurfaceView().getWidth() && y > 0 && y < getSurfaceView().getHeight()) {
+            runOnUiThread(() -> {
+                pointZeroView.setVisibility(View.VISIBLE);
+                pointZeroView.setX(-x + getSurfaceView().getWidth());
+                pointZeroView.setY(y);
+            });
+        }
+        else {
+            runOnUiThread(() -> {
+                pointZeroView.setVisibility(View.INVISIBLE);
+            });
+        }
+    }
+
+    @Override
+    protected boolean callPostPreFrame() {
+        return true;
     }
 }

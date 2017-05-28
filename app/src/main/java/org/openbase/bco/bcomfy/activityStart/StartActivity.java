@@ -95,7 +95,7 @@ public class StartActivity extends Activity {
             // OpenGL thread or in the UI thread.
             synchronized (StartActivity.this) {
                 try {
-                    TangoSupport.initialize();
+                    TangoSupport.initialize(tango);
                     tangoConfig = setupTangoConfig(tango);
                     tango.connect(tangoConfig);
                     runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
