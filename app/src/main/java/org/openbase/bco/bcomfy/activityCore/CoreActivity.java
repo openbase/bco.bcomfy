@@ -109,7 +109,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -193,8 +192,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
 
-        pointZeroView = LayoutInflater.from(this).inflate(R.layout.core_selector, uiContainer, true);
+        pointZeroView = LayoutInflater.from(this).inflate(R.layout.core_selector, uiContainer, false);
         pointZeroView.setVisibility(View.INVISIBLE);
+        uiContainer.addView(pointZeroView);
     }
 
     private void setupLeftDrawer() {
@@ -291,6 +291,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         inEditMode = true;
         drawerLayout.closeDrawers();
         buttonsEdit.setVisibility(View.VISIBLE);
+
+        addDebugSphere();
     }
 
     private void leaveEditMode() {
@@ -347,25 +349,19 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         double[] transformedPoint;
 
         transformedPoint = TangoSupport.doubleTransformPoint(glToCameraTransform.matrix, TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0}));
-//        Log.i(TAG, transformedPoint[0] + "\t" + transformedPoint[1] + "\t" + transformedPoint[2]);
 
-        Matrix3d vectorToPixelMatrix = new Matrix3d(intrinsics.fx, 0, intrinsics.cx,
-                                                    0, intrinsics.fy, intrinsics.cy,
-                                                    0, 0, 1);
+        Vector3 vector3d = new Vector3(transformedPoint[0], transformedPoint[1], transformedPoint[2]);
+        getRenderer().getCurrentCamera().getProjectionMatrix().projectVector(vector3d);
 
-        Vector3d vector3d = new Vector3d(transformedPoint[0], transformedPoint[1], transformedPoint[2]);
-        vectorToPixelMatrix.transform(vector3d);
-
-        int x = (int) (vector3d.x/vector3d.z);
-        int y = (int) (vector3d.y/vector3d.z);
-
-//        Log.i(TAG, "X: " + x + "\tY: " + y);
-
-        if (x > 0 && x < getSurfaceView().getWidth() && y > 0 && y < getSurfaceView().getHeight()) {
+        if (vector3d.x > -1 &&
+                vector3d.x < 1 &&
+                vector3d.y > -1 &&
+                vector3d.y < 1 &&
+                vector3d.z < 1) {
             runOnUiThread(() -> {
                 pointZeroView.setVisibility(View.VISIBLE);
-                pointZeroView.setX(-x + getSurfaceView().getWidth());
-                pointZeroView.setY(y);
+                pointZeroView.setX((float) ((getSurfaceView().getWidth()/2)  + (getSurfaceView().getWidth()/2) *vector3d.x - (pointZeroView.getWidth()/2)));
+                pointZeroView.setY((float) ((getSurfaceView().getHeight()/2) - (getSurfaceView().getHeight()/2)*vector3d.y - (pointZeroView.getHeight()/2)));
             });
         }
         else {
@@ -378,5 +374,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     protected boolean callPostPreFrame() {
         return true;
+    }
+
+    private void addDebugSphere() {
+        this.getRenderer().addSphere(new Vector3(TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0})), Color.RED);
     }
 }
