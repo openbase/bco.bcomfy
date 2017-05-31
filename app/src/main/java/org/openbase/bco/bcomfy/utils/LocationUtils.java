@@ -32,9 +32,9 @@ public final class LocationUtils {
         private String locationId;
         ArrayList<Vector3> ground;
         double[] glToBcoTransform;
-        private OnTaskFinishedListener listener;
+        private OnTaskFinishedListener<Void> listener;
 
-        public updateLocationShapeTask(String locationId, ArrayList<Vector3> ground, double[] glToBcoTransform, OnTaskFinishedListener listener) {
+        public updateLocationShapeTask(String locationId, ArrayList<Vector3> ground, double[] glToBcoTransform, OnTaskFinishedListener<Void> listener) {
             this.locationId = locationId;
             this.ground = ground;
             this.glToBcoTransform = glToBcoTransform;
@@ -106,7 +106,7 @@ public final class LocationUtils {
 
         @Override
         protected void onPostExecute(Void v) {
-            listener.taskFinishedCallback();
+            listener.taskFinishedCallback(null);
         }
     }
 

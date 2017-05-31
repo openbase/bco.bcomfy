@@ -2,20 +2,15 @@ package org.openbase.bco.bcomfy.activityCore;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
-import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +25,13 @@ import org.openbase.bco.bcomfy.TangoRenderer;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
+import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.view.SurfaceView;
 
@@ -50,7 +47,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import java8.util.stream.StreamSupport;
@@ -67,13 +63,14 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
-    private RelativeLayout uiContainer;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
     private Button buttonEditCancel;
 
     private View pointZeroView;
+    private Matrix4 bcoToPixelTransform;
+    private UiOverlayHolder uiOverlayHolder;
 
     private View editLocationButton;
     boolean inEditMode = false;
@@ -126,6 +123,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     public void onResume() {
         super.onResume();
 //        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
+        uiOverlayHolder.showAllDevices();
     }
 
 
@@ -173,8 +171,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
-        uiContainer  = (RelativeLayout) findViewById(R.id.ui_container);
-
         buttonsEdit = (LinearLayout) findViewById(R.id.buttons_edit);
         buttonEditApply = (Button) findViewById(R.id.button_apply);
         buttonEditCancel = (Button) findViewById(R.id.button_cancel);
@@ -192,9 +188,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
 
-        pointZeroView = LayoutInflater.from(this).inflate(R.layout.core_selector, uiContainer, false);
-        pointZeroView.setVisibility(View.INVISIBLE);
-        uiContainer.addView(pointZeroView);
+        uiOverlayHolder = new UiOverlayHolder(this);
     }
 
     private void setupLeftDrawer() {
@@ -328,6 +322,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             // Update unitConfig
             Registries.getUnitRegistry().updateUnitConfig(unitConfig);
 
+            uiOverlayHolder.showAllDevices();
             leaveEditMode();
         } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
@@ -346,29 +341,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                         TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                         TangoSupport.ROTATION_IGNORED);
 
-        double[] transformedPoint;
+        bcoToPixelTransform = new Matrix4(bcoToGlTransform);
+        bcoToPixelTransform.leftMultiply(new Matrix4(glToCameraTransform.matrix)).leftMultiply(getRenderer().getCurrentCamera().getProjectionMatrix());
 
-        transformedPoint = TangoSupport.doubleTransformPoint(glToCameraTransform.matrix, TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0}));
-
-        Vector3 vector3d = new Vector3(transformedPoint[0], transformedPoint[1], transformedPoint[2]);
-        getRenderer().getCurrentCamera().getProjectionMatrix().projectVector(vector3d);
-
-        if (vector3d.x > -1 &&
-                vector3d.x < 1 &&
-                vector3d.y > -1 &&
-                vector3d.y < 1 &&
-                vector3d.z < 1) {
-            runOnUiThread(() -> {
-                pointZeroView.setVisibility(View.VISIBLE);
-                pointZeroView.setX((float) ((getSurfaceView().getWidth()/2)  + (getSurfaceView().getWidth()/2) *vector3d.x - (pointZeroView.getWidth()/2)));
-                pointZeroView.setY((float) ((getSurfaceView().getHeight()/2) - (getSurfaceView().getHeight()/2)*vector3d.y - (pointZeroView.getHeight()/2)));
-            });
-        }
-        else {
-            runOnUiThread(() -> {
-                pointZeroView.setVisibility(View.INVISIBLE);
-            });
-        }
+        uiOverlayHolder.updateBcoToPixelTransform(bcoToPixelTransform);
     }
 
     @Override

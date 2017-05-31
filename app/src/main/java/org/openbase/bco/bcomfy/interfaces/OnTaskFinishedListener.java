@@ -1,6 +1,6 @@
 package org.openbase.bco.bcomfy.interfaces;
 
-public interface OnTaskFinishedListener {
+public interface OnTaskFinishedListener<T> {
 
-    void taskFinishedCallback();
+    void taskFinishedCallback(T returnObject);
 }

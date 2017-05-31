@@ -72,7 +72,7 @@ public class StartActivity extends Activity {
         startActivityForResult(
                 Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
 
-        initBcoTask = new InitBcoTask(() -> changeState(StartActivityState.GET_ADF));
+        initBcoTask = new InitBcoTask(returnObject -> StartActivity.this.changeState(StartActivityState.GET_ADF));
         initBcoTask.execute();
     }
 
@@ -213,7 +213,7 @@ public class StartActivity extends Activity {
             initBcoTask.cancel(true);
         }
 
-        initBcoTask = new InitBcoTask(() -> changeState(StartActivityState.GET_ADF));
+        initBcoTask = new InitBcoTask(returnObject -> changeState(StartActivityState.GET_ADF));
         initBcoTask.execute();
 
         changeState(StartActivityState.INIT_BCO);
@@ -283,9 +283,9 @@ public class StartActivity extends Activity {
 
     private static class InitBcoTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = InitBcoTask.class.getSimpleName();
-        private OnTaskFinishedListener listener;
+        private OnTaskFinishedListener<Void> listener;
 
-        InitBcoTask(OnTaskFinishedListener listener) {
+        InitBcoTask(OnTaskFinishedListener<Void> listener) {
             this.listener = listener;
         }
 
@@ -309,7 +309,7 @@ public class StartActivity extends Activity {
             Log.i(TAG, "Connection to BCO initialized.");
             Log.i(TAG, BCO.BCO_LOGO_ASCI_ARTS);
 
-            listener.taskFinishedCallback();
+            listener.taskFinishedCallback(null);
         }
 
         @Override

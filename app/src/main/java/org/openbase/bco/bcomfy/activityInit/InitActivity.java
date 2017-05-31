@@ -1,6 +1,5 @@
 package org.openbase.bco.bcomfy.activityInit;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
@@ -12,14 +11,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.google.atap.tangoservice.TangoException;
-import com.google.atap.tangoservice.TangoPointCloudData;
-import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
-import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
@@ -31,14 +26,10 @@ import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.utils.LocationUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
-import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.view.SurfaceView;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -239,7 +230,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 locationId,
                 ground,
                 measurer.getGlToBcoTransform(),
-                () -> Log.i(TAG, "Updated shape of location: " + locationId))
+                returnObject -> Log.i(TAG, "Updated shape of location: " + locationId))
                 .execute();
     }
 
