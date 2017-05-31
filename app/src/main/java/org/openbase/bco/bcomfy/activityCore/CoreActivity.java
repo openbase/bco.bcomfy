@@ -188,7 +188,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
 
-        uiOverlayHolder = new UiOverlayHolder(this);
+        uiOverlayHolder = new UiOverlayHolder(this, this);
     }
 
     private void setupLeftDrawer() {

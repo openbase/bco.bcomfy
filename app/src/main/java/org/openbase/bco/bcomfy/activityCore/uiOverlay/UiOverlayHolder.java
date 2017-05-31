@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -33,13 +34,14 @@ public class UiOverlayHolder {
 
     private RelativeLayout uiOverlay;
     private Context context;
+    private OnDeviceClickedListener onDeviceClickedListener;
 
     private List<UnitSelectorHolder> units;
 
-    public UiOverlayHolder(Context context) {
-
+    public UiOverlayHolder(Context context, OnDeviceClickedListener onDeviceClickedListener) {
         this.uiOverlay = (RelativeLayout) ((Activity) context).findViewById(R.id.ui_container);
         this.context = context;
+        this.onDeviceClickedListener = onDeviceClickedListener;
 
         units = new ArrayList<>();
     }
@@ -59,6 +61,7 @@ public class UiOverlayHolder {
                 unit.setUnitSelector(createNewDeviceView());
                 unit.setParentWidth(uiOverlay.getWidth());
                 unit.setParentHeight(uiOverlay.getHeight());
+                unit.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(unit.getId()));
                 uiOverlay.addView(unit.getUnitSelector());
             });
         }).execute();
