@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.vecmath.Vector3d;
 
@@ -53,6 +54,7 @@ import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.location.LocationConfigType;
 import rst.geometry.PoseType;
+import rst.geometry.RotationType;
 import rst.geometry.TranslationType;
 import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
@@ -307,13 +309,21 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             // Transform BCO-Root position to BCO-Device-Location position
             Vector3d transformedBcoPosition = new Vector3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
-            Registries.getLocationRegistry().getUnitTransformation(device).get().getTransform().transform(transformedBcoPosition);
+            Registries.getLocationRegistry().waitForData();
+            Registries.getLocationRegistry().getUnitTransformation(device).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
             // Generate new protobuf unitConfig
             TranslationType.Translation translation =
                     device.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
+            RotationType.Rotation rotation;
+            if (device.getPlacementConfig().hasPosition()) {
+                rotation = device.getPlacementConfig().getPosition().getRotation();
+            }
+            else {
+                rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
+            }
             PoseType.Pose pose  =
-                    device.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).build();
+                    device.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
             PlacementConfigType.PlacementConfig placementConfig =
                     device.getPlacementConfig().toBuilder().setPosition(pose).build();
             UnitConfigType.UnitConfig unitConfig =
@@ -324,7 +334,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             uiOverlayHolder.showAllDevices();
             leaveEditMode();
-        } catch (CouldNotPerformException | InterruptedException | ExecutionException e) {
+        } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
             e.printStackTrace();
         }

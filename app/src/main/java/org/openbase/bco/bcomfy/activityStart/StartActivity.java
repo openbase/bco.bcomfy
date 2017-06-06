@@ -197,6 +197,7 @@ public class StartActivity extends Activity {
         changeState(StartActivityState.SETTINGS);
 
         if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) {
+            Log.i(TAG, "Cancel initialization task...");
             initBcoTask.cancel(true);
         } else {
             try {
@@ -210,6 +211,7 @@ public class StartActivity extends Activity {
     @SuppressWarnings("unchecked")
     public void onButtonRetryClicked(View view) {
         if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) {
+            Log.i(TAG, "Cancel initialization task...");
             initBcoTask.cancel(true);
         }
 
