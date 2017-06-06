@@ -52,9 +52,21 @@ public class UiOverlayHolder {
     }
 
     public void showAllDevices() {
-        clearUiOverlay();
+        updateUiOverlay();
 
+        try {
+            Registries.getUnitRegistry().addDataObserver((observable, unitRegistryData) -> {
+                updateUiOverlay();
+            });
+        } catch (NotAvailableException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateUiOverlay() {
         new fetchNewUnitMapTask(returnObject -> {
+            clearUiOverlay();
+
             units = returnObject;
 
             StreamSupport.stream(units).forEach(unit -> {
@@ -83,7 +95,7 @@ public class UiOverlayHolder {
         private OnTaskFinishedListener<List<UnitSelectorHolder>> listener;
         private List<UnitSelectorHolder> newUnitList;
 
-        public fetchNewUnitMapTask(OnTaskFinishedListener<List<UnitSelectorHolder>> listener) {
+        fetchNewUnitMapTask(OnTaskFinishedListener<List<UnitSelectorHolder>> listener) {
             this.listener = listener;
             this.newUnitList = new ArrayList<>();
         }
