@@ -1,164 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_core"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!-- The main content view -->
-    <RelativeLayout
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <org.rajawali3d.view.SurfaceView
-            android:id="@+id/surfaceview_core"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
+        <!-- The main content view -->
         <RelativeLayout
-            android:id="@+id/ui_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <TextView
-            android:id="@+id/locationLabelView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="29dp"
-            android:background="@color/background_gray_slightly_transparent"
-            android:padding="10dp"
-            android:text="@android:string/untitled"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="24sp"
-            android:visibility="invisible" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:visibility="visible" />
-
-        <LinearLayout
-            android:id="@+id/buttons_edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="29dp"
-            android:orientation="horizontal"
-            android:visibility="invisible">
-
-            <Button
-                android:id="@+id/button_apply"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/button_apply"
-                android:textSize="24sp" />
-
-            <Space
-                android:layout_width="20dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/button_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/button_cancel"
-                android:textSize="24sp" />
-
-        </LinearLayout>
-
-
-    </RelativeLayout>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/left_drawer"
-        android:layout_width="240dp"
-        android:layout_height="fill_parent"
-        android:layout_gravity="start"
-        android:background="#303030" />
-
-    <LinearLayout
-        android:id="@+id/right_drawer"
-        android:layout_width="240dp"
-        android:layout_height="fill_parent"
-        android:layout_gravity="end"
-        android:background="#303030"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#212121"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.8"
-                android:orientation="vertical"
-                android:padding="5dp">
-
-                <TextView
-                    android:id="@+id/device_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="DeviceLabel"
-                    android:textAlignment="center"
-                    android:textAppearance="@android:style/TextAppearance.Material.Large" />
-
-                <TextView
-                    android:id="@+id/device_type"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="DeviceType"
-                    android:textAlignment="center"
-                    android:textAppearance="@android:style/TextAppearance.Material.Medium"
-                    android:textStyle="italic" />
-            </LinearLayout>
-
-            <com.balysv.materialripple.MaterialRippleLayout
-                android:id="@+id/edit_location_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="0.2"
-                app:mrl_rippleHover="false"
-                app:mrl_rippleDelayClick="false">
-
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center"
-                    app:ico_color="#FFFFFF"
-                    app:ico_icon="gmd-edit-location"
-                    app:ico_size="32dp" />
-
-            </com.balysv.materialripple.MaterialRippleLayout>
-
-        </LinearLayout>
-
-        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <org.rajawali3d.view.SurfaceView
+                android:id="@+id/surfaceview_core"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <RelativeLayout
+                android:id="@+id/ui_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/locationLabelView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="29dp"
+                android:background="@color/background_gray_slightly_transparent"
+                android:padding="10dp"
+                android:text="@android:string/untitled"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="24sp"
+                android:visibility="invisible" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="visible" />
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/left_drawer"
+            android:layout_width="240dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="start"
+            android:background="#303030" />
+
+        <LinearLayout
+            android:id="@+id/right_drawer"
+            android:layout_width="240dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="end"
+            android:background="#303030"
+            android:orientation="vertical" >
+
             <LinearLayout
-                android:id="@+id/unit_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#303030"
-                android:orientation="vertical"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp" />
-        </ScrollView>
+                android:background="#212121"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.8"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:id="@+id/device_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="DeviceLabel"
+                        android:textAlignment="center"
+                        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+                    <TextView
+                        android:id="@+id/device_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="DeviceType"
+                        android:textAlignment="center"
+                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textStyle="italic" />
+                </LinearLayout>
+
+                <com.balysv.materialripple.MaterialRippleLayout
+                    android:id="@+id/edit_location_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.2"
+                    app:mrl_rippleHover="false"
+                    app:mrl_rippleDelayClick="false">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        app:ico_color="#FFFFFF"
+                        app:ico_icon="gmd-edit-location"
+                        app:ico_size="32dp" />
+
+                </com.balysv.materialripple.MaterialRippleLayout>
+
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/unit_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#303030"
+                    android:orientation="vertical"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp" />
+            </ScrollView>
+        </LinearLayout>
+
+    </android.support.v4.widget.DrawerLayout>
+
+    <LinearLayout
+        android:id="@+id/buttons_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="29dp"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
+        <Button
+            android:id="@+id/button_apply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="@string/button_apply"
+            android:textSize="24sp" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_cancel"
+            android:textSize="24sp" />
+
     </LinearLayout>
 
-</android.support.v4.widget.DrawerLayout>
+    <RelativeLayout
+        android:id="@+id/floating_context_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.github.clans.fab.FloatingActionMenu
+            android:id="@+id/floating_context_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            fab:menu_colorNormal="#000000"
+            fab:menu_colorPressed="#101010"
+            fab:menu_openDirection="down"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp">
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_item0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="#313131"
+                app:fab_colorPressed="#414141"
+                fab:fab_size="mini"
+                fab:fab_label="Menu item 0" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_item1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="#313131"
+                app:fab_colorPressed="#414141"
+                fab:fab_size="mini"
+                fab:fab_label="Menu item 1" />
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_item2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="#313131"
+                app:fab_colorPressed="#414141"
+                fab:fab_size="mini"
+                fab:fab_label="Menu item 2" />
+
+
+        </com.github.clans.fab.FloatingActionMenu>
+
+    </RelativeLayout>
+
+</RelativeLayout>
+
+
+

@@ -11,9 +11,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.iconics.context.IconicsContextWrapper;
@@ -65,6 +67,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
+
+    private RelativeLayout floatingContextContainer;
+    private FloatingActionMenu floatingContextButton;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
@@ -169,9 +174,28 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     protected void setupGui() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.activity_core);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
+
+        floatingContextContainer = (RelativeLayout) findViewById(R.id.floating_context_container);
+        floatingContextButton = (FloatingActionMenu) findViewById(R.id.floating_context_button);
+
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                if (drawerView == rightDrawer) {
+                    floatingContextContainer.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+//                    floatingContextButton.animate().translationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                }
+            }
+            @Override
+            public void onDrawerOpened(View drawerView) {}
+            @Override
+            public void onDrawerClosed(View drawerView) {}
+            @Override
+            public void onDrawerStateChanged(int newState) {}
+        });
 
         buttonsEdit = (LinearLayout) findViewById(R.id.buttons_edit);
         buttonEditApply = (Button) findViewById(R.id.button_apply);

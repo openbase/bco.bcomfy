@@ -52,6 +52,7 @@ dependencies {
     compile 'com.mikepenz:google-material-typeface:3.0.1.0.original@aar'
     compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
     compile 'com.balysv:material-ripple:1.0.2'
+    compile 'com.github.clans:fab:1.6.4'
 
     compile(group: 'org.openbase.bco', name: 'dal.remote', version: '1.4-SNAPSHOT') {
         exclude group: 'com.fasterxml.jackson.core'
