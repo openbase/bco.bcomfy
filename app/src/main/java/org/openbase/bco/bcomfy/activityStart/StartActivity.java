@@ -196,16 +196,16 @@ public class StartActivity extends Activity {
     public void onButtonCancelClicked(View view) {
         changeState(StartActivityState.SETTINGS);
 
-        if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) {
-            Log.i(TAG, "Cancel initialization task...");
-            initBcoTask.cancel(true);
-        } else {
-            try {
-                Registries.shutdown();
-            } catch (CancellationException ex) {
-                Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
-            }
-        }
+//        if (initBcoTask.getStatus() != AsyncTask.Status.FINISHED) { TODO: how to restart bco connection?
+//            Log.i(TAG, "Cancel initialization task...");
+//            initBcoTask.cancel(true);
+//        } else {
+//            try {
+//                Registries.shutdown();
+//            } catch (CancellationException ex) {
+//                Log.e(TAG, "Can not shutdown registries! Maybe they were not started?");
+//            }
+//        }
     }
 
     @SuppressWarnings("unchecked")
@@ -316,7 +316,7 @@ public class StartActivity extends Activity {
 
         @Override
         protected void onCancelled() {
-            Registries.shutdown();
+//            Registries.shutdown(); TODO: how to restart bco connection?
         }
     }
 }

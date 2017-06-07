@@ -24,7 +24,7 @@ import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
-import org.openbase.bco.bcomfy.utils.LocationUtils;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.view.SurfaceView;
@@ -226,7 +226,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
         getRenderer().clearPlanes();
 
-        new LocationUtils.updateLocationShapeTask(
+        new BcoUtils.UpdateLocationShapeTask(
                 locationId,
                 ground,
                 measurer.getGlToBcoTransform(),

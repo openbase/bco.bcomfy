@@ -38,4 +38,16 @@
             android:title="@string/pref_init_anchor" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Registry Utilities (use with caution!)">
+        <Preference
+            android:key="pref_delete_device_poses"
+            android:title="Delete Device Poses"
+            android:summary="This deletes the poses of all devices" />
+
+        <Preference
+            android:key="pref_delete_location_shapes"
+            android:title="Delete Location Shapes"
+            android:summary="This deletes the shapes and poses of all locations (and Doors, Connections...)" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

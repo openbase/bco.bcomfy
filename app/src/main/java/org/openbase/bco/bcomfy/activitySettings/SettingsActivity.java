@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activitySettings;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -12,8 +13,11 @@ import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.text.method.NumberKeyListener;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
+import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
@@ -29,6 +33,8 @@ public class SettingsActivity extends Activity {
     public static final String KEY_PREF_INIT_DEFAULT = "pref_init_default";
     public static final String KEY_PREF_INIT_ALIGN = "pref_init_align";
     public static final String KEY_PREF_INIT_ANCHOR = "pref_init_anchor";
+    public static final String KEY_PREF_DELETE_DEVICE_POSES = "pref_delete_device_poses";
+    public static final String KEY_PREF_DELETE_LOCATION_SHAPES = "pref_delete_location_shapes";
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
         String stringValue = value.toString();
@@ -74,14 +80,31 @@ public class SettingsActivity extends Activity {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences);
 
-            bindPreferenceSummaryToValue(findPreference(KEY_PREF_IP));
-            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PORT));
-            bindPreferenceSummaryToValue(findPreference(KEY_PREF_INIT_DEFAULT));
-            bindPreferenceSummaryToValue(findPreference(KEY_PREF_INIT_ANCHOR));
+            // Find preferences
+            EditTextPreference ipPreference = (EditTextPreference) findPreference(KEY_PREF_IP);
+            EditTextPreference portPreference = (EditTextPreference) findPreference(KEY_PREF_PORT);
 
-            EditText portPreference = ((EditTextPreference)
-                    findPreference(KEY_PREF_PORT)).getEditText();
-            portPreference.setKeyListener(new NumberKeyListener() {
+            EditTextPreference initDefaultPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_DEFAULT);
+            CheckBoxPreference initAlignPreference = (CheckBoxPreference) findPreference(KEY_PREF_INIT_ALIGN);
+            EditTextPreference initAnchorPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_ANCHOR);
+
+            Preference deleteDevicePosesUtil = findPreference(KEY_PREF_DELETE_DEVICE_POSES);
+            Preference deleteLocationShapesUtil = findPreference(KEY_PREF_DELETE_LOCATION_SHAPES);
+
+            // Bind preference summaries
+            bindPreferenceSummaryToValue(ipPreference);
+            bindPreferenceSummaryToValue(portPreference);
+            bindPreferenceSummaryToValue(initDefaultPreference);
+            bindPreferenceSummaryToValue(initAnchorPreference);
+
+
+            initAlignPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                initAnchorPreference.setEnabled((boolean) newValue);
+                return true;
+            });
+
+            EditText portPreferenceText = portPreference.getEditText();
+            portPreferenceText.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
                     return InputType.TYPE_CLASS_NUMBER;
@@ -94,9 +117,8 @@ public class SettingsActivity extends Activity {
                 }
             });
 
-            EditText initDefaultPreference = ((EditTextPreference)
-                    findPreference(KEY_PREF_INIT_DEFAULT)).getEditText();
-            initDefaultPreference.setKeyListener(new NumberKeyListener() {
+            EditText initDefaultPreferenceText = initDefaultPreference.getEditText();
+            initDefaultPreferenceText.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
                     return InputType.TYPE_CLASS_NUMBER;
@@ -109,9 +131,8 @@ public class SettingsActivity extends Activity {
                 }
             });
 
-            EditText initAnchorPreference = ((EditTextPreference)
-                    findPreference(KEY_PREF_INIT_ANCHOR)).getEditText();
-            initAnchorPreference.setKeyListener(new NumberKeyListener() {
+            EditText initAnchorPreferenceText = initAnchorPreference.getEditText();
+            initAnchorPreferenceText.setKeyListener(new NumberKeyListener() {
                 @Override
                 public int getInputType() {
                     return InputType.TYPE_CLASS_NUMBER;
@@ -122,6 +143,42 @@ public class SettingsActivity extends Activity {
                 protected char[] getAcceptedChars() {
                     return "1234567890".toCharArray();
                 }
+            });
+
+            // Configure Utility to delete all unit poses
+            deleteDevicePosesUtil.setEnabled(Registries.isDataAvailable());
+            deleteDevicePosesUtil.setOnPreferenceClickListener(preference -> {
+                deleteDevicePosesUtil.setEnabled(false);
+
+                new BcoUtils.DeleteAllDevicePosesTask(successful -> {
+                    if (successful) {
+                        Toast.makeText(getContext(), "Delete All Unit Poses: SUCCESSFUL!", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Delete All Unit Poses: FAILED!", Toast.LENGTH_LONG).show();
+                    }
+                    deleteDevicePosesUtil.setEnabled(true);
+                }).execute();
+
+                return true;
+            });
+
+            // Configure Utility to delete all location shapes
+            deleteLocationShapesUtil.setEnabled(Registries.isDataAvailable());
+            deleteLocationShapesUtil.setOnPreferenceClickListener(preference -> {
+                deleteLocationShapesUtil.setEnabled(false);
+
+                new BcoUtils.DeleteAllLocationShapesTask(successful -> {
+                    if (successful) {
+                        Toast.makeText(getContext(), "Delete all Location Shapes: SUCCESSFUL!", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Delete all Location Shapes: FAILED!", Toast.LENGTH_LONG).show();
+                    }
+                    deleteLocationShapesUtil.setEnabled(true);
+                }).execute();
+
+                return true;
             });
         }
     }

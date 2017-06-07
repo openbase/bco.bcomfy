@@ -16,6 +16,7 @@ import java8.util.stream.StreamSupport;
 import rsb.introspection.LacksOsInformationException;
 import rsb.util.os.RuntimeOsUtilities;
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitTemplateType;
 import rst.geometry.PoseType;
 import rst.geometry.RotationType;
 import rst.geometry.TranslationType;
@@ -23,18 +24,18 @@ import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 import rst.spatial.ShapeType;
 
-public final class LocationUtils {
+public final class BcoUtils {
 
-    private static final String TAG = LocationUtils.class.getSimpleName();
+    private static final String TAG = BcoUtils.class.getSimpleName();
 
-    public static class updateLocationShapeTask extends AsyncTask<Void, Void, Void> {
-        private static final String TAG = LocationUtils.updateLocationShapeTask.class.getSimpleName();
+    public static class UpdateLocationShapeTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = UpdateLocationShapeTask.class.getSimpleName();
         private String locationId;
         ArrayList<Vector3> ground;
         double[] glToBcoTransform;
         private OnTaskFinishedListener<Void> listener;
 
-        public updateLocationShapeTask(String locationId, ArrayList<Vector3> ground, double[] glToBcoTransform, OnTaskFinishedListener<Void> listener) {
+        public UpdateLocationShapeTask(String locationId, ArrayList<Vector3> ground, double[] glToBcoTransform, OnTaskFinishedListener<Void> listener) {
             this.locationId = locationId;
             this.ground = ground;
             this.glToBcoTransform = glToBcoTransform;
@@ -73,7 +74,6 @@ public final class LocationUtils {
 
                 // Build the pose
                 TranslationType.Translation.Builder translationBuilder = TranslationType.Translation.getDefaultInstance().toBuilder();
-//                translationBuilder.setX(originVertex.z).setY(originVertex.x).setZ(originVertex.y);
                 translationBuilder.setX(originVertex.x).setY(originVertex.y).setZ(originVertex.z);
                 RotationType.Rotation.Builder rotationBuilder = RotationType.Rotation.getDefaultInstance().toBuilder();
                 rotationBuilder.setQw(1.0).setQx(0.0).setQy(0.0).setQz(0.0);
@@ -85,7 +85,6 @@ public final class LocationUtils {
                 ShapeType.Shape.Builder shapeBuilder = ShapeType.Shape.getDefaultInstance().toBuilder();
                 for (Vector3 vector3 : transformedGround) {
                     shapeBuilder.addFloor(Vec3DDoubleType.Vec3DDouble.getDefaultInstance().toBuilder()
-//                            .setX(vector3.z).setY(vector3.x).setZ(vector3.y).build());
                             .setX(vector3.x).setY(vector3.y).setZ(vector3.z).build());
                 }
 
@@ -107,6 +106,99 @@ public final class LocationUtils {
         @Override
         protected void onPostExecute(Void v) {
             listener.taskFinishedCallback(null);
+        }
+    }
+
+    public static class DeleteAllDevicePosesTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = DeleteAllDevicePosesTask.class.getSimpleName();
+        private OnTaskFinishedListener<Boolean> listener;
+        private Boolean successful;
+
+        public DeleteAllDevicePosesTask(OnTaskFinishedListener<Boolean> listener) {
+            this.listener = listener;
+            this.successful = Boolean.FALSE;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
+                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE)
+                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
+                        .forEach(unitConfig -> {
+                            try {
+                                PlacementConfigType.PlacementConfig placementConfig =
+                                    unitConfig.getPlacementConfig().toBuilder().clearPosition().build();
+
+                                UnitConfigType.UnitConfig newUnitConfig =
+                                    unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
+
+                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
+                            } catch (CouldNotPerformException | InterruptedException e) {
+                                Log.e(TAG, "Error while updating unitConfig!");
+                                e.printStackTrace();
+                            }
+                        });
+
+                successful = Boolean.TRUE;
+            } catch (CouldNotPerformException | InterruptedException e) {
+                Log.e(TAG, "Error while fetching unitConfigs!");
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            listener.taskFinishedCallback(successful);
+        }
+    }
+
+    public static class DeleteAllLocationShapesTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = DeleteAllLocationShapesTask.class.getSimpleName();
+        private OnTaskFinishedListener<Boolean> listener;
+        private Boolean successful;
+
+        public DeleteAllLocationShapesTask(OnTaskFinishedListener<Boolean> listener) {
+            this.listener = listener;
+            this.successful = Boolean.FALSE;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
+                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION ||
+                                                unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.CONNECTION)
+                        .filter(unitConfig -> unitConfig.getPlacementConfig().getShape().getFloorCount() > 0)
+                        .forEach(unitConfig -> {
+                            try {
+                                PlacementConfigType.PlacementConfig placementConfig =
+                                        unitConfig.getPlacementConfig().toBuilder().clearShape().clearPosition().build();
+
+                                UnitConfigType.UnitConfig newUnitConfig =
+                                        unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
+
+                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
+                            } catch (CouldNotPerformException | InterruptedException e) {
+                                Log.e(TAG, "Error while updating unitConfig!");
+                                e.printStackTrace();
+                            }
+                        });
+
+                successful = Boolean.TRUE;
+            } catch (CouldNotPerformException | InterruptedException e) {
+                Log.e(TAG, "Error while fetching unitConfigs!");
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            listener.taskFinishedCallback(successful);
         }
     }
 
