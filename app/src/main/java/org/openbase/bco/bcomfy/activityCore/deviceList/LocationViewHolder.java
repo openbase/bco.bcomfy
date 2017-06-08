@@ -8,7 +8,7 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import org.openbase.bco.bcomfy.R;
 
 
-public class LocationViewHolder extends ParentViewHolder {
+public class LocationViewHolder extends ParentViewHolder<Location, Device> {
 
     private View divider;
     private TextView label;

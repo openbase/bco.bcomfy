@@ -10,11 +10,10 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 
 
-public class DeviceViewHolder extends ChildViewHolder {
+public class DeviceViewHolder extends ChildViewHolder<Device> {
 
     private View deviceView;
     private TextView deviceTextView;
-    private ImageView noPositionIcon;
 
     public DeviceViewHolder(View itemView) {
         super(itemView);

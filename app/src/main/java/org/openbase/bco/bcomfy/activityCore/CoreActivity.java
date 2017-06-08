@@ -11,13 +11,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.context.IconicsContextWrapper;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -68,14 +70,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
 
-    private RelativeLayout floatingContextContainer;
-    private FloatingActionMenu floatingContextButton;
+    private FloatingActionButton floatingActionButtonLeft;
+    private FloatingActionMenu floatingContextMenu;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
     private Button buttonEditCancel;
 
-    private View pointZeroView;
     private Matrix4 bcoToPixelTransform;
     private UiOverlayHolder uiOverlayHolder;
 
@@ -178,21 +179,35 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
         rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
 
-        floatingContextContainer = (RelativeLayout) findViewById(R.id.floating_context_container);
-        floatingContextButton = (FloatingActionMenu) findViewById(R.id.floating_context_button);
+        floatingActionButtonLeft = (FloatingActionButton) findViewById(R.id.floating_action_button_left);
+        floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(16));
+        floatingActionButtonLeft.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
+
+        floatingContextMenu = (FloatingActionMenu) findViewById(R.id.floating_context_button);
+        floatingContextMenu.getMenuIconView().setImageBitmap(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_more_vert).color(Color.WHITE).sizeDp(16).toBitmap());
 
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 if (drawerView == rightDrawer) {
-                    floatingContextContainer.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
-//                    floatingContextButton.animate().translationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    floatingContextMenu.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                }
+                else {
+                    floatingActionButtonLeft.setAlpha(1 - slideOffset);
                 }
             }
             @Override
-            public void onDrawerOpened(View drawerView) {}
+            public void onDrawerOpened(View drawerView) {
+                if (drawerView == leftDrawer) {
+                    floatingActionButtonLeft.setClickable(false);
+                }
+            }
             @Override
-            public void onDrawerClosed(View drawerView) {}
+            public void onDrawerClosed(View drawerView) {
+                if (drawerView == leftDrawer) {
+                    floatingActionButtonLeft.setClickable(true);
+                }
+            }
             @Override
             public void onDrawerStateChanged(int newState) {}
         });

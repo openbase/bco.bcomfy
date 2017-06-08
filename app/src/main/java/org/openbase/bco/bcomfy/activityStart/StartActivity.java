@@ -29,7 +29,6 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
-import java.util.concurrent.CancellationException;
 
 public class StartActivity extends Activity {
 
