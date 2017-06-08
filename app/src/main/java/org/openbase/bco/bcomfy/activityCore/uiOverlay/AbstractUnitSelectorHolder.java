@@ -2,14 +2,13 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
-public class UnitSelectorHolder {
-    private static final String TAG = UnitSelectorHolder.class.getSimpleName();
+public abstract class AbstractUnitSelectorHolder {
+    private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
 
     private String id;
     private View unitSelector;
@@ -17,9 +16,9 @@ public class UnitSelectorHolder {
     private int parentWidth;
     private int parentHeight;
 
-    public UnitSelectorHolder (String id, @Nullable View unitSelector, Vector3 rootVector) {
+    public AbstractUnitSelectorHolder(String id, Vector3 rootVector) {
         this.id = id;
-        this.unitSelector = unitSelector;
+        this.unitSelector = null;
         this.rootVector = rootVector;
         this.parentWidth = 0;
         this.parentHeight = 0;

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder.SelectorHolderFactory;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
@@ -36,7 +37,7 @@ public class UiOverlayHolder {
     private Context context;
     private OnDeviceClickedListener onDeviceClickedListener;
 
-    private List<UnitSelectorHolder> units;
+    private List<AbstractUnitSelectorHolder> units;
 
     public UiOverlayHolder(Context context, OnDeviceClickedListener onDeviceClickedListener) {
         this.uiOverlay = (RelativeLayout) ((Activity) context).findViewById(R.id.ui_container);
@@ -92,10 +93,10 @@ public class UiOverlayHolder {
 
     private static class fetchNewUnitMapTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = UiOverlayHolder.fetchNewUnitMapTask.class.getSimpleName();
-        private OnTaskFinishedListener<List<UnitSelectorHolder>> listener;
-        private List<UnitSelectorHolder> newUnitList;
+        private OnTaskFinishedListener<List<AbstractUnitSelectorHolder>> listener;
+        private List<AbstractUnitSelectorHolder> newUnitList;
 
-        fetchNewUnitMapTask(OnTaskFinishedListener<List<UnitSelectorHolder>> listener) {
+        fetchNewUnitMapTask(OnTaskFinishedListener<List<AbstractUnitSelectorHolder>> listener) {
             this.listener = listener;
             this.newUnitList = new ArrayList<>();
         }
@@ -119,8 +120,7 @@ public class UiOverlayHolder {
 
                                 Vector3 rootUnitPosition = new Vector3(unitVector.x, unitVector.y, unitVector.z);
 
-                                UnitSelectorHolder unitSelectorHolder = new UnitSelectorHolder(unitConfig.getId(), null, rootUnitPosition);
-                                newUnitList.add(unitSelectorHolder);
+                                newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig.getId(), rootUnitPosition));
                             } catch (NotAvailableException | InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
                             }
