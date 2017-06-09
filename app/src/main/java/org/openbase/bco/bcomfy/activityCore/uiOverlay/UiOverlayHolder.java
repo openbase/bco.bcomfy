@@ -72,6 +72,7 @@ public class UiOverlayHolder {
 
             StreamSupport.stream(units).forEach(unit -> {
                 unit.setUnitSelector(createNewDeviceView());
+                unit.initIcon();
                 unit.setParentWidth(uiOverlay.getWidth());
                 unit.setParentHeight(uiOverlay.getHeight());
                 unit.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(unit.getId()));
@@ -110,18 +111,8 @@ public class UiOverlayHolder {
                                 unitConfig.getPlacementConfig().getPosition().getTranslation().getZ() != 0)
                         .forEach(unitConfig -> {
                             try {
-                                Log.e(TAG, "device: " + unitConfig.getLabel());
-                                TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
-                                Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
-
-                                Transform3D transform3D = Registries.getLocationRegistry().getUnitTransformation(unitConfig).get().getTransform();
-                                transform3D.invert();
-                                transform3D.transform(unitVector);
-
-                                Vector3 rootUnitPosition = new Vector3(unitVector.x, unitVector.y, unitVector.z);
-
-                                newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig.getId(), rootUnitPosition));
-                            } catch (NotAvailableException | InterruptedException | ExecutionException e) {
+                                newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
+                            } catch (InterruptedException | CouldNotPerformException | ExecutionException e) {
                                 e.printStackTrace();
                             }
                         });

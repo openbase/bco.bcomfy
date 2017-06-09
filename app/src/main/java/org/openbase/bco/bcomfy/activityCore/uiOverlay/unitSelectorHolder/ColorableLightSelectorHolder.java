@@ -15,15 +15,15 @@ import java.util.concurrent.ExecutionException;
 
 import rst.domotic.unit.UnitConfigType;
 
-public class GenericSelectorHolder extends AbstractUnitSelectorHolder {
+public class ColorableLightSelectorHolder extends AbstractUnitSelectorHolder {
 
-    public GenericSelectorHolder(UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws InterruptedException, ExecutionException, NotAvailableException {
+    public ColorableLightSelectorHolder(UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws InterruptedException, ExecutionException, NotAvailableException {
         super(unitConfig, isMainSelector);
     }
 
     @Override
     public void initIcon() {
         ImageView imageView = this.getUnitSelector().findViewById(R.id.iconView);
-        imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(GoogleMaterial.Icon.gmd_question_answer).color(Color.BLACK).sizeDp(24).toBitmap());
+        imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(GoogleMaterial.Icon.gmd_lightbulb_outline).color(Color.BLACK).sizeDp(24).toBitmap());
     }
 }

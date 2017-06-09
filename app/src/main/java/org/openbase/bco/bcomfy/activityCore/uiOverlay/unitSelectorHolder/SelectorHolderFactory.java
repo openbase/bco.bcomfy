@@ -1,17 +1,59 @@
 package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
+import android.util.Log;
+
+import org.openbase.bco.bcomfy.activityCore.deviceList.Device;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.AbstractUnitSelectorHolder;
+import org.openbase.bco.dal.lib.layer.unit.Unit;
+import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
+import org.openbase.bco.dal.remote.unit.ColorableLightRemote;
+import org.openbase.bco.dal.remote.unit.Units;
+import org.openbase.bco.dal.remote.unit.device.DeviceRemote;
+import org.openbase.bco.registry.device.lib.DeviceRegistry;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.util.concurrent.ExecutionException;
+
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitTemplateType;
+import rst.domotic.unit.device.DeviceClassType;
+import rst.domotic.unit.device.DeviceConfigType;
 
 public class SelectorHolderFactory {
 
     private static final String TAG = SelectorHolderFactory.class.getSimpleName();
 
-    public static AbstractUnitSelectorHolder createUnitSelectorHolder(String id, Vector3 rootVector) {
-        AbstractUnitSelectorHolder unitSelectorHolder = new GenericSelectorHolder(id, rootVector);
+    public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException, ExecutionException {
+
+        AbstractUnitSelectorHolder unitSelectorHolder;
+
+        switch (unitConfig.getType()) {
+            case DEVICE:
+                if (unitConfig.getDeviceConfig().getUnitIdCount() > 1) {
+                    unitSelectorHolder = createUnitSelectorHolderGroup(unitConfig);
+                }
+                else {
+                    unitSelectorHolder =
+                            createUnitSelectorHolder(Registries.getUnitRegistry().getUnitConfigById(
+                                    unitConfig.getDeviceConfig().getUnitId(0)));
+                }
+                break;
+            case COLORABLE_LIGHT:
+                unitSelectorHolder = new ColorableLightSelectorHolder(unitConfig, true);
+                break;
+            default:
+                unitSelectorHolder = new GenericSelectorHolder(unitConfig, true);
+                break;
+        }
 
         return unitSelectorHolder;
+    }
+
+    public static AbstractUnitSelectorHolder createUnitSelectorHolderGroup(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, NotAvailableException {
+        Log.e(TAG, "unitSelectorHolderGroup not supported yet! Falling back to generic device visualization...");
+        return new GenericSelectorHolder(unitConfig, true);
     }
 }
