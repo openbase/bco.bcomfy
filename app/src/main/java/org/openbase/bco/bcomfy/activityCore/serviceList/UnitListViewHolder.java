@@ -2,6 +2,7 @@ package org.openbase.bco.bcomfy.activityCore.serviceList;
 
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,6 +26,8 @@ public class UnitListViewHolder {
     private LinearLayout unitList;
     private TextView labelText;
     private TextView typeText;
+    private Activity activity;
+    private String id;
 
     private List<UnitViewHolder> unitViewHolderList;
 
@@ -34,51 +37,73 @@ public class UnitListViewHolder {
 
     public UnitListViewHolder(LinearLayout serviceList) {
         this.serviceList = serviceList;
-        unitList = (LinearLayout) serviceList.findViewById(R.id.unit_list);
-        labelText = (TextView) serviceList.findViewById(R.id.device_label);
-        typeText = (TextView) serviceList.findViewById(R.id.device_type);
+        unitList  = serviceList.findViewById(R.id.unit_list);
+        labelText = serviceList.findViewById(R.id.device_label);
+        typeText  = serviceList.findViewById(R.id.device_type);
 
         unitViewHolderList = new ArrayList<>();
     }
 
     public void displayUnit(Activity activity, String id) {
-        unitList.removeAllViews();
-        StreamSupport.stream(unitViewHolderList).forEach(UnitViewHolder::shutdownRemotes);
-        unitViewHolderList.clear();
+        this.activity = activity;
+        this.id = id;
+        new displayUnitTask().execute(this);
+    }
 
-        try {
-            deviceRegistry = Registries.getDeviceRegistry();
-            unitRegistry = Registries.getUnitRegistry();
-            UnitConfigType.UnitConfig unitConfig = unitRegistry.getUnitConfigById(id);
+    private static class displayUnitTask extends AsyncTask<UnitListViewHolder, Void, Void> {
+        @Override
+        protected Void doInBackground(UnitListViewHolder... unitListViewHolder) {
+            unitListViewHolder[0].activity.runOnUiThread(() ->
+                    unitListViewHolder[0].unitList.removeAllViews());
+            StreamSupport.stream(unitListViewHolder[0].unitViewHolderList).forEach(UnitViewHolder::shutdownRemotes);
+            unitListViewHolder[0].unitViewHolderList.clear();
 
-            // Distinguish whether to display a device or an unit
-            if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
-                // Display a device
-                deviceConfig = deviceRegistry.getDeviceConfigById(id);
+            try {
+                unitListViewHolder[0].deviceRegistry = Registries.getDeviceRegistry();
+                unitListViewHolder[0].unitRegistry = Registries.getUnitRegistry();
+                UnitConfigType.UnitConfig unitConfig = unitListViewHolder[0].unitRegistry.getUnitConfigById(unitListViewHolder[0].id);
 
-                labelText.setText(deviceConfig.getLabel());
-                typeText.setText(deviceRegistry.getDeviceClassById(deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel());
+                // Distinguish whether to display a device or an unit
+                if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+                    // Display a device
+                    unitListViewHolder[0].deviceConfig =
+                            unitListViewHolder[0].deviceRegistry.getDeviceConfigById(unitListViewHolder[0].id);
 
-                for (String unitId : deviceConfig.getDeviceConfig().getUnitIdList()) {
-                    UnitViewHolder unitViewHolder = new UnitViewHolder(activity, unitId, unitList);
-                    unitViewHolderList.add(unitViewHolder);
+                    String labelText = unitListViewHolder[0].deviceConfig.getLabel();
+                    unitListViewHolder[0].activity.runOnUiThread(() ->
+                            unitListViewHolder[0].labelText.setText(labelText));
 
-                    unitList.addView(unitViewHolder.getCardView());
+                    String typeText = unitListViewHolder[0].deviceRegistry.getDeviceClassById(
+                            unitListViewHolder[0].deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel();
+                    unitListViewHolder[0].activity.runOnUiThread(() ->
+                            unitListViewHolder[0].typeText.setText(typeText));
+
+                    for (String unitId : unitListViewHolder[0].deviceConfig.getDeviceConfig().getUnitIdList()) {
+                        UnitViewHolder unitViewHolder = new UnitViewHolder(unitListViewHolder[0].activity, unitId, unitListViewHolder[0].unitList);
+                        unitListViewHolder[0].unitViewHolderList.add(unitViewHolder);
+
+                        unitListViewHolder[0].activity.runOnUiThread(() ->
+                                unitListViewHolder[0].unitList.addView(unitViewHolder.getCardView()));
+                    }
                 }
+                else {
+                    // Display a unit
+                    unitListViewHolder[0].activity.runOnUiThread(() ->
+                            unitListViewHolder[0].labelText.setText(unitConfig.getLabel()));
+                    unitListViewHolder[0].activity.runOnUiThread(() ->
+                            unitListViewHolder[0].typeText.setText(unitConfig.getDescription()));
+
+                    UnitViewHolder unitViewHolder = new UnitViewHolder(unitListViewHolder[0].activity, unitListViewHolder[0].id, unitListViewHolder[0].unitList);
+                    unitListViewHolder[0].unitViewHolderList.add(unitViewHolder);
+
+                    unitListViewHolder[0].activity.runOnUiThread(() ->
+                            unitListViewHolder[0].unitList.addView(unitViewHolder.getCardView()));
+                }
+
+            } catch (CouldNotPerformException | InterruptedException e) {
+                e.printStackTrace();
             }
-            else {
-                // Display a unit
-                labelText.setText(unitConfig.getLabel());
-                typeText.setText(unitConfig.getDescription());
-
-                UnitViewHolder unitViewHolder = new UnitViewHolder(activity, id, unitList);
-                unitViewHolderList.add(unitViewHolder);
-
-                unitList.addView(unitViewHolder.getCardView());
-            }
-
-        } catch (CouldNotPerformException | InterruptedException e) {
-            e.printStackTrace();
+            return null;
         }
     }
 
