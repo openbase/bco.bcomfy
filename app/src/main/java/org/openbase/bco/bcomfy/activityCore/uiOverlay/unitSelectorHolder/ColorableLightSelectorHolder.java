@@ -18,12 +18,6 @@ import rst.domotic.unit.UnitConfigType;
 public class ColorableLightSelectorHolder extends AbstractUnitSelectorHolder {
 
     public ColorableLightSelectorHolder(UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws InterruptedException, ExecutionException, NotAvailableException {
-        super(unitConfig, isMainSelector);
-    }
-
-    @Override
-    public void initIcon() {
-        ImageView imageView = this.getUnitSelector().findViewById(R.id.iconView);
-        imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(GoogleMaterial.Icon.gmd_lightbulb_outline).color(Color.BLACK).sizeDp(24).toBitmap());
+        super(GoogleMaterial.Icon.gmd_lightbulb_outline, unitConfig, isMainSelector);
     }
 }

@@ -2,8 +2,15 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.typeface.GenericFont;
+import com.mikepenz.iconics.typeface.IIcon;
+
+import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.NotAvailableException;
 import org.rajawali3d.math.Matrix4;
@@ -20,6 +27,7 @@ import rst.geometry.TranslationType;
 public abstract class AbstractUnitSelectorHolder {
     private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
 
+    private IIcon icon;
     private String id;
     private View unitSelector;
     private boolean isMainSelector;
@@ -27,7 +35,8 @@ public abstract class AbstractUnitSelectorHolder {
     private int parentWidth;
     private int parentHeight;
 
-    public AbstractUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException {
+    public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException {
+        this.icon = icon;
         this.id = unitConfig.getId();
         this.unitSelector = null;
         this.isMainSelector = isMainSelector;
@@ -120,5 +129,8 @@ public abstract class AbstractUnitSelectorHolder {
         throw new UnsupportedOperationException();
     }
 
-    public abstract void initIcon();
+    public void initIcon() {
+        ImageView imageView = this.getUnitSelector().findViewById(R.id.iconView);
+        imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(icon).color(Color.BLACK).sizeDp(48).toBitmap());
+    }
 }
