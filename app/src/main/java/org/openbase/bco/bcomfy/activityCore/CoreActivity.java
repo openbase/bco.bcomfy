@@ -71,7 +71,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private LinearLayout rightDrawer;
 
     private FloatingActionButton floatingActionButtonLeft;
-    private FloatingActionMenu floatingContextMenu;
+    private FloatingActionButton floatingActionButtonRight;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
@@ -175,25 +175,29 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     protected void setupGui() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        leftDrawer   = (RecyclerView) findViewById(R.id.left_drawer);
-        rightDrawer  = (LinearLayout) findViewById(R.id.right_drawer);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        leftDrawer   = findViewById(R.id.left_drawer);
+        rightDrawer  = findViewById(R.id.right_drawer);
 
-        floatingActionButtonLeft = (FloatingActionButton) findViewById(R.id.floating_action_button_left);
-        floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(16));
+        floatingActionButtonLeft = findViewById(R.id.floating_action_button_left);
+        floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
         floatingActionButtonLeft.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
 
-        floatingContextMenu = (FloatingActionMenu) findViewById(R.id.floating_context_button);
-        floatingContextMenu.getMenuIconView().setImageBitmap(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_more_vert).color(Color.WHITE).sizeDp(16).toBitmap());
+        floatingActionButtonRight = findViewById(R.id.floating_action_button_right);
+        floatingActionButtonRight.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
+        floatingActionButtonRight.setOnClickListener(v -> enterEditMode());
+        floatingActionButtonRight.setAlpha(0f);
+        floatingActionButtonRight.setClickable(false);
 
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
-                if (drawerView == rightDrawer) {
-                    floatingContextMenu.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                if (drawerView == leftDrawer) {
+                    floatingActionButtonLeft.setAlpha(1 - slideOffset);
                 }
                 else {
-                    floatingActionButtonLeft.setAlpha(1 - slideOffset);
+                    floatingActionButtonRight.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    floatingActionButtonRight.setAlpha(slideOffset);
                 }
             }
             @Override
@@ -201,20 +205,26 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(false);
                 }
+                else {
+                    floatingActionButtonRight.setClickable(true);
+                }
             }
             @Override
             public void onDrawerClosed(View drawerView) {
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(true);
                 }
+                else {
+                    floatingActionButtonRight.setClickable(false);
+                }
             }
             @Override
             public void onDrawerStateChanged(int newState) {}
         });
 
-        buttonsEdit = (LinearLayout) findViewById(R.id.buttons_edit);
-        buttonEditApply = (Button) findViewById(R.id.button_apply);
-        buttonEditCancel = (Button) findViewById(R.id.button_cancel);
+        buttonsEdit         = findViewById(R.id.buttons_edit);
+        buttonEditApply     = findViewById(R.id.button_apply);
+        buttonEditCancel    = findViewById(R.id.button_cancel);
 
         buttonEditApply.setOnClickListener(v -> editApply());
         buttonEditCancel.setOnClickListener(v -> leaveEditMode());
@@ -222,10 +232,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         setupLeftDrawer();
         setupRightDrawer();
 
-        locationLabelView = (TextView) findViewById(R.id.locationLabelView);
+        locationLabelView = findViewById(R.id.locationLabelView);
         drawerLayout.setScrimColor(Color.TRANSPARENT);
 
-        setSurfaceView((SurfaceView) findViewById(R.id.surfaceview_core));
+        setSurfaceView(findViewById(R.id.surfaceview_core));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
 
@@ -261,8 +271,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void setupRightDrawer() {
         unitListViewHolder = new UnitListViewHolder(rightDrawer);
-        editLocationButton = findViewById(R.id.edit_location_button);
-        editLocationButton.setOnClickListener(v -> enterEditMode());
     }
 
     private void initFetchLocationLabelTask() {
