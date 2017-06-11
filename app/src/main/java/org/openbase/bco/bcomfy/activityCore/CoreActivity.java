@@ -317,7 +317,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         drawerLayout.closeDrawer(leftDrawer);
 
         currentDevice = id;
-        unitListViewHolder.displayDevice(this, id);
+        unitListViewHolder.displayUnit(this, id);
 
         drawerLayout.openDrawer(rightDrawer);
     }
