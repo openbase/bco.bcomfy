@@ -334,6 +334,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         inEditMode = true;
         drawerLayout.closeDrawers();
         buttonsEdit.setVisibility(View.VISIBLE);
+        uiOverlayHolder.setUiOverlayVisibility(View.INVISIBLE);
 
         addDebugSphere();
     }
@@ -342,6 +343,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         inEditMode = false;
         drawerLayout.openDrawer(rightDrawer);
         buttonsEdit.setVisibility(View.INVISIBLE);
+        uiOverlayHolder.setUiOverlayVisibility(View.VISIBLE);
 
         getRenderer().clearSpheres();
         buttonEditApply.setEnabled(false);

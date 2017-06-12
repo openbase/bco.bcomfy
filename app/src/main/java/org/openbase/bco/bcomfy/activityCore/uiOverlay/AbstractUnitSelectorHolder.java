@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -11,8 +12,13 @@ import com.mikepenz.iconics.typeface.GenericFont;
 import com.mikepenz.iconics.typeface.IIcon;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
+import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.pattern.Observable;
+import org.openbase.jul.pattern.Observer;
+import org.openbase.jul.pattern.Remote;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -28,40 +34,37 @@ public abstract class AbstractUnitSelectorHolder {
     private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
 
     private IIcon icon;
-    private String id;
     private View unitSelector;
     private boolean isMainSelector;
     private Vector3 positionFromRoot;
     private int parentWidth;
     private int parentHeight;
 
+    private UnitConfigType.UnitConfig unitConfig;
+    private UnitRemote unitRemote;
+
     public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException {
         this.icon = icon;
-        this.id = unitConfig.getId();
-        this.unitSelector = null;
+        this.unitConfig = unitConfig;
         this.isMainSelector = isMainSelector;
 
         if (isMainSelector) {
-            TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
-            Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
-
-            Transform3D transform3D = Registries.getLocationRegistry().getUnitTransformation(unitConfig).get().getTransform();
-            transform3D.invert();
-            transform3D.transform(unitVector);
-
-            positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
+            updatePositionFromRoot();
         }
 
         this.parentWidth = 0;
         this.parentHeight = 0;
+
+        unitRemote = Units.getUnit(unitConfig, true);
+        unitRemote.addConfigObserver((observable, o) -> {
+            this.updatePositionFromRoot();
+        });
+        unitRemote.addConnectionStateObserver((observable, connectionState) ->
+                updateConnectionState((Remote.ConnectionState) connectionState));
     }
 
     public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        return unitConfig.getId();
     }
 
     public View getUnitSelector() {
@@ -132,5 +135,27 @@ public abstract class AbstractUnitSelectorHolder {
     public void initIcon() {
         ImageView imageView = this.getUnitSelector().findViewById(R.id.iconView);
         imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(icon).color(Color.BLACK).sizeDp(48).toBitmap());
+    }
+
+    private void updateConnectionState(Remote.ConnectionState connectionState) {
+        switch (connectionState) {
+            case CONNECTED:
+                Log.i(TAG, "Connection to unit " + unitConfig.getId() + " established.");
+                break;
+            default:
+                Log.i(TAG, "Connection to unit " + unitConfig.getId() + " lost.");
+                break;
+        }
+    }
+
+    private void updatePositionFromRoot() throws NotAvailableException, InterruptedException, ExecutionException {
+        TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
+        Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
+
+        Transform3D transform3D = Registries.getLocationRegistry().getUnitTransformation(unitConfig).get().getTransform();
+        transform3D.invert();
+        transform3D.transform(unitVector);
+
+        positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
     }
 }

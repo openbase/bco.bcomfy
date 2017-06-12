@@ -4,6 +4,7 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.transition.Visibility;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,8 +41,8 @@ public class UiOverlayHolder {
     private List<AbstractUnitSelectorHolder> units;
 
     public UiOverlayHolder(Context context, OnDeviceClickedListener onDeviceClickedListener) {
-        this.uiOverlay = (RelativeLayout) ((Activity) context).findViewById(R.id.ui_container);
-        this.context = context;
+        this.uiOverlay               = ((Activity) context).findViewById(R.id.ui_container);
+        this.context                 = context;
         this.onDeviceClickedListener = onDeviceClickedListener;
 
         units = new ArrayList<>();
@@ -55,13 +56,13 @@ public class UiOverlayHolder {
     public void showAllDevices() {
         updateUiOverlay();
 
-        try {
-            Registries.getUnitRegistry().addDataObserver((observable, unitRegistryData) -> {
-                updateUiOverlay();
-            });
-        } catch (NotAvailableException | InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Registries.getUnitRegistry().addDataObserver((observable, unitRegistryData) -> {
+//                updateUiOverlay();
+//            });
+//        } catch (NotAvailableException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void updateUiOverlay() {
@@ -79,6 +80,10 @@ public class UiOverlayHolder {
                 uiOverlay.addView(unit.getUnitSelector());
             });
         }).execute();
+    }
+
+    public void setUiOverlayVisibility(int visibility) {
+        uiOverlay.setVisibility(visibility);
     }
 
     private void clearUiOverlay() {
