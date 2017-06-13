@@ -13,6 +13,7 @@ import com.mikepenz.iconics.typeface.IIcon;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
+import org.openbase.bco.dal.remote.unit.ColorableLightRemote;
 import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.NotAvailableException;
@@ -28,6 +29,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitTemplateType;
 import rst.geometry.TranslationType;
 
 public abstract class AbstractUnitSelectorHolder {
@@ -56,15 +58,21 @@ public abstract class AbstractUnitSelectorHolder {
         this.parentHeight = 0;
 
         unitRemote = Units.getUnit(unitConfig, true);
-        unitRemote.addConfigObserver((observable, o) -> {
+        unitRemote.addConfigObserver((observable, newUnitConfig) -> {
+            this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
             this.updatePositionFromRoot();
         });
         unitRemote.addConnectionStateObserver((observable, connectionState) ->
                 updateConnectionState((Remote.ConnectionState) connectionState));
     }
 
-    public String getId() {
-        return unitConfig.getId();
+    public String getDeviceId() {
+        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+            return unitConfig.getId();
+        }
+        else {
+            return unitConfig.getUnitHostId();
+        }
     }
 
     public View getUnitSelector() {
@@ -152,7 +160,7 @@ public abstract class AbstractUnitSelectorHolder {
         TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
         Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
 
-        Transform3D transform3D = Registries.getLocationRegistry().getUnitTransformation(unitConfig).get().getTransform();
+        Transform3D transform3D = Units.getUnitTransformation(unitConfig).get().getTransform();
         transform3D.invert();
         transform3D.transform(unitVector);
 

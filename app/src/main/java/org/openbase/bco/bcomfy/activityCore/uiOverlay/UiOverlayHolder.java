@@ -4,8 +4,6 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.transition.Visibility;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -16,20 +14,14 @@ import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.NotAvailableException;
 import org.rajawali3d.math.Matrix4;
-import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitTemplateType;
-import rst.geometry.TranslationType;
 
 public class UiOverlayHolder {
     private static final String TAG = UiOverlayHolder.class.getSimpleName();
@@ -76,7 +68,7 @@ public class UiOverlayHolder {
                 unit.initIcon();
                 unit.setParentWidth(uiOverlay.getWidth());
                 unit.setParentHeight(uiOverlay.getHeight());
-                unit.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(unit.getId()));
+                unit.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(unit.getDeviceId()));
                 uiOverlay.addView(unit.getUnitSelector());
             });
         }).execute();
