@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import java8.util.stream.StreamSupport;
+import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
 public class UiOverlayHolder {
@@ -30,18 +31,18 @@ public class UiOverlayHolder {
     private Context context;
     private OnDeviceClickedListener onDeviceClickedListener;
 
-    private List<AbstractUnitSelectorHolder> units;
+    private List<AbstractUnitSelectorHolder> holderList;
 
     public UiOverlayHolder(Context context, OnDeviceClickedListener onDeviceClickedListener) {
         this.uiOverlay               = ((Activity) context).findViewById(R.id.ui_container);
         this.context                 = context;
         this.onDeviceClickedListener = onDeviceClickedListener;
 
-        units = new ArrayList<>();
+        holderList = new ArrayList<>();
     }
 
     public void updateBcoToPixelTransform(Matrix4 bcoToPixelTransform) {
-        StreamSupport.stream(units).forEach(unit ->
+        StreamSupport.stream(holderList).forEach(unit ->
                 unit.alignViewToPixel(context, bcoToPixelTransform));
     }
 
@@ -61,17 +62,20 @@ public class UiOverlayHolder {
         new fetchNewUnitMapTask(returnObject -> {
             clearUiOverlay();
 
-            units = returnObject;
+            holderList = returnObject;
 
-            StreamSupport.stream(units).forEach(unit -> {
-                unit.setUnitSelector(createNewDeviceView());
-                unit.initIcon();
-                unit.setParentWidth(uiOverlay.getWidth());
-                unit.setParentHeight(uiOverlay.getHeight());
-                unit.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(unit.getDeviceId()));
-                uiOverlay.addView(unit.getUnitSelector());
-            });
+            StreamSupport.stream(holderList).forEach(this::initUnitSelector);
         }).execute();
+    }
+
+    public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException {
+        if (!StreamSupport.stream(holderList)
+                .anyMatch(abstractUnitSelectorHolder -> abstractUnitSelectorHolder.getDeviceId().equals(unitConfig.getId()))) {
+            AbstractUnitSelectorHolder holder = SelectorHolderFactory.createUnitSelectorHolder(unitConfig);
+
+            holderList.add(holder);
+            initUnitSelector(holder);
+        }
     }
 
     public void setUiOverlayVisibility(int visibility) {
@@ -79,7 +83,7 @@ public class UiOverlayHolder {
     }
 
     private void clearUiOverlay() {
-        StreamSupport.stream(units).forEach(unit ->
+        StreamSupport.stream(holderList).forEach(unit ->
                 ((Activity) context).runOnUiThread(() -> uiOverlay.removeView(unit.getUnitSelector())));
     }
 
@@ -87,6 +91,15 @@ public class UiOverlayHolder {
         View unitView = LayoutInflater.from(context).inflate(R.layout.core_selector, uiOverlay, false);
         unitView.setVisibility(View.INVISIBLE);
         return unitView;
+    }
+
+    private void initUnitSelector(AbstractUnitSelectorHolder holder) {
+        holder.setUnitSelector(createNewDeviceView());
+        holder.initIcon();
+        holder.setParentWidth(uiOverlay.getWidth());
+        holder.setParentHeight(uiOverlay.getHeight());
+        holder.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(holder.getDeviceId()));
+        uiOverlay.addView(holder.getUnitSelector());
     }
 
     private static class fetchNewUnitMapTask extends AsyncTask<Void, Void, Void> {

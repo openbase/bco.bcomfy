@@ -350,16 +350,53 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void editApply() {
+        // TODO: move to AsyncTask
         try {
             UnitConfigType.UnitConfig device = Registries.getUnitRegistry().getUnitConfigById(currentDevice);
 
             // Transform OpenGL position to BCO Position
             double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
 
-            // Transform BCO-Root position to BCO-Device-Location position
+            // Get location for that specific coordinate
+            List<UnitConfigType.UnitConfig> locations =
+                Registries.getLocationRegistry().getLocationConfigsByCoordinate(
+                    Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
+
+            if (locations.size() == 0) {
+                Log.w(TAG, "No location found for current unit position!");
+                return;
+            }
+
+            UnitConfigType.UnitConfig[] location = new UnitConfigType.UnitConfig[1];
+            // Get Region if there is any
+            StreamSupport.stream(locations)
+                    .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
+                    .findAny()
+                    .ifPresent(unitConfig -> location[0] = unitConfig);
+            // Otherwise use tile if there is any
+            if (location[0] == null) {
+                StreamSupport.stream(locations)
+                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
+                        .findAny()
+                        .ifPresent(unitConfig -> location[0] = unitConfig);
+            }
+            // Otherwise use zone if there is any
+            if (location[0] == null) {
+                StreamSupport.stream(locations)
+                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
+                        .findAny()
+                        .ifPresent(unitConfig -> location[0] = unitConfig);
+            }
+            // Otherwise return... Unknown LocationType...
+            if (location[0] == null) {
+                Log.w(TAG, "No valid location found for selected position!");
+                return;
+            }
+
+            // Transform BCO-Root position to BCO-Location-of-selected-point position
             Vector3d transformedBcoPosition = new Vector3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
             Registries.getLocationRegistry().waitForData();
-            Registries.getLocationRegistry().getUnitTransformation(device).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+            Registries.getLocationRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
             // Generate new protobuf unitConfig
             TranslationType.Translation translation =
@@ -374,14 +411,14 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             PoseType.Pose pose  =
                     device.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
             PlacementConfigType.PlacementConfig placementConfig =
-                    device.getPlacementConfig().toBuilder().setPosition(pose).build();
+                    device.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
             UnitConfigType.UnitConfig unitConfig =
                     device.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
             Registries.getUnitRegistry().updateUnitConfig(unitConfig);
 
-            uiOverlayHolder.showAllDevices();
+            uiOverlayHolder.checkAndAddNewUnit(unitConfig);
             leaveEditMode();
         } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
