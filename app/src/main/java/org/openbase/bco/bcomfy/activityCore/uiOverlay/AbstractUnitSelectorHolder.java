@@ -8,17 +8,12 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.iconics.typeface.GenericFont;
 import com.mikepenz.iconics.typeface.IIcon;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
-import org.openbase.bco.dal.remote.unit.ColorableLightRemote;
 import org.openbase.bco.dal.remote.unit.Units;
-import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.pattern.Observable;
-import org.openbase.jul.pattern.Observer;
 import org.openbase.jul.pattern.Remote;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
@@ -36,7 +31,7 @@ public abstract class AbstractUnitSelectorHolder {
     private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
 
     private IIcon icon;
-    private View unitSelector;
+    private View view;
     private boolean isMainSelector;
     private Vector3 positionFromRoot;
     private int parentWidth;
@@ -75,12 +70,12 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
-    public View getUnitSelector() {
-        return unitSelector;
+    public View getView() {
+        return view;
     }
 
-    public void setUnitSelector(View unitSelector) {
-        this.unitSelector = unitSelector;
+    public void setView(View view) {
+        this.view = view;
     }
 
     public Vector3 getPositionFromRoot() {
@@ -124,14 +119,14 @@ public abstract class AbstractUnitSelectorHolder {
                 pixelVector.y < 1 &&
                 pixelVector.z < 1) {
             ((Activity) context).runOnUiThread(() -> {
-                unitSelector.setVisibility(View.VISIBLE);
-                unitSelector.setX((float) ((parentWidth/2)  + (parentWidth/2) *pixelVector.x - (unitSelector.getWidth()/2)));
-                unitSelector.setY((float) ((parentHeight/2) - (parentHeight/2)*pixelVector.y - (unitSelector.getHeight()/2)));
+                view.setVisibility(View.VISIBLE);
+                view.setX((float) ((parentWidth/2)  + (parentWidth/2) *pixelVector.x - (view.getWidth()/2)));
+                view.setY((float) ((parentHeight/2) - (parentHeight/2)*pixelVector.y - (view.getHeight()/2)));
             });
         }
         else {
             ((Activity) context).runOnUiThread(() -> {
-                unitSelector.setVisibility(View.INVISIBLE);
+                view.setVisibility(View.INVISIBLE);
             });
         }
     }
@@ -141,7 +136,7 @@ public abstract class AbstractUnitSelectorHolder {
     }
 
     public void initIcon() {
-        ImageView imageView = this.getUnitSelector().findViewById(R.id.iconView);
+        ImageView imageView = this.getView().findViewById(R.id.iconView);
         imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(icon).color(Color.BLACK).sizeDp(48).toBitmap());
     }
 

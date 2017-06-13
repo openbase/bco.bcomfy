@@ -41,4 +41,5 @@
     <string name="pref_init_align">Use anchor alignment</string>
     <string name="button_apply">{gmd-check} Apply</string>
     <string name="button_cancel">{gmd-close} Cancel</string>
+    <string name="button_clear">{gmd-location-off} Clear</string>
 </resources>

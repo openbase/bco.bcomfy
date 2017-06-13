@@ -76,6 +76,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
     private Button buttonEditCancel;
+    private Button buttonEditClear;
 
     private Matrix4 bcoToPixelTransform;
     private UiOverlayHolder uiOverlayHolder;
@@ -225,9 +226,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         buttonsEdit         = findViewById(R.id.buttons_edit);
         buttonEditApply     = findViewById(R.id.button_apply);
         buttonEditCancel    = findViewById(R.id.button_cancel);
+        buttonEditClear     = findViewById(R.id.button_clear);
 
         buttonEditApply.setOnClickListener(v -> editApply());
         buttonEditCancel.setOnClickListener(v -> leaveEditMode());
+        buttonEditClear.setOnClickListener(v -> clearUnitLocation());
 
         setupLeftDrawer();
         setupRightDrawer();
@@ -421,6 +424,27 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             uiOverlayHolder.checkAndAddNewUnit(unitConfig);
             leaveEditMode();
         } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
+            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
+            e.printStackTrace();
+        }
+    }
+
+    private void clearUnitLocation() {
+        try {
+            UnitConfigType.UnitConfig device = Registries.getUnitRegistry().getUnitConfigById(currentDevice);
+
+            // Generate new protobuf unitConfig
+            PlacementConfigType.PlacementConfig placementConfig =
+                    device.getPlacementConfig().toBuilder().clearPosition().build();
+            UnitConfigType.UnitConfig unitConfig =
+                    device.toBuilder().setPlacementConfig(placementConfig).build();
+
+            // Update unitConfig
+            Registries.getUnitRegistry().updateUnitConfig(unitConfig);
+
+            uiOverlayHolder.removeUnit(unitConfig);
+            leaveEditMode();
+        } catch (CouldNotPerformException | InterruptedException  e) {
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
             e.printStackTrace();
         }

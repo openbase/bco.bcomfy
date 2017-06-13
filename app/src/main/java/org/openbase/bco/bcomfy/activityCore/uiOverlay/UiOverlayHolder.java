@@ -17,6 +17,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -78,13 +79,26 @@ public class UiOverlayHolder {
         }
     }
 
+    public void removeUnit(UnitConfigType.UnitConfig unitConfig) {
+        Iterator<AbstractUnitSelectorHolder> iterator = holderList.iterator();
+        while (iterator.hasNext()) {
+            AbstractUnitSelectorHolder holder =  iterator.next();
+
+            if (holder.getDeviceId().equals(unitConfig.getId())) {
+                uiOverlay.removeView(holder.getView());
+                iterator.remove();
+                break;
+            }
+        }
+    }
+
     public void setUiOverlayVisibility(int visibility) {
         uiOverlay.setVisibility(visibility);
     }
 
     private void clearUiOverlay() {
         StreamSupport.stream(holderList).forEach(unit ->
-                ((Activity) context).runOnUiThread(() -> uiOverlay.removeView(unit.getUnitSelector())));
+                ((Activity) context).runOnUiThread(() -> uiOverlay.removeView(unit.getView())));
     }
 
     private View createNewDeviceView() {
@@ -94,12 +108,12 @@ public class UiOverlayHolder {
     }
 
     private void initUnitSelector(AbstractUnitSelectorHolder holder) {
-        holder.setUnitSelector(createNewDeviceView());
+        holder.setView(createNewDeviceView());
         holder.initIcon();
         holder.setParentWidth(uiOverlay.getWidth());
         holder.setParentHeight(uiOverlay.getHeight());
-        holder.getUnitSelector().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(holder.getDeviceId()));
-        uiOverlay.addView(holder.getUnitSelector());
+        holder.getView().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(holder.getDeviceId()));
+        uiOverlay.addView(holder.getView());
     }
 
     private static class fetchNewUnitMapTask extends AsyncTask<Void, Void, Void> {

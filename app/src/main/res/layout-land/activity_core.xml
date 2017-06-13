@@ -139,6 +139,19 @@
             android:text="@string/button_cancel"
             android:textSize="24sp" />
 
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/button_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_clear"
+            android:textSize="24sp" />
+
     </LinearLayout>
 
     <com.github.clans.fab.FloatingActionButton
