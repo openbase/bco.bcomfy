@@ -2,25 +2,14 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
 import android.util.Log;
 
-import org.openbase.bco.bcomfy.activityCore.deviceList.Device;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.AbstractUnitSelectorHolder;
-import org.openbase.bco.dal.lib.layer.unit.Unit;
-import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
-import org.openbase.bco.dal.remote.unit.ColorableLightRemote;
-import org.openbase.bco.dal.remote.unit.Units;
-import org.openbase.bco.dal.remote.unit.device.DeviceRemote;
-import org.openbase.bco.registry.device.lib.DeviceRegistry;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.rajawali3d.math.vector.Vector3;
 
 import java.util.concurrent.ExecutionException;
 
 import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitTemplateType;
-import rst.domotic.unit.device.DeviceClassType;
-import rst.domotic.unit.device.DeviceConfigType;
 
 public class SelectorHolderFactory {
 

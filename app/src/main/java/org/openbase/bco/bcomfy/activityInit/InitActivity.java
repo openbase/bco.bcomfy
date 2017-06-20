@@ -33,6 +33,8 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InitActivity extends TangoActivity implements View.OnTouchListener, LocationChooser.LocationChooserListener {
     private static final String TAG = InitActivity.class.getSimpleName();
@@ -44,15 +46,24 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
     private Measurer measurer;
 
+    private HashMap<String, double[]> transformMap;
+
+    private boolean recalcTransform;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_init);
         super.onCreate(savedInstanceState);
 
+        recalcTransform = getIntent().getBooleanExtra("recalcTransform", false);
+
+        transformMap = new HashMap<>();
+
         measurer = new Measurer(
                 Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
                 PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.KEY_PREF_INIT_ALIGN, true),
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")));
+                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")),
+                recalcTransform);
     }
 
     @Override
@@ -110,6 +121,11 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
      * Handle a successful plane measurement
      */
     private void updateGuiAfterPlaneMeasurement(Plane plane, Measurer.MeasureType lastMeasureType) {
+        if (recalcTransform && measurer.getAnchorState().equals(Measurer.AnchorState.FINISHED)) {
+            saveTransformsLocally();
+            finish();
+        }
+
         switch (lastMeasureType) {
             case INVALID:
                 return;
@@ -131,28 +147,34 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     protected void setupGui() {
         instructionTextView = new InstructionTextView((TextView) findViewById(R.id.instructionTextView));
 
-        buttonAddRoom = (Button) findViewById(R.id.buttonAddRoom);
+        buttonAddRoom = findViewById(R.id.buttonAddRoom);
         buttonAddRoom.setCompoundDrawables(new IconicsDrawable(this)
                         .icon(GoogleMaterial.Icon.gmd_add_circle_outline)
                         .color(Color.BLACK)
                         .sizePx((int) buttonAddRoom.getTextSize())
                 , null, null, null);
 
-        buttonFinishRoom = (Button) findViewById(R.id.buttonFinishRoom);
+        buttonFinishRoom = findViewById(R.id.buttonFinishRoom);
         buttonFinishRoom.setCompoundDrawables(new IconicsDrawable(this)
                         .icon(GoogleMaterial.Icon.gmd_done)
                         .color(Color.BLACK)
                         .sizePx((int) buttonFinishRoom.getTextSize())
                 , null, null, null);
 
-        buttonFinishMeasurement = (Button) findViewById(R.id.buttonFinishMeasurement);
+        buttonFinishMeasurement = findViewById(R.id.buttonFinishMeasurement);
         buttonFinishMeasurement.setCompoundDrawables(new IconicsDrawable(this)
                         .icon(GoogleMaterial.Icon.gmd_done_all)
                         .color(Color.BLACK)
                         .sizePx((int) buttonFinishMeasurement.getTextSize())
                 , null, null, null);
 
-        setSurfaceView((SurfaceView) findViewById(R.id.surfaceview));
+        if (recalcTransform) {
+            buttonAddRoom.setVisibility(View.GONE);
+            buttonFinishRoom.setVisibility(View.GONE);
+            buttonFinishMeasurement.setVisibility(View.GONE);
+        }
+
+        setSurfaceView(findViewById(R.id.surfaceview));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
     }

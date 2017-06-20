@@ -49,6 +49,9 @@ public class StartActivity extends Activity {
     private Button buttonRecord;
     private Button buttonManage;
     private Button buttonDebugStart;
+    private Button buttonDebugRecalc;
+
+    private boolean debugRecalc;
 
     public static Tango tango;
     private TangoConfig tangoConfig;
@@ -60,6 +63,8 @@ public class StartActivity extends Activity {
         setContentView(R.layout.activity_start);
         applicationContext = getApplicationContext();
         initGui();
+
+        debugRecalc = false;
 
         // Set default preferences if not already set.
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -158,7 +163,7 @@ public class StartActivity extends Activity {
         switch (state) {
             case INIT_BCO:
                 infoMessage.setText(R.string.gui_connect_bco);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case GET_ADF:
 //                infoMessage.setText(R.string.gui_update_adf);
@@ -168,19 +173,19 @@ public class StartActivity extends Activity {
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE);
+                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
                 break;
             case INIT_TANGO_TO_INIT:
             case INIT_TANGO_TO_CORE:
                 infoMessage.setText(R.string.gui_init_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO_FAILED:
                 infoMessage.setText(R.string.gui_init_tango_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case SETTINGS:
-                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE);
+                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE);
                 break;
             default:
                 break;
@@ -188,6 +193,7 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonInitializeClicked(View view) {
+        debugRecalc = false;
         changeState(StartActivityState.INIT_TANGO_TO_INIT);
         bindTangoService();
     }
@@ -241,7 +247,13 @@ public class StartActivity extends Activity {
         bindTangoService();
     }
 
-    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart) {
+    public void onButtonDebugTransformClicked(View view) {
+        debugRecalc = true;
+        changeState(StartActivityState.INIT_TANGO_TO_INIT);
+        bindTangoService();
+    }
+
+    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart, int debugCalc) {
         progressBar.setVisibility(progress);
         infoMessage.setVisibility(info);
         buttonInitialize.setVisibility(init);
@@ -252,19 +264,21 @@ public class StartActivity extends Activity {
         buttonRecord.setVisibility(record);
         buttonManage.setVisibility(manage);
         buttonDebugStart.setVisibility(debugStart);
+        buttonDebugRecalc.setVisibility(debugCalc);
     }
 
     private void initGui() {
-        progressBar      = (ProgressBar) findViewById(R.id.progressBar);
-        infoMessage      = (TextView) findViewById(R.id.infoMessage);
-        buttonInitialize = (Button) findViewById(R.id.button_initialize);
-        buttonCancel     = (Button) findViewById(R.id.button_cancel);
-        buttonRetry      = (Button) findViewById(R.id.button_retry);
-        buttonSettings   = (Button) findViewById(R.id.button_settings);
-        buttonPublish    = (Button) findViewById(R.id.button_publish);
-        buttonRecord     = (Button) findViewById(R.id.button_record);
-        buttonManage     = (Button) findViewById(R.id.button_manage);
-        buttonDebugStart = (Button) findViewById(R.id.button_debug_start);
+        progressBar      = findViewById(R.id.progressBar);
+        infoMessage      = findViewById(R.id.infoMessage);
+        buttonInitialize = findViewById(R.id.button_initialize);
+        buttonCancel     = findViewById(R.id.button_cancel);
+        buttonRetry      = findViewById(R.id.button_retry);
+        buttonSettings   = findViewById(R.id.button_settings);
+        buttonPublish    = findViewById(R.id.button_publish);
+        buttonRecord     = findViewById(R.id.button_record);
+        buttonManage     = findViewById(R.id.button_manage);
+        buttonDebugStart = findViewById(R.id.button_debug_start);
+        buttonDebugRecalc= findViewById(R.id.button_debug_calc_transform);
     }
 
     private void startSettingsActivity() {
@@ -274,6 +288,7 @@ public class StartActivity extends Activity {
 
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
+        intent.putExtra("recalcTransform", debugRecalc);
         startActivity(intent);
     }
 

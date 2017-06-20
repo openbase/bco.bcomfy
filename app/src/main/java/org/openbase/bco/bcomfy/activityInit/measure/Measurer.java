@@ -42,7 +42,7 @@ public class Measurer {
         INVALID, GROUND, CEILING, WALL
     }
 
-    public Measurer(int measurementsPerWallDefault, boolean alignToAnchor, int measurementsPerWallAnchor) {
+    public Measurer(int measurementsPerWallDefault, boolean alignToAnchor, int measurementsPerWallAnchor, boolean recalcTransform) {
         measurerState = MeasurerState.INIT;
         roomList = new ArrayList<>();
         anchorState = AnchorState.UNSET;
@@ -52,6 +52,10 @@ public class Measurer {
         this.measurementsPerWallAnchor = measurementsPerWallAnchor;
         this.alignToAnchor = alignToAnchor;
         currentWallMeasurements = 0;
+
+        if (recalcTransform) {
+            startNewRoom();
+        }
     }
 
     public void startNewRoom() {
@@ -63,12 +67,6 @@ public class Measurer {
         currentRoom.finish();
         roomList.add(currentRoom);
         currentRoom = null;
-
-        // Initiate calculation of glToBco transformation after finishing the first room.
-        if (roomList.size() == 1) {
-            initTransforms();
-        }
-
         measurerState = MeasurerState.INIT;
     }
 
@@ -155,6 +153,7 @@ public class Measurer {
             anchorState = AnchorState.FIRST_ANCHOR_SET;
         } else if (anchorState == AnchorState.FIRST_ANCHOR_SET) {
             rectifyAndFinishAnchor();
+            initTransforms();
             anchorState = AnchorState.FINISHED;
         }
     }
@@ -206,7 +205,7 @@ public class Measurer {
     }
 
     private void initTransforms() {
-        Vector3 anchorPoint = roomList.get(0).getGroundVertices().get(0);
+        Vector3 anchorPoint = currentRoom.getZeroPoint();
 
         double[][] glPoints = { {anchorPoint.x, anchorPoint.y, anchorPoint.z} ,
                 {anchorPoint.x + anchorNormals[1].x, anchorPoint.y + anchorNormals[1].y, anchorPoint.z + anchorNormals[1].z} ,
@@ -228,5 +227,9 @@ public class Measurer {
 
     public double[] getBcoToGlTransform() {
         return bcoToGlTransform;
+    }
+
+    public AnchorState getAnchorState() {
+        return anchorState;
     }
 }

@@ -70,6 +70,17 @@ public class Room {
         return groundVertices;
     }
 
+    public Vector3 getZeroPoint() {
+        if (groundVertices.isEmpty()) {
+            return MathUtils.calc3PlaneIntersection(walls.get(0).getPosition(), walls.get(0).getNormal(),
+                    walls.get(1).getPosition(), walls.get(1).getNormal(),
+                    ground.getPosition(), ground.getNormal());
+        }
+        else {
+            return groundVertices.get(0);
+        }
+    }
+
     private Vector3 calcGroundIntersection(Plane wall0, Plane wall1) {
         return MathUtils.calc3PlaneIntersection(wall0.getPosition(), wall0.getNormal(),
                 wall1.getPosition(), wall1.getNormal(),

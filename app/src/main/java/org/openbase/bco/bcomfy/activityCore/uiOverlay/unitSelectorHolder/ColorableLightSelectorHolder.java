@@ -1,15 +1,9 @@
 package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
-import android.graphics.Color;
-import android.widget.ImageView;
-
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.IconicsDrawable;
 
-import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.AbstractUnitSelectorHolder;
 import org.openbase.jul.exception.NotAvailableException;
-import org.rajawali3d.math.vector.Vector3;
 
 import java.util.concurrent.ExecutionException;
 
