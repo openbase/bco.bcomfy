@@ -70,7 +70,7 @@ public class ServiceViewHolder {
 
     private void initPowerStateService() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_power_state, parent, false);
-        Switch powerStateSwitch = (Switch) serviceView.findViewById(R.id.service_power_state_switch);
+        Switch powerStateSwitch = serviceView.findViewById(R.id.service_power_state_switch);
 
         try {
             PowerStateServiceRemote remote = new PowerStateServiceRemote();
@@ -81,7 +81,7 @@ public class ServiceViewHolder {
             if (provider) {
                 // Set the initial switch position
                 if (remote.getPowerState().getValue().equals(PowerState.State.ON)) {
-                    powerStateSwitch.setChecked(true);
+                    activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));
                 }
 
                 // Update the switch if status of the power state has changed

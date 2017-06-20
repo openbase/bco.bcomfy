@@ -8,6 +8,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import rst.domotic.unit.UnitConfigType;
 
@@ -15,8 +16,8 @@ public class SelectorHolderFactory {
 
     private static final String TAG = SelectorHolderFactory.class.getSimpleName();
 
-    public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException, ExecutionException {
 
+    public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException, ExecutionException, TimeoutException {
         AbstractUnitSelectorHolder unitSelectorHolder;
 
         switch (unitConfig.getType()) {
@@ -41,7 +42,7 @@ public class SelectorHolderFactory {
         return unitSelectorHolder;
     }
 
-    public static AbstractUnitSelectorHolder createUnitSelectorHolderGroup(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, NotAvailableException {
+    public static AbstractUnitSelectorHolder createUnitSelectorHolderGroup(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, NotAvailableException, TimeoutException {
         Log.e(TAG, "unitSelectorHolderGroup not supported yet! Falling back to generic device visualization...");
         return new GenericSelectorHolder(unitConfig, true);
     }

@@ -19,6 +19,8 @@ import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -40,7 +42,7 @@ public abstract class AbstractUnitSelectorHolder {
     private UnitConfigType.UnitConfig unitConfig;
     private UnitRemote unitRemote;
 
-    public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException {
+    public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException, TimeoutException {
         this.icon = icon;
         this.unitConfig = unitConfig;
         this.isMainSelector = isMainSelector;
@@ -52,7 +54,7 @@ public abstract class AbstractUnitSelectorHolder {
         this.parentWidth = 0;
         this.parentHeight = 0;
 
-        unitRemote = Units.getUnit(unitConfig, true);
+        unitRemote = Units.getFutureUnit(unitConfig, true).get(1, TimeUnit.SECONDS);
         unitRemote.addConfigObserver((observable, newUnitConfig) -> {
             this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
             this.updatePositionFromRoot();
@@ -151,11 +153,11 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
-    private void updatePositionFromRoot() throws NotAvailableException, InterruptedException, ExecutionException {
+    private void updatePositionFromRoot() throws NotAvailableException, InterruptedException, ExecutionException, TimeoutException {
         TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
         Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
 
-        Transform3D transform3D = Units.getUnitTransformation(unitConfig).get().getTransform();
+        Transform3D transform3D = Units.getUnitTransformation(unitConfig).get(1, TimeUnit.SECONDS).getTransform();
         transform3D.invert();
         transform3D.transform(unitVector);
 

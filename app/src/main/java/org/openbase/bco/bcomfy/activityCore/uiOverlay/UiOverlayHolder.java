@@ -4,6 +4,7 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
@@ -69,7 +71,7 @@ public class UiOverlayHolder {
         }).execute();
     }
 
-    public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException {
+    public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException, TimeoutException {
         if (!StreamSupport.stream(holderList)
                 .anyMatch(abstractUnitSelectorHolder -> abstractUnitSelectorHolder.getDeviceId().equals(unitConfig.getId()))) {
             AbstractUnitSelectorHolder holder = SelectorHolderFactory.createUnitSelectorHolder(unitConfig);
@@ -135,8 +137,9 @@ public class UiOverlayHolder {
                                 unitConfig.getPlacementConfig().getPosition().getTranslation().getZ() != 0)
                         .forEach(unitConfig -> {
                             try {
+                                Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
                                 newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
-                            } catch (InterruptedException | CouldNotPerformException | ExecutionException e) {
+                            } catch (InterruptedException | CouldNotPerformException | ExecutionException | TimeoutException e) {
                                 e.printStackTrace();
                             }
                         });
