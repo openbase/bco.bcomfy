@@ -328,11 +328,13 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
         intent.putExtra("recalcTransform", debugRecalc);
+        intent.putExtra("adfUuid", adfUuid);
         startActivity(intent);
     }
 
     private void startCoreActivity() {
         Intent intent = new Intent(this, CoreActivity.class);
+        intent.putExtra("adfUuid", adfUuid);
         startActivity(intent);
     }
 

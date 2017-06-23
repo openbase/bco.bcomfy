@@ -5,6 +5,7 @@ import android.util.Log;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.utils.MathUtils;
+import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -218,7 +219,7 @@ public class Measurer {
                                 {0.0, 0.0, 1.0} };
 
         glToBcoTransform = TangoSupport.findCorrespondenceSimilarityTransform(glPoints,  bcoPoints);
-        bcoToGlTransform = TangoSupport.findCorrespondenceSimilarityTransform(bcoPoints, glPoints );
+        bcoToGlTransform = new Matrix4(glToBcoTransform).inverse().getDoubleValues();
     }
 
     public double[] getGlToBcoTransform() {

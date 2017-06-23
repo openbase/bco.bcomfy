@@ -42,6 +42,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -94,15 +95,17 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private TextView locationLabelView;
 
+    private String adfUuid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_core);
         super.onCreate(savedInstanceState);
 
-        loadTransformsLocally();
-        initFetchLocationLabelTask();
+        adfUuid = getIntent().getStringExtra("adfUuid");
 
-        Log.i(TAG, "Transform loaded:\n" + Arrays.toString(glToBcoTransform) + "\n" + Arrays.toString(bcoToGlTransform));
+        loadLocalTransform();
+        initFetchLocationLabelTask();
     }
 
     @Override
@@ -305,17 +308,27 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Deprecated
-    private void loadTransformsLocally() {
-        String filename = "transform.tmp";
+    private void loadLocalTransform() {
+        String filename = "transforms.dat";
         FileInputStream inputStream;
         ObjectInputStream objectInputStream;
 
         try {
             inputStream = openFileInput(filename);
             objectInputStream = new ObjectInputStream(inputStream);
-            glToBcoTransform = (double[]) objectInputStream.readObject();
-            bcoToGlTransform = (double[]) objectInputStream.readObject();
+
+            HashMap<String, double[]> transformsMap = (HashMap<String, double[]>) objectInputStream.readObject();
             objectInputStream.close();
+
+            glToBcoTransform = transformsMap.get(adfUuid);
+            bcoToGlTransform = new Matrix4(glToBcoTransform).inverse().getDoubleValues();
+
+            objectInputStream.close();
+
+            Log.i(TAG, "Transform for uuid " + adfUuid + " loaded:\n" +
+                    Arrays.toString(glToBcoTransform) + "\n" +
+                    Arrays.toString(bcoToGlTransform) + "\n" +
+                    "Total transforms in database: " + transformsMap.size());
         } catch (Exception e) {
             e.printStackTrace();
         }

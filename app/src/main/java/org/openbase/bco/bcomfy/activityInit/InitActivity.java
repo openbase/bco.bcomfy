@@ -28,7 +28,9 @@ import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,9 +46,8 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
     private Measurer measurer;
 
-    private HashMap<String, double[]> transformMap;
-
     private boolean recalcTransform;
+    private String adfUuid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         super.onCreate(savedInstanceState);
 
         recalcTransform = getIntent().getBooleanExtra("recalcTransform", false);
-
-        transformMap = new HashMap<>();
+        adfUuid = getIntent().getStringExtra("adfUuid");
 
         measurer = new Measurer(
                 Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
@@ -120,7 +120,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
      */
     private void updateGuiAfterPlaneMeasurement(Plane plane, Measurer.MeasureType lastMeasureType) {
         if (recalcTransform && measurer.getAnchorState().equals(Measurer.AnchorState.FINISHED)) {
-            saveTransformsLocally();
+            updateLocalTransforms();
             finish();
         }
 
@@ -232,7 +232,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         measurer.finishRoom();
         updateGuiButtons();
 
-        saveTransformsLocally();
+        updateLocalTransforms();
 
         ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();
         final ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
@@ -255,18 +255,38 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Deprecated
-    private void saveTransformsLocally() {
-        String filename = "transform.tmp";
+    private void updateLocalTransforms() {
+        String filename = "transforms.dat";
+        FileInputStream inputStream;
+        ObjectInputStream objectInputStream;
         FileOutputStream outputStream;
         ObjectOutputStream objectOutputStream;
 
+        HashMap<String, double[]> transformsMap;
+
         try {
+            inputStream = openFileInput(filename);
+            objectInputStream = new ObjectInputStream(inputStream);
+
+            transformsMap = (HashMap<String, double[]>) objectInputStream.readObject();
+            objectInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            transformsMap = new HashMap<>();
+        }
+
+        try {
+            transformsMap.put(adfUuid, measurer.getGlToBcoTransform());
+
             outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
             objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(measurer.getGlToBcoTransform());
-            objectOutputStream.writeObject(measurer.getBcoToGlTransform());
+            objectOutputStream.writeObject(transformsMap);
             objectOutputStream.close();
-            Log.i(TAG, "Transform saved:\n" + Arrays.toString(measurer.getGlToBcoTransform()) + "\n" + Arrays.toString(measurer.getBcoToGlTransform()));
+
+            Log.i(TAG, "Transform for uuid " + adfUuid + " saved:\n" +
+                    Arrays.toString(measurer.getGlToBcoTransform()) + "\n" +
+                    Arrays.toString(measurer.getBcoToGlTransform()) + "\n" +
+                    "Total transforms in database: " + transformsMap.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
