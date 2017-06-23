@@ -35,7 +35,7 @@ public class LocationChooser extends DialogFragment {
         }
         else {
             throw new ClassCastException(context.toString()
-                    + " must implement NoticeDialogListener");
+                    + " must implement LocationChooserListener");
         }
     }
 

@@ -7,7 +7,8 @@
     <string name="no_permissions">Permission not granted!</string>
     <string name="gui_connect_bco">Connecting to BCO…</string>
     <string name="gui_update_adf">Updating Area Description…</string>
-    <string name="gui_init_tango">Initializing Tango Service…\nPlease hold the device upright!</string>
+    <string name="gui_connect_tango">Connecting Tango Service…\nPlease hold the device upright!</string>
+    <string name="gui_init_tango">Initializing Tango Service…</string>
     <string name="gui_init_tango_failed">Initializing of Tango Service failed!</string>
     <string name="gui_update_adf_failed">Location not initialized!</string>
     <string name="gui_cancel">Cancel</string>
@@ -26,6 +27,7 @@
     <string name="init_mark_ceiling">Please mark the ceiling</string>
     <string name="init_mark_walls">Please mark the walls clockwise</string>
     <string name="choose_location">Select the location</string>
+    <string name="choose_adf">Select the ADF</string>
     <string name="gui_initialize">Initialize</string>
     <string name="gui_retry">Retry</string>
     <string name="gui_settings">Settings</string>

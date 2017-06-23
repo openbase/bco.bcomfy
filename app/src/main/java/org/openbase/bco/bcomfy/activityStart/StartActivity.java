@@ -1,18 +1,24 @@
 package org.openbase.bco.bcomfy.activityStart;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoErrorException;
 import com.google.atap.tangoservice.TangoInvalidException;
@@ -30,7 +36,9 @@ import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
 
-public class StartActivity extends Activity {
+import java8.util.stream.StreamSupport;
+
+public class StartActivity extends Activity implements AdfChooser.AdfChooserListener{
 
     private static final String TAG = StartActivity.class.getSimpleName();
     private static Context applicationContext;
@@ -55,6 +63,7 @@ public class StartActivity extends Activity {
 
     public static Tango tango;
     private TangoConfig tangoConfig;
+    private String adfUuid;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -73,10 +82,12 @@ public class StartActivity extends Activity {
         System.setProperty("sun.arch.data.model", "32");
 
         // Ask for ADF loading and saving permissions.
-        startActivityForResult(
-                Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
+        if (!Tango.hasPermission(this, Tango.PERMISSIONTYPE_ADF_LOAD_SAVE)) {
+            startActivityForResult(
+                    Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
+        }
 
-        initBcoTask = new InitBcoTask(returnObject -> StartActivity.this.changeState(StartActivityState.GET_ADF));
+        initBcoTask = new InitBcoTask(returnObject -> StartActivity.this.changeState(StartActivityState.INIT_TANGO));
         initBcoTask.execute();
     }
 
@@ -93,22 +104,14 @@ public class StartActivity extends Activity {
     /**
      * Initialize Tango Service as a normal Android Service.
      */
-    private void bindTangoService() {
+    private void initTangoService() {
         tango = new Tango(StartActivity.this, () -> {
             // Synchronize against disconnecting while the service is being used in the
             // OpenGL thread or in the UI thread.
             synchronized (StartActivity.this) {
                 try {
                     TangoSupport.initialize(tango);
-                    tangoConfig = setupTangoConfig(tango);
-                    tango.connect(tangoConfig);
-                    runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
-                    if (state == StartActivityState.INIT_TANGO_TO_CORE) {
-                        startCoreActivity();
-                    }
-                    else {
-                        startInitActivity();
-                    }
+                    runOnUiThread(() -> changeState(StartActivityState.GET_ADF));
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
                     changeState(StartActivityState.INIT_TANGO_FAILED);
@@ -123,9 +126,26 @@ public class StartActivity extends Activity {
         });
     }
 
+
     /**
-     * Sets up the tango configuration object. Make sure mTango object is initialized before
-     * making this call.
+     * Connects the tango service.
+     */
+    private void connectTangoService() {
+        new Thread(() -> {
+            tangoConfig = setupTangoConfig(tango);
+            tango.connect(tangoConfig);
+            runOnUiThread(() -> changeState(StartActivityState.SETTINGS));
+            if (state == StartActivityState.CONNECT_TANGO_TO_CORE) {
+                startCoreActivity();
+            }
+            else {
+                startInitActivity();
+            }
+        }).start();
+    }
+
+    /**
+     * Sets up the tango configuration object.
      */
     private TangoConfig setupTangoConfig(Tango tango) {
         // Use default configuration for Tango Service, plus color camera, low latency
@@ -141,18 +161,7 @@ public class StartActivity extends Activity {
         //config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
         config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
         config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-
-        ArrayList<String> fullUUIDList;
-        // Returns a list of ADFs with their UUIDs
-        fullUUIDList = tango.listAreaDescriptions();
-        // Load the latest ADF if ADFs are found.
-        if (fullUUIDList.size() > 0) {
-            config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION,
-                    fullUUIDList.get(fullUUIDList.size() - 1));
-
-            Log.i(TAG, "using ADF: " + fullUUIDList.get(fullUUIDList.size() - 1));
-        }
-        config.putBoolean(TangoConfig.KEY_BOOLEAN_LEARNINGMODE, false);
+        config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, adfUuid);
 
         return config;
     }
@@ -165,19 +174,23 @@ public class StartActivity extends Activity {
                 infoMessage.setText(R.string.gui_connect_bco);
                 setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
+            case INIT_TANGO:
+                infoMessage.setText(R.string.gui_init_tango);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                initTangoService();
+                break;
             case GET_ADF:
-//                infoMessage.setText(R.string.gui_update_adf);
-//                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
-//                TODO: implement ADF fetching
-                changeState(StartActivityState.GET_ADF_FAILED);
+                infoMessage.setText(R.string.gui_update_adf);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                fetchLocalAdf(); //TODO: implement ADF registry fetching
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
                 setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
                 break;
-            case INIT_TANGO_TO_INIT:
-            case INIT_TANGO_TO_CORE:
-                infoMessage.setText(R.string.gui_init_tango);
+            case CONNECT_TANGO_TO_INIT:
+            case CONNECT_TANGO_TO_CORE:
+                infoMessage.setText(R.string.gui_connect_tango);
                 setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO_FAILED:
@@ -194,8 +207,8 @@ public class StartActivity extends Activity {
 
     public void onButtonInitializeClicked(View view) {
         debugRecalc = false;
-        changeState(StartActivityState.INIT_TANGO_TO_INIT);
-        bindTangoService();
+        changeState(StartActivityState.CONNECT_TANGO_TO_INIT);
+        connectTangoService();
     }
 
     public void onButtonCancelClicked(View view) {
@@ -243,14 +256,14 @@ public class StartActivity extends Activity {
     }
 
     public void onButtonDebugStartClicked(View view) {
-        changeState(StartActivityState.INIT_TANGO_TO_CORE);
-        bindTangoService();
+        changeState(StartActivityState.CONNECT_TANGO_TO_CORE);
+        connectTangoService();
     }
 
     public void onButtonDebugTransformClicked(View view) {
         debugRecalc = true;
-        changeState(StartActivityState.INIT_TANGO_TO_INIT);
-        bindTangoService();
+        changeState(StartActivityState.CONNECT_TANGO_TO_INIT);
+        connectTangoService();
     }
 
     private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart, int debugCalc) {
@@ -279,6 +292,32 @@ public class StartActivity extends Activity {
         buttonManage     = findViewById(R.id.button_manage);
         buttonDebugStart = findViewById(R.id.button_debug_start);
         buttonDebugRecalc= findViewById(R.id.button_debug_calc_transform);
+    }
+
+    private void fetchLocalAdf() {
+        DialogFragment dialogFragment = new AdfChooser();
+
+        ArrayList<String> uuidList = tango.listAreaDescriptions();
+        ArrayList<Pair<String, String>> adfList = new ArrayList<>();
+
+        StreamSupport.stream(uuidList)
+                .forEach(s -> adfList.add(new Pair<String, String>(
+                        s, new String(tango.loadAreaDescriptionMetaData(s).get(TangoAreaDescriptionMetaData.KEY_NAME)))));
+
+        Bundle args = new Bundle();
+        args.putSerializable("adfList", adfList);
+        dialogFragment.setArguments(args);
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(dialogFragment, null);
+        ft.commitAllowingStateLoss();
+    }
+
+    @Override
+    public void onAdfSelected(String adfUuid) {
+        this.adfUuid = adfUuid;
+        Log.e(TAG, "Selected adf " + adfUuid);
+        changeState(StartActivityState.GET_ADF_FAILED);
     }
 
     private void startSettingsActivity() {

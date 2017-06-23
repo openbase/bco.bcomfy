@@ -27,14 +27,12 @@ import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.rajawali3d.math.vector.Vector3;
-import org.rajawali3d.view.SurfaceView;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 public class InitActivity extends TangoActivity implements View.OnTouchListener, LocationChooser.LocationChooserListener {
     private static final String TAG = InitActivity.class.getSimpleName();
