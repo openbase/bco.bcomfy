@@ -24,6 +24,7 @@ allprojects {
         maven { url "http://repo.maven.apache.org/maven2" }
         maven { url "https://mvn.cit-ec.de/nexus/content/repositories/releases"}
         maven { url "https://mvn.cit-ec.de/nexus/content/repositories/snapshots"}
+        maven { url "https://jitpack.io" }
     }
 }
 
