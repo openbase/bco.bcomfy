@@ -7,6 +7,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.serviceList.units.AbstractUnitViewHolder;
+import org.openbase.bco.bcomfy.activityCore.serviceList.units.GenericUnitViewHolder;
+import org.openbase.bco.bcomfy.activityCore.serviceList.units.UnitViewHolderFactory;
 import org.openbase.bco.registry.device.lib.DeviceRegistry;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.lib.UnitRegistry;
@@ -28,7 +31,7 @@ public class UnitListViewHolder {
     private Activity activity;
     private String id;
 
-    private List<UnitViewHolder> unitViewHolderList;
+    private List<AbstractUnitViewHolder> unitViewHolderList;
 
     private DeviceRegistry deviceRegistry;
     private UnitRegistry unitRegistry;
@@ -51,52 +54,51 @@ public class UnitListViewHolder {
 
     private static class displayUnitTask extends AsyncTask<UnitListViewHolder, Void, Void> {
         @Override
-        protected Void doInBackground(UnitListViewHolder... unitListViewHolder) {
-            unitListViewHolder[0].activity.runOnUiThread(() ->
-                    unitListViewHolder[0].unitList.removeAllViews());
-            StreamSupport.stream(unitListViewHolder[0].unitViewHolderList).forEach(UnitViewHolder::shutdownRemotes);
-            unitListViewHolder[0].unitViewHolderList.clear();
+        protected Void doInBackground(UnitListViewHolder... unitListViewHolders) {
+            UnitListViewHolder unitListViewHolder = unitListViewHolders[0];
+            unitListViewHolder.activity.runOnUiThread(() ->
+                    unitListViewHolder.unitList.removeAllViews());
+            unitListViewHolder.unitViewHolderList.clear();
 
             try {
-                unitListViewHolder[0].deviceRegistry = Registries.getDeviceRegistry();
-                unitListViewHolder[0].unitRegistry = Registries.getUnitRegistry();
-                UnitConfigType.UnitConfig unitConfig = unitListViewHolder[0].unitRegistry.getUnitConfigById(unitListViewHolder[0].id);
+                unitListViewHolder.deviceRegistry = Registries.getDeviceRegistry();
+                unitListViewHolder.unitRegistry = Registries.getUnitRegistry();
+                UnitConfigType.UnitConfig unitConfig = unitListViewHolder.unitRegistry.getUnitConfigById(unitListViewHolder.id);
 
-                // Distinguish whether to display a device or an unit
+                // Distinguish whether to display a device or a single unit
                 if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
                     // Display a device
-                    unitListViewHolder[0].deviceConfig =
-                            unitListViewHolder[0].deviceRegistry.getDeviceConfigById(unitListViewHolder[0].id);
+                    unitListViewHolder.deviceConfig =
+                            unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.id);
 
-                    String labelText = unitListViewHolder[0].deviceConfig.getLabel();
-                    unitListViewHolder[0].activity.runOnUiThread(() ->
-                            unitListViewHolder[0].labelText.setText(labelText));
+                    // Get label and device class
+                    String labelText = unitListViewHolder.deviceConfig.getLabel();
+                    String typeText = unitListViewHolder.deviceRegistry.getDeviceClassById(
+                            unitListViewHolder.deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel();
+                    unitListViewHolder.activity.runOnUiThread(() -> {
+                        unitListViewHolder.labelText.setText(labelText);
+                        unitListViewHolder.typeText.setText(typeText);
+                    });
 
-                    String typeText = unitListViewHolder[0].deviceRegistry.getDeviceClassById(
-                            unitListViewHolder[0].deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel();
-                    unitListViewHolder[0].activity.runOnUiThread(() ->
-                            unitListViewHolder[0].typeText.setText(typeText));
+                    // Create and add UnitViewHolders for every unit that is bound by the device
+                    for (String unitId : unitListViewHolder.deviceConfig.getDeviceConfig().getUnitIdList()) {
+                        AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitId, unitListViewHolder.unitList);
+                        unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
-                    for (String unitId : unitListViewHolder[0].deviceConfig.getDeviceConfig().getUnitIdList()) {
-                        UnitViewHolder unitViewHolder = new UnitViewHolder(unitListViewHolder[0].activity, unitId, unitListViewHolder[0].unitList);
-                        unitListViewHolder[0].unitViewHolderList.add(unitViewHolder);
-
-                        unitListViewHolder[0].activity.runOnUiThread(() ->
-                                unitListViewHolder[0].unitList.addView(unitViewHolder.getCardView()));
+                        unitListViewHolder.activity.runOnUiThread(() ->
+                                unitListViewHolder.unitList.addView(unitViewHolder.getCardView()));
                     }
                 }
                 else {
-                    // Display a unit
-                    unitListViewHolder[0].activity.runOnUiThread(() ->
-                            unitListViewHolder[0].labelText.setText(unitConfig.getLabel()));
-                    unitListViewHolder[0].activity.runOnUiThread(() ->
-                            unitListViewHolder[0].typeText.setText(unitConfig.getDescription()));
+                    // Display a single unit
+                    AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitListViewHolder.id, unitListViewHolder.unitList);
+                    unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
-                    UnitViewHolder unitViewHolder = new UnitViewHolder(unitListViewHolder[0].activity, unitListViewHolder[0].id, unitListViewHolder[0].unitList);
-                    unitListViewHolder[0].unitViewHolderList.add(unitViewHolder);
-
-                    unitListViewHolder[0].activity.runOnUiThread(() ->
-                            unitListViewHolder[0].unitList.addView(unitViewHolder.getCardView()));
+                    unitListViewHolder.activity.runOnUiThread(() -> {
+                        unitListViewHolder.labelText.setText(unitConfig.getLabel());
+                        unitListViewHolder.typeText.setText(unitConfig.getDescription());
+                        unitListViewHolder.unitList.addView(unitViewHolder.getCardView());
+                    });
                 }
 
             } catch (CouldNotPerformException | InterruptedException e) {

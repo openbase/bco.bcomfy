@@ -1,15 +1,13 @@
-package org.openbase.bco.bcomfy.activityCore.serviceList;
+package org.openbase.bco.bcomfy.activityCore.serviceList.units;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.registry.remote.Registries;
-import org.openbase.bco.registry.unit.lib.UnitRegistry;
+import org.openbase.bco.bcomfy.activityCore.serviceList.services.AbstractServiceViewHolder;
+import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHolderFactory;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
@@ -18,31 +16,20 @@ import java.util.List;
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
 
-public class UnitViewHolder {
+public class GenericUnitViewHolder extends AbstractUnitViewHolder {
 
-    private TextView unitTitle;
-    private ViewGroup cardView;
     private LinearLayout servicePerUnitList;
+    private List<AbstractServiceViewHolder> serviceViewHolderList;
 
-    private List<ServiceViewHolder> serviceViewHolderList;
+    public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
+        super(activity, unitConfig, parent);
 
-    private UnitRegistry unitRegistry;
-    private UnitConfigType.UnitConfig unitConfig;
-
-    public UnitViewHolder(Activity activity, String id, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
         serviceViewHolderList = new ArrayList<>();
+        servicePerUnitList = cardView.findViewById(R.id.service_per_unit_list);
 
-        unitRegistry = Registries.getUnitRegistry();
-        unitConfig = unitRegistry.getUnitConfigById(id);
-
-        cardView = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.unit_card, parent, false);
-        unitTitle = (TextView) cardView.findViewById(R.id.unit_title);
-        servicePerUnitList = (LinearLayout) cardView.findViewById(R.id.service_per_unit_list);
-        unitTitle.setText(unitConfig.getType().toString());
-
-        // Only initialize Service if this units contains at least one
+        // Only initialize services if this unit contains at least one
         if (unitConfig.getServiceConfigCount() == 0) {
             return;
         }
@@ -57,21 +44,16 @@ public class UnitViewHolder {
         boolean operation = false;
         boolean provider = false;
         boolean consumer = false;
-        ServiceConfig previousServiceConfig = unitConfig.getServiceConfig(0);
+        ServiceConfig previousServiceConfig = sortedServiceConfigs.get(0);
 
         // Compare every service config to the previous one. If they are the same,
         // just set the corresponding pattern flag to true. If they are not, generate
-        // a new ServiceViewHolder based on the previous service and attach it to
+        // a new PowerStateServiceViewHolder based on the previous service and attach it to
         // the servicePerUnitList.
         for (ServiceConfig currentServiceConfig : sortedServiceConfigs) {
             // Compare type to previous service
             if (!currentServiceConfig.getServiceTemplate().getType().equals(previousServiceConfig.getServiceTemplate().getType())) {
-                LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
-
-                ServiceViewHolder serviceViewHolder = new ServiceViewHolder(activity, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
-                serviceViewHolderList.add(serviceViewHolder);
-
-                servicePerUnitList.addView(serviceViewHolder.getServiceView());
+                createAndAddServiceView(activity, previousServiceConfig, operation, provider, consumer);
 
                 operation = false;
                 provider = false;
@@ -92,20 +74,15 @@ public class UnitViewHolder {
         }
 
         // Since the last service is not added, do this now
+        createAndAddServiceView(activity, previousServiceConfig, operation, provider, consumer);
+    }
+
+    private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
         LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
 
-        ServiceViewHolder serviceViewHolder = new ServiceViewHolder(activity, servicePerUnitList, unitConfig, previousServiceConfig, operation, provider, consumer);
+        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, servicePerUnitList, unitConfig, serviceConfig, operation, provider, consumer);
         serviceViewHolderList.add(serviceViewHolder);
 
         servicePerUnitList.addView(serviceViewHolder.getServiceView());
     }
-
-    public View getCardView() {
-        return cardView;
-    }
-
-    public void shutdownRemotes() {
-        StreamSupport.stream(serviceViewHolderList).forEach(ServiceViewHolder::shutdownRemote);
-    }
-
 }

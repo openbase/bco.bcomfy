@@ -1,4 +1,4 @@
-package org.openbase.bco.bcomfy.activityCore.serviceList;
+package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 
 import android.app.Activity;
 import android.util.Log;
@@ -17,58 +17,21 @@ import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import rst.domotic.service.ServiceConfigType;
+import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.state.PowerStateType.PowerState;
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
 
-public class ServiceViewHolder {
+public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
 
-    private static final String TAG = ServiceViewHolder.class.getSimpleName();
+    private static final String TAG = PowerStateServiceViewHolder.class.getSimpleName();
 
-    private Activity activity;
-    private ViewGroup parent;
-    private RelativeLayout serviceView;
-
-    boolean operation;
-    boolean provider;
-    boolean consumer;
-
-    private UnitRegistry unitRegistry;
-    private UnitConfigType.UnitConfig unitConfig;
-    private ServiceConfigType.ServiceConfig serviceConfig;
-    private ServiceRemote serviceRemote;
-
-    public ServiceViewHolder (Activity activity, ViewGroup parent, UnitConfigType.UnitConfig unitConfig, ServiceConfigType.ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
-        this.activity = activity;
-        this.parent = parent;
-
-        unitRegistry = Registries.getUnitRegistry();
-        this.unitConfig = unitConfig;
-        this.serviceConfig = serviceConfig;
-
-        this.operation = operation;
-        this.provider = provider;
-        this.consumer = consumer;
-
-        switch (serviceConfig.getServiceTemplate().getType()) {
-            case POWER_STATE_SERVICE:
-                initPowerStateService();
-                break;
-            default:
-                initUnknownService();
-        }
+    public PowerStateServiceViewHolder(Activity activity, ViewGroup parent, UnitConfig unitConfig, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
+        super(activity, parent, unitConfig, serviceConfig, operation, provider, consumer);
     }
 
-    public View getServiceView() {
-        return serviceView;
-    }
-
-    public void shutdownRemote() {
-        if (serviceRemote != null) {
-            serviceRemote.shutdown();
-        }
-    }
-
-    private void initPowerStateService() {
+    @Override
+    protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_power_state, parent, false);
         Switch powerStateSwitch = serviceView.findViewById(R.id.service_power_state_switch);
 
