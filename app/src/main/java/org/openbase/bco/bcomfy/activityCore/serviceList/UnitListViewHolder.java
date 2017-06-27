@@ -17,6 +17,8 @@ import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
@@ -101,7 +103,7 @@ public class UnitListViewHolder {
                     });
                 }
 
-            } catch (CouldNotPerformException | InterruptedException e) {
+            } catch (CouldNotPerformException | InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
             return null;

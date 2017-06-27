@@ -16,6 +16,8 @@ public class ServiceViewHolderFactory {
         switch (serviceConfig.getServiceTemplate().getType()) {
             case POWER_STATE_SERVICE:
                 return new PowerStateServiceViewHolder(activity, parent, unitConfig, serviceConfig, operation, provider, consumer);
+            case COLOR_STATE_SERVICE:
+                return new ColorStateServiceViewHolder(activity, parent, unitConfig, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitConfig, serviceConfig, operation, provider, consumer);
         }

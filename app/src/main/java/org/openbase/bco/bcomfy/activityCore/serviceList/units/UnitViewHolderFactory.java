@@ -7,13 +7,16 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 public class UnitViewHolderFactory {
 
     private static final String TAG = UnitViewHolderFactory.class.getSimpleName();
 
-    public static AbstractUnitViewHolder createUnitViewHolder(Activity activity, String unitId, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
+    public static AbstractUnitViewHolder createUnitViewHolder(Activity activity, String unitId, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
         UnitConfig unitConfig = Registries.getUnitRegistry().getUnitConfigById(unitId);
 
         switch (unitConfig.getType()) {

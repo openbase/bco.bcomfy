@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList.units;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -9,21 +10,27 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.AbstractServiceViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHolderFactory;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.pattern.Remote;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
+import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 public class GenericUnitViewHolder extends AbstractUnitViewHolder {
 
+    private static final String TAG = AbstractUnitViewHolder.class.getSimpleName();
+
     private LinearLayout servicePerUnitList;
     private List<AbstractServiceViewHolder> serviceViewHolderList;
 
-    public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException {
+    public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
         super(activity, unitConfig, parent);
 
         serviceViewHolderList = new ArrayList<>();
@@ -75,6 +82,21 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder {
 
         // Since the last service is not added, do this now
         createAndAddServiceView(activity, previousServiceConfig, operation, provider, consumer);
+    }
+
+    @Override
+    protected void onConfigChanged(UnitConfig unitConfig) {
+        Log.i(TAG, "onConfigChanged");
+    }
+
+    @Override
+    protected void onConnectionStateChanged(Remote.ConnectionState connectionState) {
+        Log.i(TAG, "onConnectionStateChanged");
+    }
+
+    @Override
+    protected void onDataChanged(Object data) {
+        Log.i(TAG, "onDataChanged");
     }
 
     private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {

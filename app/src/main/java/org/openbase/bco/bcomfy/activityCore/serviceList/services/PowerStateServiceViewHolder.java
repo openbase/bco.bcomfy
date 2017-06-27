@@ -35,56 +35,50 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_power_state, parent, false);
         Switch powerStateSwitch = serviceView.findViewById(R.id.service_power_state_switch);
 
-        try {
-            PowerStateServiceRemote remote = new PowerStateServiceRemote();
-            remote.init(unitConfig);
-            remote.activate(true);
-            serviceRemote = remote;
-
-            if (provider) {
-                // Set the initial switch position
-                if (remote.getPowerState().getValue().equals(PowerState.State.ON)) {
-                    activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));
-                }
-
-                // Update the switch if status of the power state has changed
-                remote.addDataObserver((observable, powerStateData) -> {
-                    if (powerStateData.getValue().equals(PowerState.State.ON)) {
-                        activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));
-                    } else {
-                        activity.runOnUiThread(() -> powerStateSwitch.setChecked(false));
-                    }
-                });
-            }
-
-            if (operation) {
-                powerStateSwitch.setOnClickListener(v -> {
-                    try {
-                        if (((Switch) v).isChecked()) {
-                            remote.setPowerState(PowerState.newBuilder().setValue(PowerState.State.ON).build());
-                        }
-                        else {
-                            remote.setPowerState(PowerState.newBuilder().setValue(PowerState.State.OFF).build());
-                        }
-                    } catch (CouldNotPerformException e) {
-                        Log.e(TAG, "Error while changing the power state of unit: " + unitConfig.getId());
-                        e.printStackTrace();
-                    }
-                });
-            } else {
-                powerStateSwitch.setClickable(false);
-            }
-
-
-        } catch (CouldNotPerformException | InterruptedException e) {
-            Log.e(TAG, "Error while fetching unit: " + unitConfig.getId());
-            e.printStackTrace();
-        }
+//        try {
+//            PowerStateServiceRemote remote = new PowerStateServiceRemote();
+//            remote.init(unitConfig);
+//            remote.activate(true);
+//            serviceRemote = remote;
+//
+//            if (provider) {
+//                // Set the initial switch position
+//                if (remote.getPowerState().getValue().equals(PowerState.State.ON)) {
+//                    activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));
+//                }
+//
+//                // Update the switch if status of the power state has changed
+//                remote.addDataObserver((observable, powerStateData) -> {
+//                    if (powerStateData.getValue().equals(PowerState.State.ON)) {
+//                        activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));
+//                    } else {
+//                        activity.runOnUiThread(() -> powerStateSwitch.setChecked(false));
+//                    }
+//                });
+//            }
+//
+//            if (operation) {
+//                powerStateSwitch.setOnClickListener(v -> {
+//                    try {
+//                        if (((Switch) v).isChecked()) {
+//                            remote.setPowerState(PowerState.newBuilder().setValue(PowerState.State.ON).build());
+//                        }
+//                        else {
+//                            remote.setPowerState(PowerState.newBuilder().setValue(PowerState.State.OFF).build());
+//                        }
+//                    } catch (CouldNotPerformException e) {
+//                        Log.e(TAG, "Error while changing the power state of unit: " + unitConfig.getId());
+//                        e.printStackTrace();
+//                    }
+//                });
+//            } else {
+//                powerStateSwitch.setClickable(false);
+//            }
+//
+//
+//        } catch (CouldNotPerformException | InterruptedException e) {
+//            Log.e(TAG, "Error while fetching unit: " + unitConfig.getId());
+//            e.printStackTrace();
+//        }
     }
-
-    private void initUnknownService() {
-        serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_unknown, parent, false);
-        ((TextView) serviceView.findViewById(R.id.service_unknown_textview)).setText(serviceConfig.getServiceTemplate().getType().toString());
-    }
-
 }
