@@ -49,7 +49,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
                                     RGBColor.newBuilder().setRed(Color.red(color)).setGreen(Color.green(color)).setBlue(Color.blue(color)).build());
 
                     Service$.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
-                            ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor)));
+                            ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build());
                 } catch (CouldNotPerformException e) {
                     Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId());
                     e.printStackTrace();
