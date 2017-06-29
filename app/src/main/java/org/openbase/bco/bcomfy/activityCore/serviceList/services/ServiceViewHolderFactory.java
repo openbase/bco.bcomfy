@@ -19,6 +19,8 @@ public class ServiceViewHolderFactory {
                 return new PowerStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case COLOR_STATE_SERVICE:
                 return new ColorStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case BRIGHTNESS_STATE_SERVICE:
+                return new BrightnessStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }

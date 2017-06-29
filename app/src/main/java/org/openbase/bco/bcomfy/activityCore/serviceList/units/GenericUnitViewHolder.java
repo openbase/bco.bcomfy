@@ -21,21 +21,20 @@ import java.util.concurrent.TimeoutException;
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRemote> {
 
     private static final String TAG = AbstractUnitViewHolder.class.getSimpleName();
 
-    private LinearLayout servicePerUnitList;
+    private LinearLayout serviceList;
     private List<AbstractServiceViewHolder> serviceViewHolderList;
 
     public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
         super(AbstractUnitRemote.class, activity, unitConfig, parent);
 
         serviceViewHolderList = new ArrayList<>();
-        servicePerUnitList = cardView.findViewById(R.id.service_per_unit_list);
+        serviceList = cardView.findViewById(R.id.service_per_unit_list);
 
         // Only initialize services if this unit contains at least one
         if (unitConfig.getServiceConfigCount() == 0) {
@@ -57,7 +56,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
         // Compare every service config to the previous one. If they are the same,
         // just set the corresponding pattern flag to true. If they are not, generate
         // a new PowerStateServiceViewHolder based on the previous service and attach it to
-        // the servicePerUnitList.
+        // the serviceList.
         for (ServiceConfig currentServiceConfig : sortedServiceConfigs) {
             // Compare type to previous service
             if (!currentServiceConfig.getServiceTemplate().getType().equals(previousServiceConfig.getServiceTemplate().getType())) {
@@ -101,11 +100,24 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
     }
 
     private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
-        LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
+        if (serviceViewHolderList.size() == 0) {
+            addDividerThick(activity);
+        }
+        else {
+            addDivider(activity);
+        }
 
-        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, servicePerUnitList, abstractUnitRemote, serviceConfig, operation, provider, consumer);
+        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, serviceList, abstractUnitRemote, serviceConfig, operation, provider, consumer);
         serviceViewHolderList.add(serviceViewHolder);
 
-        servicePerUnitList.addView(serviceViewHolder.getServiceView());
+        serviceList.addView(serviceViewHolder.getServiceView());
+    }
+
+    private void addDivider(Activity activity) {
+        LayoutInflater.from(activity).inflate(R.layout.divider_service, serviceList, true);
+    }
+
+    private void addDividerThick(Activity activity) {
+        LayoutInflater.from(activity).inflate(R.layout.divider_service_thick, serviceList, true);
     }
 }

@@ -21,8 +21,9 @@
 
         <TextView
             android:id="@+id/unit_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="@android:string/untitled"
             android:textStyle="bold" />
 
