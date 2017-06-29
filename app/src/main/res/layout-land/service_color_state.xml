@@ -19,7 +19,7 @@
     <com.flask.colorpicker.slider.LightnessSlider
         android:id="@+id/v_lightness_slider"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="32dp"
         android:layout_below="@+id/color_picker_view" />
 
 </RelativeLayout>

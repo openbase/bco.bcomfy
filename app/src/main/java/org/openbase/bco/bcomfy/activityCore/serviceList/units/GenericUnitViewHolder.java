@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.AbstractServiceViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHolderFactory;
+import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.pattern.Remote;
 
@@ -23,7 +24,7 @@ import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 
-public class GenericUnitViewHolder extends AbstractUnitViewHolder {
+public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRemote> {
 
     private static final String TAG = AbstractUnitViewHolder.class.getSimpleName();
 
@@ -31,7 +32,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder {
     private List<AbstractServiceViewHolder> serviceViewHolderList;
 
     public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
-        super(activity, unitConfig, parent);
+        super(AbstractUnitRemote.class, activity, unitConfig, parent);
 
         serviceViewHolderList = new ArrayList<>();
         servicePerUnitList = cardView.findViewById(R.id.service_per_unit_list);
@@ -86,23 +87,23 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder {
 
     @Override
     protected void onConfigChanged(UnitConfig unitConfig) {
-        Log.i(TAG, "onConfigChanged");
+        Log.i(TAG, this.unitConfig.getLabel() + " -> onConfigChanged");
     }
 
     @Override
     protected void onConnectionStateChanged(Remote.ConnectionState connectionState) {
-        Log.i(TAG, "onConnectionStateChanged");
+        Log.i(TAG, this.unitConfig.getLabel() + " -> onConnectionStateChanged");
     }
 
     @Override
     protected void onDataChanged(Object data) {
-        Log.i(TAG, "onDataChanged");
+        StreamSupport.stream(serviceViewHolderList).forEach(AbstractServiceViewHolder::updateDynamicContent);
     }
 
     private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
         LayoutInflater.from(activity).inflate(R.layout.divider_service, servicePerUnitList, true);
 
-        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, servicePerUnitList, unitConfig, serviceConfig, operation, provider, consumer);
+        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, servicePerUnitList, abstractUnitRemote, serviceConfig, operation, provider, consumer);
         serviceViewHolderList.add(serviceViewHolder);
 
         servicePerUnitList.addView(serviceViewHolder.getServiceView());
