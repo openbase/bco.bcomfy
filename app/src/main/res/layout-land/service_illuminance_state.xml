@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
 
     <TextView
@@ -10,7 +11,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_centerVertical="true"
-        android:text="Battery"
+        android:text="Illuminance"
         android:textAppearance="@android:style/TextAppearance.Material.Small" />
 
     <LinearLayout
@@ -21,23 +22,23 @@
         android:weightSum="10">
 
         <SeekBar
-            android:id="@+id/seek_bar_battery"
+            android:id="@+id/seek_bar_illuminance"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="7.5"
-            android:max="100"
+            android:max="60"
             android:scaleY="5"
             android:splitTrack="false" />
 
         <TextView
-            android:id="@+id/battery_state_text"
+            android:id="@+id/illuminance_state_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="2.5"
             android:gravity="center_vertical"
-            android:text="%"
+            android:text="lx"
             android:textAppearance="@android:style/TextAppearance.Material.Small" />
     </LinearLayout>
 

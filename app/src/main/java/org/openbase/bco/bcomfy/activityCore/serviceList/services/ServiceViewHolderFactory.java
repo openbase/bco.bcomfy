@@ -22,6 +22,8 @@ public class ServiceViewHolderFactory {
                 return new BrightnessStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case BATTERY_STATE_SERVICE:
                 return new BatteryStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case ILLUMINANCE_STATE_SERVICE:
+                return new IlluminanceStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }

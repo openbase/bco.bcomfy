@@ -52,7 +52,7 @@ public class BatteryStateServiceViewHolder extends AbstractServiceViewHolder {
 
             activity.runOnUiThread(() -> {
                 seekBar.setProgress((int) batteryState.getLevel());
-                batteryStateTextView.setText(batteryState.getLevel() + "%");
+                batteryStateTextView.setText((int) batteryState.getLevel() + "%");
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
