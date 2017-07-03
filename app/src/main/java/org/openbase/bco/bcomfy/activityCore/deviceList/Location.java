@@ -28,7 +28,7 @@ public class Location implements Parent<Device> {
 
         try {
             StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), false))
-                    .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE)
+                    .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .sorted(Comparators.thenComparing(Comparators.comparing(UnitConfigType.UnitConfig::getType), UnitConfigType.UnitConfig::getLabel))
                     .forEachOrdered(unitConfig -> deviceList.add(new Device(unitConfig)));
         } catch (CouldNotPerformException e) {
