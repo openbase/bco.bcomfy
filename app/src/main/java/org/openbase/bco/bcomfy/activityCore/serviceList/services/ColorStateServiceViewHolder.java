@@ -11,6 +11,7 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.slider.LightnessSlider;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Service$;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -40,6 +41,8 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
         colorPickerView = serviceView.findViewById(R.id.color_picker_view);
         lightnessSlider = serviceView.findViewById(R.id.v_lightness_slider);
 
+        colorPickerView.setOnTouchListener(new DrawerDisablingOnTouchListener());
+        lightnessSlider.setOnTouchListener(new DrawerDisablingOnTouchListener());
 
         if (operation) {
             colorPickerView.addOnColorChangedListener(color -> {

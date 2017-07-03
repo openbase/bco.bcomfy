@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Service$;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -30,7 +31,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
     protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_brightness_state, viewParent, false);
         seekBar = serviceView.findViewById(R.id.seek_bar);
-
+        seekBar.setOnTouchListener(new DrawerDisablingOnTouchListener());
 
         if (operation) {
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

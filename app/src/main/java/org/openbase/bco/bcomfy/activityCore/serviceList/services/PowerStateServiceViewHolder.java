@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Service$;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -35,6 +36,7 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
     protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_power_state, viewParent, false);
         powerStateSwitch = serviceView.findViewById(R.id.service_power_state_switch);
+        powerStateSwitch.setOnTouchListener(new DrawerDisablingOnTouchListener());
 
         if (operation) {
             powerStateSwitch.setOnClickListener(v -> {
