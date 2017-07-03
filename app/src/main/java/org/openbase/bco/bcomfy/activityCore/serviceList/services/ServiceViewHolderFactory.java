@@ -7,7 +7,6 @@ import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
 
 public class ServiceViewHolderFactory {
 
@@ -21,6 +20,8 @@ public class ServiceViewHolderFactory {
                 return new ColorStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case BRIGHTNESS_STATE_SERVICE:
                 return new BrightnessStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case BATTERY_STATE_SERVICE:
+                return new BatteryStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }
