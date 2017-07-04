@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
 
     <LinearLayout
@@ -10,19 +11,22 @@
         android:weightSum="10">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/motionStateTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="7.5"
-            android:text="Power"
+            android:gravity="center_vertical"
+            android:text="No motion"
             android:textAppearance="@android:style/TextAppearance.Material.Small" />
 
-        <Switch
-            android:id="@+id/service_power_state_switch"
+        <ImageView
+            android:id="@+id/motionStateImageView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_margin="5dp"
             android:layout_weight="2.5" />
     </LinearLayout>
+
 </RelativeLayout>
