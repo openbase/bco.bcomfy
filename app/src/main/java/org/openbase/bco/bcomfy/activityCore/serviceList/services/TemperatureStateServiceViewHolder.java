@@ -18,6 +18,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import rst.domotic.state.AlarmStateType;
 import rst.domotic.state.IlluminanceStateType.IlluminanceState;
 import rst.domotic.state.TemperatureStateType;
 import rst.domotic.state.TemperatureStateType.TemperatureState;
