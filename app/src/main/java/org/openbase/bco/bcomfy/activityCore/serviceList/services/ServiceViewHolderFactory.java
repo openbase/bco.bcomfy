@@ -34,6 +34,8 @@ public class ServiceViewHolderFactory {
                 return new TemperatureAlarmStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case POWER_CONSUMPTION_STATE_SERVICE:
                 return new PowerConsumptionStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case HANDLE_STATE_SERVICE:
+                return new HandleStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }
