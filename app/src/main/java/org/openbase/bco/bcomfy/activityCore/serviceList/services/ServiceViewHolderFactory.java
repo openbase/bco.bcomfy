@@ -36,6 +36,8 @@ public class ServiceViewHolderFactory {
                 return new PowerConsumptionStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case HANDLE_STATE_SERVICE:
                 return new HandleStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case TAMPER_STATE_SERVICE:
+                return new TamperStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }
