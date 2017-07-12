@@ -40,6 +40,8 @@ public class ServiceViewHolderFactory {
                 return new TamperStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case ACTIVATION_STATE_SERVICE:
                 return new ActivationStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+            case BLIND_STATE_SERVICE:
+                return new BlindStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
                 return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
         }

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/blindStateSeekBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:weightSum="10">
+
+        <SeekBar
+            android:id="@+id/blindStateSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="7.5"
+            android:max="100"
+            android:scaleY="5"
+            android:splitTrack="false" />
+
+        <TextView
+            android:id="@+id/blindStateTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="2.5"
+            android:gravity="center_vertical"
+            android:text="%"
+            android:textAppearance="@android:style/TextAppearance.Material.Small" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/blindStateButtonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/blindStateSeekBarLayout"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+
+        <Button
+            android:id="@+id/blindStateButtonDown"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_blind_down" />
+
+        <Button
+            android:id="@+id/blindStateButtonStop"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_blind_stop" />
+
+        <Button
+            android:id="@+id/blindStateButtonUp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_blind_up" />
+    </LinearLayout>
+
+</RelativeLayout>
