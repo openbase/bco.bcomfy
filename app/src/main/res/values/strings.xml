@@ -44,7 +44,7 @@
     <string name="button_apply">{gmd-check} Apply</string>
     <string name="button_cancel">{gmd-close} Cancel</string>
     <string name="button_clear">{gmd-location-off} Clear</string>
-    <string name="button_blind_down">{gmd-file-download}\nDown</string>
+    <string name="button_blind_down">{gmd-arrow-downward}\nDown</string>
     <string name="button_blind_stop">{gmd-stop}\nStop</string>
-    <string name="button_blind_up">{gmd-file-upload}\nUp</string>
+    <string name="button_blind_up">{gmd-arrow-upward}\nUp</string>
 </resources>
