@@ -96,8 +96,6 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
         try {
             BlindState blindState = (BlindState) Service$.invokeProviderServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote);
 
-            Log.i(TAG, blindState.toString());
-
             activity.runOnUiThread(() -> {
                 if (blindState.hasOpeningRatio()) {
                     blindStateSeekBar.setProgress((int) blindState.getOpeningRatio());

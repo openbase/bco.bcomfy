@@ -29,6 +29,14 @@
             android:text="@android:string/untitled"
             android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
+        <ImageView
+            android:id="@+id/location_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="16dp" />
+
     </RelativeLayout>
 
 </com.balysv.materialripple.MaterialRippleLayout>
