@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,45 +58,60 @@ public class PowerConsumptionStateServiceViewHolder extends AbstractServiceViewH
 
             activity.runOnUiThread(() -> {
                 if (powerConsumptionState.hasConsumption()) {
-                    if (powerConsumptionState.getConsumption() > 0.0d) {
-                        progressBar.setIndeterminate(true);
-                    }
-                    else {
-                        progressBar.setIndeterminate(false);
-                    }
-                    textViewConsumption.setVisibility(View.VISIBLE);
+                    try {
+                        if (powerConsumptionState.getConsumption() > 0.0d) {
+                            progressBar.setIndeterminate(true);
+                        }
+                        else {
+                            progressBar.setIndeterminate(false);
+                        }
+                        textViewConsumption.setVisibility(View.VISIBLE);
 
-                    double d = powerConsumptionState.getConsumption();
-                    BigDecimal bd = new BigDecimal(d);
-                    bd = bd.round(new MathContext(4));
+                        double d = powerConsumptionState.getConsumption();
+                        BigDecimal bd = new BigDecimal(d);
+                        bd = bd.round(new MathContext(4));
 
-                    textViewConsumptionValue.setText(bd.doubleValue() + " W");
+                        textViewConsumptionValue.setText(bd.doubleValue() + " W");
+                    } catch (NumberFormatException ex) {
+                        Log.w(TAG, "NumberFormatException while reading powerConsumptionState of unit " + serviceConfig.getUnitId());
+                        textViewCurrentValue.setText("? W");
+                    }
                 }
                 else {
                     textViewConsumption.setVisibility(View.GONE);
                 }
 
                 if (powerConsumptionState.hasCurrent()) {
-                    textViewCurrent.setVisibility(View.VISIBLE);
+                    try {
+                        textViewCurrent.setVisibility(View.VISIBLE);
 
-                    double d = powerConsumptionState.getCurrent();
-                    BigDecimal bd = new BigDecimal(d);
-                    bd = bd.round(new MathContext(4));
+                        double d = powerConsumptionState.getCurrent();
+                        BigDecimal bd = new BigDecimal(d);
+                        bd = bd.round(new MathContext(4));
 
-                    textViewCurrentValue.setText(bd.doubleValue() + " A");
+                        textViewCurrentValue.setText(bd.doubleValue() + " A");
+                    } catch (NumberFormatException ex) {
+                        Log.w(TAG, "NumberFormatException while reading powerConsumptionState of unit " + serviceConfig.getUnitId());
+                        textViewCurrentValue.setText("? A");
+                    }
                 }
                 else {
                     textViewCurrent.setVisibility(View.GONE);
                 }
 
                 if (powerConsumptionState.hasVoltage()) {
-                    textViewVoltage.setVisibility(View.VISIBLE);
+                    try {
+                        textViewVoltage.setVisibility(View.VISIBLE);
 
-                    double d = powerConsumptionState.getVoltage();
-                    BigDecimal bd = new BigDecimal(d);
-                    bd = bd.round(new MathContext(4));
+                        double d = powerConsumptionState.getVoltage();
+                        BigDecimal bd = new BigDecimal(d);
+                        bd = bd.round(new MathContext(4));
 
-                    textViewVoltageValue.setText(bd.doubleValue() + " V");
+                        textViewVoltageValue.setText(bd.doubleValue() + " V");
+                    } catch (NumberFormatException ex) {
+                        Log.w(TAG, "NumberFormatException while reading powerConsumptionState of unit " + serviceConfig.getUnitId());
+                        textViewCurrentValue.setText("? V");
+                    }
                 }
                 else {
                     textViewVoltage.setVisibility(View.GONE);
