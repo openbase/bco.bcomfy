@@ -29,7 +29,7 @@ public class LocationAdapter extends ExpandableRecyclerAdapter<Location, Device,
     @Override
     public LocationViewHolder onCreateParentViewHolder(@NonNull ViewGroup parentViewGroup, int viewType) {
         View locationView = inflater.inflate(R.layout.location_textview, parentViewGroup, false);
-        return new LocationViewHolder(locationView);
+        return new LocationViewHolder(locationView, onDeviceClickedListener);
     }
 
     @NonNull

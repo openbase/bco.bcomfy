@@ -49,4 +49,12 @@ public class Location implements Parent<Device> {
     public String getLabel() {
         return locationConfig.getLabel();
     }
+
+    public String getId() {
+        return locationConfig.getId();
+    }
+
+    public UnitConfigType.UnitConfig getUnitConfig() {
+        return locationConfig;
+    }
 }

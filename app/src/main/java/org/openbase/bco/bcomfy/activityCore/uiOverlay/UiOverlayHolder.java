@@ -73,7 +73,7 @@ public class UiOverlayHolder {
 
     public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException, TimeoutException {
         if (!StreamSupport.stream(holderList)
-                .anyMatch(abstractUnitSelectorHolder -> abstractUnitSelectorHolder.getDeviceId().equals(unitConfig.getId()))) {
+                .anyMatch(abstractUnitSelectorHolder -> abstractUnitSelectorHolder.getUnitHostId().equals(unitConfig.getId()))) {
             AbstractUnitSelectorHolder holder = SelectorHolderFactory.createUnitSelectorHolder(unitConfig);
 
             holderList.add(holder);
@@ -86,7 +86,7 @@ public class UiOverlayHolder {
         while (iterator.hasNext()) {
             AbstractUnitSelectorHolder holder =  iterator.next();
 
-            if (holder.getDeviceId().equals(unitConfig.getId())) {
+            if (holder.getUnitHostId().equals(unitConfig.getId())) {
                 uiOverlay.removeView(holder.getView());
                 iterator.remove();
                 break;
@@ -114,7 +114,14 @@ public class UiOverlayHolder {
         holder.initIcon();
         holder.setParentWidth(uiOverlay.getWidth());
         holder.setParentHeight(uiOverlay.getHeight());
-        holder.getView().setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(holder.getDeviceId()));
+        holder.getView().setOnClickListener(v -> {
+            try {
+                onDeviceClickedListener.onDeviceClicked(holder.getUnitHostConfig());
+            } catch (CouldNotPerformException | InterruptedException e) {
+                Log.e(TAG, "Error while fetching unit config of unit " + holder.getUnitHostId());
+                e.printStackTrace();
+            }
+        });
         uiOverlay.addView(holder.getView());
     }
 

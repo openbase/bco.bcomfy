@@ -10,12 +10,8 @@ public class Device {
         this.device = device;
     }
 
-    public String getLabel() {
-        return device.getLabel();
-    }
-
-    public String getId() {
-        return device.getId();
+    public UnitConfigType.UnitConfig getUnitConfig() {
+        return device;
     }
 
 }

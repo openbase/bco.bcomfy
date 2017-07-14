@@ -15,11 +15,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.context.IconicsContextWrapper;
+import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
@@ -70,7 +72,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private LinearLayout rightDrawer;
 
     private FloatingActionButton floatingActionButtonLeft;
-    private FloatingActionButton floatingActionButtonRight;
+    private FloatingActionMenu floatingActionMenuRight;
+    private FloatingActionButton floatingActionButtonEdit;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
@@ -83,7 +86,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private View editLocationButton;
     boolean inEditMode = false;
     Vector3 currentEditPosition;
-    private String currentDevice;
+    private UnitConfigType.UnitConfig currentDevice;
 
     private UnitListViewHolder unitListViewHolder;
 
@@ -185,11 +188,15 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
         floatingActionButtonLeft.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
 
-        floatingActionButtonRight = findViewById(R.id.floating_action_button_right);
-        floatingActionButtonRight.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
-        floatingActionButtonRight.setOnClickListener(v -> enterEditMode());
-        floatingActionButtonRight.setAlpha(0f);
-        floatingActionButtonRight.setClickable(false);
+        floatingActionMenuRight = findViewById(R.id.floating_action_menu_right);
+        floatingActionMenuRight.getMenuIconView().setImageDrawable(new IconicsDrawable(getApplicationContext(), MaterialDesignIconic.Icon.gmi_more_vert).color(Color.WHITE).sizeDp(24));
+
+        floatingActionButtonEdit = findViewById(R.id.floating_action_button_edit);
+        floatingActionButtonEdit.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
+        floatingActionButtonEdit.setOnClickListener(v -> {
+            floatingActionMenuRight.close(true);
+            enterEditMode();
+        });
 
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -198,8 +205,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     floatingActionButtonLeft.setAlpha(1 - slideOffset);
                 }
                 else {
-                    floatingActionButtonRight.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
-                    floatingActionButtonRight.setAlpha(slideOffset);
+                    floatingActionMenuRight.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
                 }
             }
             @Override
@@ -207,17 +213,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(false);
                 }
-                else {
-                    floatingActionButtonRight.setClickable(true);
-                }
             }
             @Override
             public void onDrawerClosed(View drawerView) {
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(true);
-                }
-                else {
-                    floatingActionButtonRight.setClickable(false);
                 }
             }
             @Override
@@ -335,11 +335,18 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Override
-    public void onDeviceClicked(String id) {
+    public void onDeviceClicked(UnitConfigType.UnitConfig unitConfig) {
         drawerLayout.closeDrawer(leftDrawer);
 
-        currentDevice = id;
-        unitListViewHolder.displayUnit(this, id);
+        currentDevice = unitConfig;
+        unitListViewHolder.displayUnit(this, unitConfig);
+
+        if (isUnitLocationEditable(unitConfig)) {
+            floatingActionButtonEdit.setVisibility(View.VISIBLE);
+        }
+        else {
+            floatingActionButtonEdit.setVisibility(View.GONE);
+        }
 
         drawerLayout.openDrawer(rightDrawer);
     }
@@ -366,8 +373,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private void editApply() {
         // TODO: move to AsyncTask
         try {
-            UnitConfigType.UnitConfig device = Registries.getUnitRegistry().getUnitConfigById(currentDevice);
-
             // Transform OpenGL position to BCO Position
             double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
 
@@ -414,20 +419,20 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             // Generate new protobuf unitConfig
             TranslationType.Translation translation =
-                    device.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
+                    currentDevice.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
             RotationType.Rotation rotation;
-            if (device.getPlacementConfig().hasPosition()) {
-                rotation = device.getPlacementConfig().getPosition().getRotation();
+            if (currentDevice.getPlacementConfig().hasPosition()) {
+                rotation = currentDevice.getPlacementConfig().getPosition().getRotation();
             }
             else {
                 rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
             }
             PoseType.Pose pose  =
-                    device.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
+                    currentDevice.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
             PlacementConfigType.PlacementConfig placementConfig =
-                    device.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
+                    currentDevice.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
             UnitConfigType.UnitConfig unitConfig =
-                    device.toBuilder().setPlacementConfig(placementConfig).build();
+                    currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
             Registries.getUnitRegistry().updateUnitConfig(unitConfig);
@@ -442,13 +447,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void clearUnitLocation() {
         try {
-            UnitConfigType.UnitConfig device = Registries.getUnitRegistry().getUnitConfigById(currentDevice);
-
             // Generate new protobuf unitConfig
             PlacementConfigType.PlacementConfig placementConfig =
-                    device.getPlacementConfig().toBuilder().clearPosition().build();
+                    currentDevice.getPlacementConfig().toBuilder().clearPosition().build();
             UnitConfigType.UnitConfig unitConfig =
-                    device.toBuilder().setPlacementConfig(placementConfig).build();
+                    currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
             Registries.getUnitRegistry().updateUnitConfig(unitConfig);
@@ -485,5 +488,21 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void addDebugSphere() {
         this.getRenderer().addSphere(new Vector3(TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0})), Color.RED);
+    }
+
+    private boolean isUnitLocationEditable(UnitConfigType.UnitConfig unitConfig) {
+        switch (unitConfig.getType()) {
+            case DEVICE:
+                return true;
+            case LOCATION:
+                return false;
+            default:
+                if (unitConfig.getBoundToUnitHost()) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+        }
     }
 }

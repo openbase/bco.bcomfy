@@ -13,6 +13,8 @@ import com.mikepenz.iconics.typeface.IIcon;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
+import org.openbase.bco.registry.remote.Registries;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.pattern.Remote;
 import org.rajawali3d.math.Matrix4;
@@ -54,6 +56,7 @@ public abstract class AbstractUnitSelectorHolder {
         this.parentWidth = 0;
         this.parentHeight = 0;
 
+
         unitRemote = Units.getFutureUnit(unitConfig, true).get(1, TimeUnit.SECONDS);
         unitRemote.addConfigObserver((observable, newUnitConfig) -> {
             this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
@@ -63,12 +66,21 @@ public abstract class AbstractUnitSelectorHolder {
                 updateConnectionState((Remote.ConnectionState) connectionState));
     }
 
-    public String getDeviceId() {
+    public String getUnitHostId() {
         if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
             return unitConfig.getId();
         }
         else {
             return unitConfig.getUnitHostId();
+        }
+    }
+
+    public UnitConfigType.UnitConfig getUnitHostConfig() throws CouldNotPerformException, InterruptedException {
+        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+            return unitConfig;
+        }
+        else {
+            return Registries.getUnitRegistry().getUnitConfigById(unitConfig.getUnitHostId());
         }
     }
 

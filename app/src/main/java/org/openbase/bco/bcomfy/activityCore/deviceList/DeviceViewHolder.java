@@ -17,11 +17,11 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
     public DeviceViewHolder(View itemView) {
         super(itemView);
         deviceView = itemView;
-        deviceTextView = (TextView) itemView.findViewById(R.id.device_textview);
+        deviceTextView = itemView.findViewById(R.id.device_textview);
     }
 
     public void bind(Device device, OnDeviceClickedListener onDeviceClickedListener) {
-        deviceTextView.setText(device.getLabel());
-        deviceView.setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(device.getId()));
+        deviceTextView.setText(device.getUnitConfig().getLabel());
+        deviceView.setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(device.getUnitConfig()));
     }
 }

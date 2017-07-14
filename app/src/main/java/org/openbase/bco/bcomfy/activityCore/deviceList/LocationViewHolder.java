@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityCore.deviceList;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -11,19 +12,27 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.registry.remote.Registries;
+
+import java.util.concurrent.TimeUnit;
 
 
 public class LocationViewHolder extends ParentViewHolder<Location, Device> {
 
+    private static final String TAG = LocationViewHolder.class.getSimpleName();
+
     private View divider;
     private TextView label;
     private ImageView indicator;
+    private OnDeviceClickedListener onDeviceClickedListener;
 
-    public LocationViewHolder(View itemView) {
+    public LocationViewHolder(View itemView, OnDeviceClickedListener onDeviceClickedListener) {
         super(itemView);
         divider = itemView.findViewById(R.id.location_divider_top);
         label = itemView.findViewById(R.id.location_textview);
         indicator = itemView.findViewById(R.id.location_indicator);
+        this.onDeviceClickedListener = onDeviceClickedListener;
 
         indicator.setImageDrawable(new IconicsDrawable(itemView.getContext(), GoogleMaterial.Icon.gmd_chevron_left).color(Color.WHITE).sizeDp(12));
     }
@@ -33,6 +42,11 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
         if (getAdapterPosition() == 0) {
             divider.setVisibility(View.INVISIBLE);
         }
+
+        itemView.setOnLongClickListener(view -> {
+            onDeviceClickedListener.onDeviceClicked(location.getUnitConfig());
+            return true;
+        });
     }
 
     @Override
@@ -47,7 +61,6 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
                     .start();
         }
         else {
-            indicator.setRotation(-90.0f);
             indicator.animate()
                     .setDuration(200)
                     .rotation(-90.0f)

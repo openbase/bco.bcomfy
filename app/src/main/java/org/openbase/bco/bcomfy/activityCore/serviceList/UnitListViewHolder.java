@@ -31,12 +31,11 @@ public class UnitListViewHolder {
     private TextView labelText;
     private TextView typeText;
     private Activity activity;
-    private String id;
+    private UnitConfigType.UnitConfig unitConfig;
 
     private List<AbstractUnitViewHolder> unitViewHolderList;
 
     private DeviceRegistry deviceRegistry;
-    private UnitRegistry unitRegistry;
     private UnitConfigType.UnitConfig deviceConfig;
 
     public UnitListViewHolder(LinearLayout serviceList) {
@@ -48,9 +47,9 @@ public class UnitListViewHolder {
         unitViewHolderList = new ArrayList<>();
     }
 
-    public void displayUnit(Activity activity, String id) {
+    public void displayUnit(Activity activity, UnitConfigType.UnitConfig unitConfig) {
         this.activity = activity;
-        this.id = id;
+        this.unitConfig = unitConfig;
         new displayUnitTask().execute(this);
     }
 
@@ -64,14 +63,12 @@ public class UnitListViewHolder {
 
             try {
                 unitListViewHolder.deviceRegistry = Registries.getDeviceRegistry();
-                unitListViewHolder.unitRegistry = Registries.getUnitRegistry();
-                UnitConfigType.UnitConfig unitConfig = unitListViewHolder.unitRegistry.getUnitConfigById(unitListViewHolder.id);
 
                 // Distinguish whether to display a device or a single unit
-                if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+                if (unitListViewHolder.unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
                     // Display a device
                     unitListViewHolder.deviceConfig =
-                            unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.id);
+                            unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.unitConfig.getId());
 
                     // Get label and device class
                     String labelText = unitListViewHolder.deviceConfig.getLabel();
@@ -84,7 +81,8 @@ public class UnitListViewHolder {
 
                     // Create and add UnitViewHolders for every unit that is bound by the device
                     for (String unitId : unitListViewHolder.deviceConfig.getDeviceConfig().getUnitIdList()) {
-                        AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitId, unitListViewHolder.unitList);
+                        UnitConfigType.UnitConfig unitConfig = Registries.getUnitRegistry().getUnitConfigById(unitId);
+                        AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitConfig, unitListViewHolder.unitList);
                         unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
                         unitListViewHolder.activity.runOnUiThread(() ->
@@ -93,12 +91,12 @@ public class UnitListViewHolder {
                 }
                 else {
                     // Display a single unit
-                    AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitListViewHolder.id, unitListViewHolder.unitList);
+                    AbstractUnitViewHolder unitViewHolder = UnitViewHolderFactory.createUnitViewHolder(unitListViewHolder.activity, unitListViewHolder.unitConfig, unitListViewHolder.unitList);
                     unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
                     unitListViewHolder.activity.runOnUiThread(() -> {
-                        unitListViewHolder.labelText.setText(unitConfig.getLabel());
-                        unitListViewHolder.typeText.setText(unitConfig.getDescription());
+                        unitListViewHolder.labelText.setText(unitListViewHolder.unitConfig.getLabel());
+                        unitListViewHolder.typeText.setText(unitListViewHolder.unitConfig.getDescription());
                         unitListViewHolder.unitList.addView(unitViewHolder.getCardView());
                     });
                 }
