@@ -7,40 +7,31 @@
     app:mrl_rippleHover="false"
     app:mrl_rippleDelayClick="false">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
 
         <TextView
             android:id="@+id/device_textview"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_weight="8"
             android:paddingBottom="5dp"
-            android:paddingLeft="16dp"
+            android:paddingLeft="24dp"
             android:paddingRight="5dp"
             android:text="@android:string/untitled"
-            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Material.Small" />
 
-        <!--<ImageView-->
-            <!--android:id="@+id/no_position_icon"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--app:srcCompat="@color/transparent" />-->
-
-        <TextView
+        <ImageView
             android:id="@+id/no_position_icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="16dp"
-            android:text="{gmd-error}"
-            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="2"
+            android:visibility="invisible" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </com.balysv.materialripple.MaterialRippleLayout>
