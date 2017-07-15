@@ -72,7 +72,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private LinearLayout rightDrawer;
 
     private FloatingActionButton floatingActionButtonLeft;
-    private FloatingActionMenu floatingActionMenuRight;
+//    private FloatingActionMenu floatingActionMenuRight;
     private FloatingActionButton floatingActionButtonEdit;
 
     private LinearLayout buttonsEdit;
@@ -188,13 +188,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
         floatingActionButtonLeft.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
 
-        floatingActionMenuRight = findViewById(R.id.floating_action_menu_right);
-        floatingActionMenuRight.getMenuIconView().setImageDrawable(new IconicsDrawable(getApplicationContext(), MaterialDesignIconic.Icon.gmi_more_vert).color(Color.WHITE).sizeDp(24));
+//        floatingActionMenuRight = findViewById(R.id.floating_action_menu_right);
+//        floatingActionMenuRight.getMenuIconView().setImageDrawable(new IconicsDrawable(getApplicationContext(), MaterialDesignIconic.Icon.gmi_more_vert).color(Color.WHITE).sizeDp(24));
 
         floatingActionButtonEdit = findViewById(R.id.floating_action_button_edit);
         floatingActionButtonEdit.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
         floatingActionButtonEdit.setOnClickListener(v -> {
-            floatingActionMenuRight.close(true);
+//            floatingActionMenuRight.close(true);
             enterEditMode();
         });
 
@@ -205,7 +205,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     floatingActionButtonLeft.setAlpha(1 - slideOffset);
                 }
                 else {
-                    floatingActionMenuRight.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    floatingActionButtonEdit.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    floatingActionButtonEdit.setAlpha(slideOffset);
                 }
             }
             @Override
@@ -213,11 +214,17 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(false);
                 }
+                else {
+                    floatingActionButtonEdit.setClickable(true);
+                }
             }
             @Override
             public void onDrawerClosed(View drawerView) {
                 if (drawerView == leftDrawer) {
                     floatingActionButtonLeft.setClickable(true);
+                }
+                else {
+                    floatingActionButtonEdit.setClickable(false);
                 }
             }
             @Override
