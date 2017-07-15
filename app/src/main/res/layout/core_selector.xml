@@ -4,7 +4,7 @@
     android:layout_height="100dp"
     android:layout_width="100dp"
     app:mrl_rippleOverlay="true"
-    app:mrl_rippleHover="false"
+    app:mrl_rippleHover="true"
     app:mrl_rippleDelayClick="false"
     app:mrl_rippleRoundedCorners="50dp">
 
