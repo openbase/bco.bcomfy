@@ -1,8 +1,10 @@
 package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 
 import android.app.Activity;
+import android.preference.PreferenceManager;
 import android.view.ViewGroup;
 
+import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -43,7 +45,12 @@ public class ServiceViewHolderFactory {
             case BLIND_STATE_SERVICE:
                 return new BlindStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             default:
-                return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+                if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(SettingsActivity.KEY_PREF_MISC_UNKONWN_SERVICE, false)) {
+                    return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
+                }
+                else {
+                    throw new CouldNotPerformException("Service " + serviceConfig.getServiceTemplate().getType().name() + " ignored since it is not supported!");
+                }
         }
     }
 

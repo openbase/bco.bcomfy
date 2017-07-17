@@ -11,6 +11,7 @@ import org.openbase.bco.bcomfy.activityCore.serviceList.services.AbstractService
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHolderFactory;
 import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Remote;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
     private LinearLayout serviceList;
     private List<AbstractServiceViewHolder> serviceViewHolderList;
 
-    public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
+    public GenericUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws InstantiationException {
         super(AbstractUnitRemote.class, activity, unitConfig, parent);
 
         serviceViewHolderList = new ArrayList<>();
@@ -99,18 +100,22 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
         StreamSupport.stream(serviceViewHolderList).forEach(AbstractServiceViewHolder::updateDynamicContent);
     }
 
-    private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
-        if (serviceViewHolderList.size() == 0) {
-            addDividerThick(activity);
-        }
-        else {
-            addDivider(activity);
-        }
+    private void createAndAddServiceView(Activity activity, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) {
+        try {
+            AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, serviceList, abstractUnitRemote, serviceConfig, operation, provider, consumer);
 
-        AbstractServiceViewHolder serviceViewHolder = ServiceViewHolderFactory.createServiceViewHolder(activity, serviceList, abstractUnitRemote, serviceConfig, operation, provider, consumer);
-        serviceViewHolderList.add(serviceViewHolder);
+            if (serviceViewHolderList.size() == 0) {
+                addDividerThick(activity);
+            }
+            else {
+                addDivider(activity);
+            }
 
-        serviceList.addView(serviceViewHolder.getServiceView());
+            serviceViewHolderList.add(serviceViewHolder);
+            serviceList.addView(serviceViewHolder.getServiceView());
+        } catch (CouldNotPerformException | InterruptedException ex) {
+            Log.i(TAG, ex.getMessage());
+        }
     }
 
     private void addDivider(Activity activity) {

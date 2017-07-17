@@ -33,6 +33,7 @@ public class SettingsActivity extends Activity {
     public static final String KEY_PREF_INIT_DEFAULT = "pref_init_default";
     public static final String KEY_PREF_INIT_ALIGN = "pref_init_align";
     public static final String KEY_PREF_INIT_ANCHOR = "pref_init_anchor";
+    public static final String KEY_PREF_MISC_UNKONWN_SERVICE = "pref_misc_unknown_service";
     public static final String KEY_PREF_DELETE_DEVICE_POSES = "pref_delete_device_poses";
     public static final String KEY_PREF_DELETE_LOCATION_SHAPES = "pref_delete_location_shapes";
 
