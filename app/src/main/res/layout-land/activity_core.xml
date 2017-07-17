@@ -155,7 +155,7 @@
     </LinearLayout>
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/floating_action_button_left"
+        android:id="@+id/fab_expand_drawer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -166,42 +166,29 @@
         android:layout_marginLeft="16dp"/>
 
     <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/floating_action_button_edit"
+        android:id="@+id/fab_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:alpha="0"
+        app:fab_colorNormal="#000000"
+        app:fab_colorPressed="#101010"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"/>
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fab_location_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
+        android:alpha="0"
         app:fab_colorNormal="#000000"
         app:fab_colorPressed="#101010"
         android:layout_marginTop="16dp"
         android:layout_marginRight="16dp"/>
 
-    <!--<com.github.clans.fab.FloatingActionMenu-->
-        <!--android:id="@+id/floating_action_menu_right"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignParentTop="true"-->
-        <!--app:menu_colorNormal="#000000"-->
-        <!--app:menu_colorPressed="#101010"-->
-        <!--app:menu_openDirection="down"-->
-        <!--android:layout_marginTop="16dp"-->
-        <!--android:layout_marginRight="16dp">-->
-
-        <!--<com.github.clans.fab.FloatingActionButton-->
-            <!--android:id="@+id/floating_action_button_edit"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:layout_alignParentTop="true"-->
-            <!--app:fab_colorNormal="#000000"-->
-            <!--app:fab_colorPressed="#101010"-->
-            <!--app:fab_label="Edit location of current unit"-->
-            <!--app:fab_size="mini"-->
-            <!--android:layout_marginTop="16dp"-->
-            <!--android:layout_marginRight="16dp"/>-->
-
-    <!--</com.github.clans.fab.FloatingActionMenu>-->
 
 
 

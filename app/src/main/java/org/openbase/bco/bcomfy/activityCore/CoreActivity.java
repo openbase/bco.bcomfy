@@ -21,12 +21,12 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.context.IconicsContextWrapper;
-import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
+import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
@@ -64,16 +64,21 @@ import rst.geometry.TranslationType;
 import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 
-public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceClickedListener {
+public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceClickedListener, ListSettingsDialogFragment.OnSettingsChosenListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
     private RecyclerView leftDrawer;
     private LinearLayout rightDrawer;
 
-    private FloatingActionButton floatingActionButtonLeft;
-//    private FloatingActionMenu floatingActionMenuRight;
-    private FloatingActionButton floatingActionButtonEdit;
+    private FloatingActionButton fabExpandDrawer;
+    private FloatingActionButton fabSettings;
+    private FloatingActionButton fabEditLocation;
+
+    private SettingValue currentUnitSetting;
+    private SettingValue currentLocationSetting;
+
+    private ListSettingsDialogFragment listSettings;
 
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
@@ -83,7 +88,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private Matrix4 bcoToPixelTransform;
     private UiOverlayHolder uiOverlayHolder;
 
-    private View editLocationButton;
     boolean inEditMode = false;
     Vector3 currentEditPosition;
     private UnitConfigType.UnitConfig currentDevice;
@@ -106,6 +110,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         super.onCreate(savedInstanceState);
 
         adfUuid = getIntent().getStringExtra("adfUuid");
+
+        currentUnitSetting = SettingValue.ALL;
+        currentLocationSetting = SettingValue.LOCATED;
 
         loadLocalTransform();
         initFetchLocationLabelTask();
@@ -184,47 +191,51 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         leftDrawer   = findViewById(R.id.left_drawer);
         rightDrawer  = findViewById(R.id.right_drawer);
 
-        floatingActionButtonLeft = findViewById(R.id.floating_action_button_left);
-        floatingActionButtonLeft.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
-        floatingActionButtonLeft.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
+        fabExpandDrawer = findViewById(R.id.fab_expand_drawer);
+        fabExpandDrawer.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
+        fabExpandDrawer.setOnClickListener(v -> drawerLayout.openDrawer(leftDrawer));
 
-//        floatingActionMenuRight = findViewById(R.id.floating_action_menu_right);
-//        floatingActionMenuRight.getMenuIconView().setImageDrawable(new IconicsDrawable(getApplicationContext(), MaterialDesignIconic.Icon.gmi_more_vert).color(Color.WHITE).sizeDp(24));
+        fabSettings = findViewById(R.id.fab_settings);
+        fabSettings.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_settings).color(Color.WHITE).sizeDp(24));
+        fabSettings.setOnClickListener(v -> openSettingsDialog());
+        fabSettings.setClickable(false);
 
-        floatingActionButtonEdit = findViewById(R.id.floating_action_button_edit);
-        floatingActionButtonEdit.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
-        floatingActionButtonEdit.setOnClickListener(v -> {
-//            floatingActionMenuRight.close(true);
-            enterEditMode();
-        });
+        fabEditLocation = findViewById(R.id.fab_location_edit);
+        fabEditLocation.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_edit_location).color(Color.WHITE).sizeDp(24));
+        fabEditLocation.setOnClickListener(v -> enterEditMode());
+        fabEditLocation.setClickable(false);
 
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 if (drawerView == leftDrawer) {
-                    floatingActionButtonLeft.setAlpha(1 - slideOffset);
+                    fabExpandDrawer.setAlpha(1 - slideOffset);
+                    fabSettings.setAlpha(slideOffset);
+                    fabSettings.setTranslationX(leftDrawer.getMeasuredWidth() * slideOffset);
                 }
                 else {
-                    floatingActionButtonEdit.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
-                    floatingActionButtonEdit.setAlpha(slideOffset);
+                    fabEditLocation.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    fabEditLocation.setAlpha(slideOffset);
                 }
             }
             @Override
             public void onDrawerOpened(View drawerView) {
                 if (drawerView == leftDrawer) {
-                    floatingActionButtonLeft.setClickable(false);
+                    fabExpandDrawer.setClickable(false);
+                    fabSettings.setClickable(true);
                 }
                 else {
-                    floatingActionButtonEdit.setClickable(true);
+                    fabEditLocation.setClickable(true);
                 }
             }
             @Override
             public void onDrawerClosed(View drawerView) {
                 if (drawerView == leftDrawer) {
-                    floatingActionButtonLeft.setClickable(true);
+                    fabExpandDrawer.setClickable(true);
+                    fabSettings.setClickable(false);
                 }
                 else {
-                    floatingActionButtonEdit.setClickable(false);
+                    fabEditLocation.setClickable(false);
                 }
             }
             @Override
@@ -251,6 +262,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         setRenderer(new TangoRenderer(this));
 
         uiOverlayHolder = new UiOverlayHolder(this, this);
+        listSettings = new ListSettingsDialogFragment();
     }
 
     private void setupLeftDrawer() {
@@ -281,6 +293,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void setupRightDrawer() {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, rightDrawer);
         unitListViewHolder = new UnitListViewHolder(rightDrawer);
     }
 
@@ -349,13 +362,26 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         unitListViewHolder.displayUnit(this, unitConfig);
 
         if (isUnitLocationEditable(unitConfig)) {
-            floatingActionButtonEdit.setVisibility(View.VISIBLE);
+            fabEditLocation.setVisibility(View.VISIBLE);
         }
         else {
-            floatingActionButtonEdit.setVisibility(View.GONE);
+            fabEditLocation.setVisibility(View.GONE);
         }
 
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, rightDrawer);
         drawerLayout.openDrawer(rightDrawer);
+    }
+
+    @Override
+    public void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting) {
+        //TODO: load new deviceList...
+
+        currentUnitSetting = unitSetting;
+        currentLocationSetting = locationSetting;
+    }
+
+    private void openSettingsDialog() {
+        listSettings.show(getFragmentManager(), "ListSettingsDialogFragment");
     }
 
     private void enterEditMode() {
@@ -511,5 +537,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     return true;
                 }
         }
+    }
+
+    public SettingValue getCurrentUnitSetting() {
+        return currentUnitSetting;
+    }
+
+    public SettingValue getCurrentLocationSetting() {
+        return currentLocationSetting;
     }
 }
