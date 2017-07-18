@@ -27,8 +27,8 @@ android:
 
 branches:
   except:
-  - /^(?i:feature)-.*$/
-  - /^(?i:release)-.*$/
+  #- /^(?i:feature)-.*$/
+  #- /^(?i:release)-.*$/
 
 notifications:
   slack:
@@ -39,13 +39,21 @@ notifications:
 
 before_install:
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
-  - "./jps/install.sh"
+  - cd jps
+  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+  - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jul.git
-  - "./jul/install.sh"
+  - cd jul
+  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+  - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.registry.git
-  - "./bco.registry/install.sh"
+  - cd bco.registry
+  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+  - cd ..
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.dal.git
-  - "./bco.dal/install.sh"
+  - cd bco.dal
+  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+  - cd ..
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
