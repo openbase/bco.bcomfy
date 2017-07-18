@@ -108,12 +108,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_core);
+        currentUnitSetting = SettingValue.ALL;
+        currentLocationSetting = SettingValue.LOCATED;
+
         super.onCreate(savedInstanceState);
 
         adfUuid = getIntent().getStringExtra("adfUuid");
-
-        currentUnitSetting = SettingValue.ALL;
-        currentLocationSetting = SettingValue.LOCATED;
 
         loadLocalTransform();
         initFetchLocationLabelTask();
