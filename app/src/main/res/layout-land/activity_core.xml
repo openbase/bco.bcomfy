@@ -48,12 +48,27 @@
 
         </RelativeLayout>
 
-        <android.support.v7.widget.RecyclerView
+        <RelativeLayout
             android:id="@+id/left_drawer"
             android:layout_width="240dp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="#303030" />
+            android:background="#303030">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_left_drawer"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/right_drawer"

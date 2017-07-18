@@ -11,11 +11,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -27,13 +28,13 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
+import org.openbase.bco.bcomfy.activityCore.deviceList.FetchDeviceListTask;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
-import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
@@ -41,11 +42,9 @@ import org.rajawali3d.math.vector.Vector3;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -68,7 +67,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
-    private RecyclerView leftDrawer;
+    private RelativeLayout leftDrawer;
+    private RecyclerView recyclerView;
+    private ProgressBar progressBarLeftDrawer;
     private LinearLayout rightDrawer;
 
     private FloatingActionButton fabExpandDrawer;
@@ -187,9 +188,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     protected void setupGui() {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        leftDrawer   = findViewById(R.id.left_drawer);
-        rightDrawer  = findViewById(R.id.right_drawer);
+        drawerLayout          = findViewById(R.id.drawer_layout);
+        leftDrawer            = findViewById(R.id.left_drawer);
+        recyclerView          = findViewById(R.id.recycler_view);
+        progressBarLeftDrawer = findViewById(R.id.progress_bar_left_drawer);
+        rightDrawer           = findViewById(R.id.right_drawer);
 
         fabExpandDrawer = findViewById(R.id.fab_expand_drawer);
         fabExpandDrawer.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
@@ -251,7 +254,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         buttonEditCancel.setOnClickListener(v -> leaveEditMode());
         buttonEditClear.setOnClickListener(v -> clearUnitLocation());
 
-        setupLeftDrawer();
+        updateLeftDrawer();
         setupRightDrawer();
 
         locationLabelView = findViewById(R.id.locationLabelView);
@@ -265,31 +268,20 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         listSettings = new ListSettingsDialogFragment();
     }
 
-    private void setupLeftDrawer() {
-        List<Location> locations = new ArrayList<>();
+    private void updateLeftDrawer() {
+        progressBarLeftDrawer.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
 
-        try {
-            LocationRegistryRemote remote = Registries.getLocationRegistry();
-            remote.waitForData();
+        new FetchDeviceListTask(currentUnitSetting, currentLocationSetting, this::onFetchDeviceListTaskFinished).execute();
+    }
 
-            StreamSupport.stream(remote.getLocationConfigs())
-                    .filter(locationConfig -> locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)
-                    .sorted((o1, o2) -> o1.getLabel().compareTo(o2.getLabel()))
-                    .forEach(locationConfig -> locations.add(new Location(locationConfig, remote)));
-        } catch (CouldNotPerformException | InterruptedException e) {
-            Log.e(TAG, "Could not fetch locations!\n" + Log.getStackTraceString(e));
-        }
+    public void onFetchDeviceListTaskFinished(List<Location> locationList) {
+        progressBarLeftDrawer.setVisibility(View.INVISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
 
-        for (Iterator<Location> it = locations.iterator(); it.hasNext();) {
-            Location location = it.next();
-            if (location.getChildList().size() == 0) {
-                it.remove();
-            }
-        }
-
-        LocationAdapter locationAdapter = new LocationAdapter(this, locations, this);
-        leftDrawer.setAdapter(locationAdapter);
-        leftDrawer.setLayoutManager(new LinearLayoutManager(this));
+        LocationAdapter locationAdapter = new LocationAdapter(this, locationList, this);
+        recyclerView.setAdapter(locationAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setupRightDrawer() {
@@ -374,10 +366,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     public void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting) {
-        //TODO: load new deviceList...
-
         currentUnitSetting = unitSetting;
         currentLocationSetting = locationSetting;
+
+        updateLeftDrawer();
     }
 
     private void openSettingsDialog() {
