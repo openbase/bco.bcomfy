@@ -39,13 +39,13 @@ notifications:
 
 before_install:
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
-  - ./jps/install.sh
+  - "./jps/install.sh"
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jul.git
-  - ./jul/install.sh
+  - "./jul/install.sh"
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.registry.git
-  - ./bco.registry/install.sh
+  - "./bco.registry/install.sh"
   - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.dal.git
-  - ./bco.dal/install.sh
+  - "./bco.dal/install.sh"
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 

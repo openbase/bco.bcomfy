@@ -49,7 +49,7 @@ dependencies {
     compile 'com.google.tango:sdk-base:1.55'
     compile 'com.google.tango:support-base:1.54'
 
-    compile "com.mikepenz:iconics-core:2.8.9@aar"
+    compile "com.mikepenz:iconics-core:2.9.0@aar"
     compile 'com.mikepenz:google-material-typeface:3.0.1.1.original@aar'
     compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.3@aar'
     compile 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
@@ -71,7 +71,7 @@ dependencies {
 
     compile group: 'org.slf4j', name: 'slf4j-android', version: '1.7.25'
 
-    compile "org.rajawali3d:rajawali:1.1.777"
+    compile "org.rajawali3d:rajawali:1.1.970"
 
     compile files('libs/streamsupport_AS3C5-Java8-1.5.6-SNAPSHOT.jar')
 }
