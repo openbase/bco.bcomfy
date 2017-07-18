@@ -86,47 +86,28 @@ public class ListSettingsDialogFragment extends DialogFragment {
         builder.setView(dialogView)
                 .setIcon(new IconicsDrawable(getContext(), GoogleMaterial.Icon.gmd_settings).color(Color.WHITE).sizeDp(24))
                 .setTitle(R.string.list_settings_title)
-                .setPositiveButton(R.string.gui_apply, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-//                        RadioButton radioButtonUnitsAll;
-//                        RadioButton radioButtonUnitsLocated;
-//                        RadioButton radioButtonUnitsUnlocated;
-//                        RadioButton radioButtonLocationsAll;
-//                        RadioButton radioButtonLocationsLocated;
-//
-//                        radioButtonUnitsAll = ((AlertDialog) dialog).findViewById(R.id.radioButtonUnitsAll);
-//                        radioButtonUnitsLocated = ((AlertDialog) dialog).findViewById(R.id.radioButtonUnitsLocated);
-//                        radioButtonUnitsUnlocated = ((AlertDialog) dialog).findViewById(R.id.radioButtonUnitsUnlocated);
-//                        radioButtonLocationsAll = ((AlertDialog) dialog).findViewById(R.id.radioButtonLocationsAll);
-//                        radioButtonLocationsLocated = ((AlertDialog) dialog).findViewById(R.id.radioButtonLocationsLocated);
+                .setPositiveButton(R.string.gui_apply, (dialog, id) -> {
+                    SettingValue unitSetting;
+                    SettingValue locationSetting;
 
-                        SettingValue unitSetting;
-                        SettingValue locationSetting;
-
-                        if (radioButtonUnitsAll.isChecked()) {
-                            unitSetting = SettingValue.ALL;
-                        } else if (radioButtonUnitsLocated.isChecked()) {
-                            unitSetting = SettingValue.LOCATED;
-                        } else {
-                            unitSetting = SettingValue.UNLOCATED;
-                        }
-
-                        if (radioButtonLocationsAll.isChecked()) {
-                            locationSetting = SettingValue.ALL;
-                        } else {
-                            locationSetting = SettingValue.LOCATED;
-                        }
-
-                        onSettingsChosenListener.onSettingsChosen(unitSetting, locationSetting);
+                    if (radioButtonUnitsAll.isChecked()) {
+                        unitSetting = SettingValue.ALL;
+                    } else if (radioButtonUnitsLocated.isChecked()) {
+                        unitSetting = SettingValue.LOCATED;
+                    } else {
+                        unitSetting = SettingValue.UNLOCATED;
                     }
+
+                    if (radioButtonLocationsAll.isChecked()) {
+                        locationSetting = SettingValue.ALL;
+                    } else {
+                        locationSetting = SettingValue.LOCATED;
+                    }
+
+                    onSettingsChosenListener.onSettingsChosen(unitSetting, locationSetting);
                 })
-                .setNegativeButton(R.string.gui_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                .setNegativeButton(R.string.gui_cancel, (dialog, id) -> {});
 
-                    }
-                });
-
-        // Create the AlertDialog object and return it
         return builder.create();
     }
 
