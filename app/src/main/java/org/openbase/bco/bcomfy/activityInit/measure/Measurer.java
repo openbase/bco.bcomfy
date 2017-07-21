@@ -86,13 +86,12 @@ public class Measurer {
                 measurerState = MeasurerState.MARK_WALLS;
                 return MeasureType.CEILING;
             case MARK_WALLS:
-                plane.setNormal(new Vector3(plane.getNormal().x, 0.0, plane.getNormal().z));
                 addPlaneToWall(plane);
                 if (currentRoom.hasEnoughWalls())
                     measurerState = MeasurerState.ENOUGH_WALLS;
                 return MeasureType.WALL;
             case ENOUGH_WALLS:
-                currentRoom.addWall(plane);
+                addPlaneToWall(plane);
                 return MeasureType.WALL;
         }
 
@@ -116,6 +115,8 @@ public class Measurer {
     }
 
     private void addPlaneToWall(Plane plane) {
+        plane.setNormal(new Vector3(plane.getNormal().x, 0.0, plane.getNormal().z));
+
         currentWall.add(plane);
         currentWallMeasurements++;
 
