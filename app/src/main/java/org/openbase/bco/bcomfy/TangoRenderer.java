@@ -220,4 +220,10 @@ public class TangoRenderer extends Renderer {
 
         spheres.clear();
     }
+
+    public void removeRecentPlane() {
+        getCurrentScene().removeChild(planes.get(planes.size() - 1));
+
+        planes.remove(planes.size() - 1);
+    }
 }

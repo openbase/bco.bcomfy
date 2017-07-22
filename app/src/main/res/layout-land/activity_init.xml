@@ -24,9 +24,20 @@
         android:onClick="onAddRoomClicked"/>
 
     <Button
-        android:text="@string/gui_finish_room"
+        android:text="@string/gui_undo_measurement"
         android:layout_height="wrap_content"
         android:layout_below="@+id/buttonAddRoom"
+        android:layout_alignStart="@+id/buttonAddRoom"
+        android:layout_marginTop="21dp"
+        android:id="@+id/buttonUndoMeasurement"
+        android:onClick="onUndoMeasurementClicked"
+        android:layout_width="160dp"
+        android:enabled="false" />
+
+    <Button
+        android:text="@string/gui_finish_room"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonUndoMeasurement"
         android:layout_alignStart="@+id/buttonAddRoom"
         android:layout_marginTop="21dp"
         android:id="@+id/buttonFinishRoom"
@@ -35,7 +46,7 @@
         android:enabled="false" />
 
     <Button
-        android:text="@string/gui_finish_measurement"
+        android:text="@string/gui_finish_measuring"
         android:layout_height="wrap_content"
         android:layout_below="@+id/buttonFinishRoom"
         android:layout_alignStart="@+id/buttonAddRoom"

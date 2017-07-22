@@ -5,6 +5,7 @@ import android.util.Log;
 import com.projecttango.tangosupport.TangoSupport;
 
 import org.openbase.bco.bcomfy.utils.MathUtils;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -19,24 +20,22 @@ public class Measurer {
     private static final Vector3 CEILING_NORMAL = new Vector3(0.0, -1.0, 0.0);
 
     private MeasurerState measurerState;
-    private Room currentRoom;
     private ArrayList<Room> roomList;
-    private AnchorState anchorState;
+    private Room currentRoom;
+
+    private AnchorRoom anchorRoom;
     private Vector3[] anchorNormals;
-    private ArrayList<Plane> currentWall;
+
     private int measurementsPerWallDefault;
     private int measurementsPerWallAnchor;
     private boolean alignToAnchor;
-    private int currentWallMeasurements;
+
+    private boolean transformIsInit;
     private double[] glToBcoTransform;
     private double[] bcoToGlTransform;
 
     public enum MeasurerState {
         INIT, MARK_GROUND, MARK_CEILING, MARK_WALLS, ENOUGH_WALLS
-    }
-
-    public enum AnchorState {
-        UNSET, FIRST_ANCHOR_SET, FINISHED
     }
 
     public enum MeasureType {
@@ -46,13 +45,14 @@ public class Measurer {
     public Measurer(int measurementsPerWallDefault, boolean alignToAnchor, int measurementsPerWallAnchor, boolean recalcTransform) {
         measurerState = MeasurerState.INIT;
         roomList = new ArrayList<>();
-        anchorState = AnchorState.UNSET;
+
         anchorNormals = new Vector3[4];
-        currentWall = new ArrayList<>();
+
+        transformIsInit = false;
+
         this.measurementsPerWallDefault = measurementsPerWallDefault;
         this.measurementsPerWallAnchor = measurementsPerWallAnchor;
         this.alignToAnchor = alignToAnchor;
-        currentWallMeasurements = 0;
 
         if (recalcTransform) {
             startNewRoom();
@@ -60,7 +60,14 @@ public class Measurer {
     }
 
     public void startNewRoom() {
-        currentRoom = new Room();
+        if (alignToAnchor && anchorRoom == null) {
+            anchorRoom = new AnchorRoom(measurementsPerWallDefault, measurementsPerWallAnchor);
+            currentRoom = anchorRoom;
+        }
+        else {
+            currentRoom = new Room(measurementsPerWallDefault);
+        }
+
         measurerState = MeasurerState.MARK_GROUND;
     }
 
@@ -86,12 +93,14 @@ public class Measurer {
                 measurerState = MeasurerState.MARK_WALLS;
                 return MeasureType.CEILING;
             case MARK_WALLS:
-                addPlaneToWall(plane);
-                if (currentRoom.hasEnoughWalls())
-                    measurerState = MeasurerState.ENOUGH_WALLS;
-                return MeasureType.WALL;
             case ENOUGH_WALLS:
-                addPlaneToWall(plane);
+                addWallMeasurement(plane);
+                if (currentRoom.isInFinishedState()) {
+                    measurerState = MeasurerState.ENOUGH_WALLS;
+                }
+                else {
+                    measurerState = MeasurerState.MARK_WALLS;
+                }
                 return MeasureType.WALL;
         }
 
@@ -114,49 +123,26 @@ public class Measurer {
         return roomList.get(roomList.size()-1).getCeilingVertices();
     }
 
-    private void addPlaneToWall(Plane plane) {
+    private void addWallMeasurement(Plane plane) {
+        // Use the constraint that walls are perpendicular to the ground
         plane.setNormal(new Vector3(plane.getNormal().x, 0.0, plane.getNormal().z));
 
-        currentWall.add(plane);
-        currentWallMeasurements++;
-
-        if (anchorState == AnchorState.FINISHED) {
-            if (currentWall.size() >= measurementsPerWallDefault) {
-                finishWall();
-            }
-        } else {
-            if (currentWall.size() >= measurementsPerWallAnchor) {
-                finishWall();
-            }
-        }
-    }
-
-    private void finishWall() {
-        Vector3 meanPosition = new Vector3();
-        Vector3 meanNormal = new Vector3();
-
-        StreamSupport.stream(currentWall).forEach(plane -> {
-            meanPosition.add(plane.getPosition());
-            meanNormal.add(plane.getNormal());
-        });
-
-        meanPosition.divide(currentWallMeasurements);
-        meanNormal.normalize();
-
-        if (alignToAnchor && anchorState == AnchorState.FINISHED) {
-            align(meanNormal);
+        // Align the normal to the anchor if necessary/possible
+        if (alignToAnchor && anchorRoom.isAnchorFinished()) {
+            Vector3 alignedNormal = plane.getNormal();
+            align(alignedNormal);
+            plane.setNormal(alignedNormal);
         }
 
-        currentRoom.addWall(new Plane(meanPosition, meanNormal));
-        currentWall.clear();
-        currentWallMeasurements = 0;
+        // Add the measurement to the current room
+        currentRoom.addWallMeasurement(plane);
 
-        if (anchorState == AnchorState.UNSET) {
-            anchorState = AnchorState.FIRST_ANCHOR_SET;
-        } else if (anchorState == AnchorState.FIRST_ANCHOR_SET) {
-            rectifyAndFinishAnchor();
-            initTransforms();
-            anchorState = AnchorState.FINISHED;
+        // Check whether the anchor normals are finished
+        if (alignToAnchor) {
+            if (anchorRoom.isAnchorFinished() && !transformIsInit) {
+                anchorNormals = anchorRoom.getAnchorNormals();
+                initTransforms();
+            }
         }
     }
 
@@ -180,32 +166,6 @@ public class Measurer {
         normal.setAll(anchorNormals[smallestAngleIndex]);
     }
 
-    private void rectifyAndFinishAnchor() {
-        Vector3 firstWallNormal = currentRoom.getWalls()[0].getNormal();
-        Vector3 secondWallNormal = currentRoom.getWalls()[1].getNormal();
-
-        double angle = MathUtils.clockwiseAngle(secondWallNormal, firstWallNormal);
-        double angleDifference;
-        if (angle > 0.0) {
-            angleDifference = (Math.toRadians(90.0) - angle) / 2.0;
-        } else {
-            angleDifference = (-Math.toRadians(90.0) - angle) / 2.0;
-        }
-
-        firstWallNormal.rotateY(-angleDifference);
-        secondWallNormal.rotateY(angleDifference);
-
-        anchorNormals[0] = firstWallNormal.clone();
-        anchorNormals[1] = secondWallNormal.clone();
-        anchorNormals[2] = firstWallNormal.clone().inverse();
-        anchorNormals[3] = secondWallNormal.clone().inverse();
-
-        Log.d(TAG, "Anchor set to:\n" + anchorNormals[0].toString() + "\n" +
-                anchorNormals[1].toString() + "\n" +
-                anchorNormals[2].toString() + "\n" +
-                anchorNormals[3].toString());
-    }
-
     private void initTransforms() {
         Vector3 anchorPoint = currentRoom.getZeroPoint();
 
@@ -223,6 +183,18 @@ public class Measurer {
         bcoToGlTransform = new Matrix4(glToBcoTransform).inverse().getDoubleValues();
     }
 
+    public void undoLastMeasurement() throws CouldNotPerformException {
+        switch (measurerState) {
+            case MARK_CEILING:
+                currentRoom.clearGround();
+                measurerState = MeasurerState.MARK_GROUND;
+                break;
+
+            default:
+                throw new CouldNotPerformException("Not able to undo measurement in state " + measurerState.name());
+        }
+    }
+
     public double[] getGlToBcoTransform() {
         return glToBcoTransform;
     }
@@ -231,7 +203,12 @@ public class Measurer {
         return bcoToGlTransform;
     }
 
-    public AnchorState getAnchorState() {
-        return anchorState;
+    public boolean isAnchorFinished() {
+        if (anchorRoom == null) {
+            return false;
+        }
+        else {
+            return anchorRoom.isAnchorFinished();
+        }
     }
 }
