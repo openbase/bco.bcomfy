@@ -71,19 +71,6 @@ public class Room {
         return walls.get(walls.size() - 1);
     }
 
-    public Plane[] getWalls() {
-        Plane[] wallArray = new Plane[walls.size()];
-        return walls.toArray(wallArray);
-    }
-
-    public int getWallCount() {
-        return walls.size();
-    }
-
-    public void removeRecentWall() {
-        walls.remove(walls.size() - 1);
-    }
-
     public boolean isFinishable() {
         if (walls.size() > 3 && ground != null && ceiling != null) {
             for (Wall wall : walls) {
@@ -96,10 +83,6 @@ public class Room {
         else {
             return false;
         }
-    }
-
-    public boolean isUndoable() {
-        return walls.size() != 0 || ceiling != null || ground != null;
     }
 
     public void finish() {

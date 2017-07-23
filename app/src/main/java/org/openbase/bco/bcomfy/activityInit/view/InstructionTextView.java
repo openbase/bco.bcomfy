@@ -37,4 +37,32 @@ public class InstructionTextView {
                 break;
         }
     }
+
+    public void updateInstruction(Instruction instruction, int wallNumber, int measurementsFinished, int measurementsNeeded) {
+        updateInstruction(instruction);
+        String nextWallNumberString;
+        int nextWallNumber = wallNumber + 1;
+
+        switch (nextWallNumber) {
+            case 1:
+                nextWallNumberString = "1st";
+                break;
+            case 2:
+                nextWallNumberString = "2nd";
+                break;
+            case 3:
+                nextWallNumberString = "3rd";
+                break;
+            default:
+                nextWallNumberString = nextWallNumber + "th";
+        }
+
+        if (measurementsNeeded > 1) {
+            textView.setText("Please mark the " + nextWallNumberString + " wall in a clockwise order\n\n" +
+                                "Measurements left: " + (measurementsNeeded - measurementsFinished));
+        }
+        else {
+            textView.setText("Please mark the " + nextWallNumberString + " wall in a clockwise order");
+        }
+    }
 }

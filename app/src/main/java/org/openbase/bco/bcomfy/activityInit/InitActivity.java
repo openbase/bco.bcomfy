@@ -215,17 +215,22 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 buttonUndoMeasurement.setEnabled(true);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS,
+                        measurer.getCurrentFinishedWallCount(),
+                        measurer.getCurrentMeasurementCount(),
+                        measurer.getNeededMeasurementCount());
                 break;
             case ENOUGH_WALLS:
                 buttonAddRoom.setEnabled(false);
                 buttonUndoMeasurement.setEnabled(true);
                 buttonFinishRoom.setEnabled(true);
                 buttonFinishMeasuring.setEnabled(false);
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS,
+                        measurer.getCurrentFinishedWallCount(),
+                        measurer.getCurrentMeasurementCount(),
+                        measurer.getNeededMeasurementCount());
                 break;
         }
-
-        printMeasurerDebug();
     }
 
     public void onAddRoomClicked(View v) {
@@ -315,13 +320,5 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void printMeasurerDebug() {
-        Log.i(TAG, "measurerState: " + measurer.getMeasurerState().name());
-        Log.i(TAG, "getCurrentFinishedWallCount: " + measurer.getCurrentFinishedWallCount());
-        Log.i(TAG, "getNeededFinishedWallCount: " + measurer.getNeededFinishedWallCount());
-        Log.i(TAG, "getCurrentMeasurementCount: " + measurer.getCurrentMeasurementCount());
-        Log.i(TAG, "getNeededMeasurementCount: " + measurer.getNeededMeasurementCount());
     }
 }
