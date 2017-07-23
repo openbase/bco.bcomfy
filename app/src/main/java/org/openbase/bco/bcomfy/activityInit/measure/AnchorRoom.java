@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityInit.measure;
 import android.util.Log;
 
 import org.openbase.bco.bcomfy.utils.MathUtils;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 
 public class AnchorRoom extends Room {
@@ -37,13 +38,20 @@ public class AnchorRoom extends Room {
             }
         }
 
-        // Add measurement to current wall
-        boolean wallIsFinished = getCurrentWall().addMeasurement(measurement);
+        boolean wallIsFinished = false;
 
-        // Calculate anchor normals if wall is the second finished one
-        if (wallIsFinished && walls.size() == 2) {
-            rectifyAndFinishAnchor();
+        try {
+            // Add measurement to current wall
+            wallIsFinished = getCurrentWall().addMeasurement(measurement);
+
+            // Calculate anchor normals if wall is the second finished one
+            if (wallIsFinished && walls.size() == 2) {
+                rectifyAndFinishAnchor();
+            }
+        } catch (CouldNotPerformException e) {
+            e.printStackTrace();
         }
+
     }
 
     public boolean isAnchorFinished() {
@@ -86,5 +94,26 @@ public class AnchorRoom extends Room {
         walls.get(1).getFinishedWall().setNormal(secondWallNormal.clone());
 
         anchorFinished = true;
+    }
+
+    @Override
+    public void undoLastMeasurement() throws CouldNotPerformException {
+        super.undoLastMeasurement();
+
+        if (anchorFinished) {
+            if (!walls.get(1).isFinished()) {
+                anchorFinished = false;
+            }
+        }
+    }
+
+    @Override
+    public int getNeededMeasurementCount() {
+        if (anchorFinished) {
+            return measurementsPerWall;
+        }
+        else {
+            return measurementsPerWallAnchor;
+        }
     }
 }

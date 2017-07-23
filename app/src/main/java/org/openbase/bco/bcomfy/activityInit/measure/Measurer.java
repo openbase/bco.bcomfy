@@ -4,14 +4,11 @@ import android.util.Log;
 
 import com.projecttango.tangosupport.TangoSupport;
 
-import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
-
-import java8.util.stream.StreamSupport;
 
 public class Measurer {
     private static final String TAG = Measurer.class.getSimpleName();
@@ -95,12 +92,7 @@ public class Measurer {
             case MARK_WALLS:
             case ENOUGH_WALLS:
                 addWallMeasurement(plane);
-                if (currentRoom.isInFinishedState()) {
-                    measurerState = MeasurerState.ENOUGH_WALLS;
-                }
-                else {
-                    measurerState = MeasurerState.MARK_WALLS;
-                }
+                measurerState = currentRoom.getMeasurerState();
                 return MeasureType.WALL;
         }
 
@@ -184,14 +176,12 @@ public class Measurer {
     }
 
     public void undoLastMeasurement() throws CouldNotPerformException {
-        switch (measurerState) {
-            case MARK_CEILING:
-                currentRoom.clearGround();
-                measurerState = MeasurerState.MARK_GROUND;
-                break;
-
-            default:
-                throw new CouldNotPerformException("Not able to undo measurement in state " + measurerState.name());
+        if (currentRoom == null) {
+            throw new CouldNotPerformException("Not able to undo measurement. Current room is null.");
+        }
+        else {
+            currentRoom.undoLastMeasurement();
+            measurerState = currentRoom.getMeasurerState();
         }
     }
 
@@ -209,6 +199,42 @@ public class Measurer {
         }
         else {
             return anchorRoom.isAnchorFinished();
+        }
+    }
+
+    public int getCurrentFinishedWallCount() {
+        if (currentRoom == null) {
+            return -1;
+        }
+        else {
+            return currentRoom.getCurrentFinishedWallCount();
+        }
+    }
+
+    public int getNeededFinishedWallCount() {
+        if (currentRoom == null) {
+            return -1;
+        }
+        else {
+            return currentRoom.getNeededFinishedWallCount();
+        }
+    }
+
+    public int getCurrentMeasurementCount() {
+        if (currentRoom == null) {
+            return -1;
+        }
+        else {
+            return currentRoom.getCurrentMeasurementCount();
+        }
+    }
+
+    public int getNeededMeasurementCount() {
+        if (currentRoom == null) {
+            return -1;
+        }
+        else {
+            return currentRoom.getNeededMeasurementCount();
         }
     }
 }

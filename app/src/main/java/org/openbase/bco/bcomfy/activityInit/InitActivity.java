@@ -224,6 +224,8 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 buttonFinishMeasuring.setEnabled(false);
                 break;
         }
+
+        printMeasurerDebug();
     }
 
     public void onAddRoomClicked(View v) {
@@ -313,5 +315,13 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void printMeasurerDebug() {
+        Log.i(TAG, "measurerState: " + measurer.getMeasurerState().name());
+        Log.i(TAG, "getCurrentFinishedWallCount: " + measurer.getCurrentFinishedWallCount());
+        Log.i(TAG, "getNeededFinishedWallCount: " + measurer.getNeededFinishedWallCount());
+        Log.i(TAG, "getCurrentMeasurementCount: " + measurer.getCurrentMeasurementCount());
+        Log.i(TAG, "getNeededMeasurementCount: " + measurer.getNeededMeasurementCount());
     }
 }

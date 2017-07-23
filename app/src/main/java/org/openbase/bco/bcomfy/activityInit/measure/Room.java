@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityInit.measure;
 import android.util.Log;
 
 import org.openbase.bco.bcomfy.utils.MathUtils;
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -58,7 +59,12 @@ public class Room {
         }
 
         // Add measurement to current wall
-        getCurrentWall().addMeasurement(measurement);
+        try {
+            getCurrentWall().addMeasurement(measurement);
+        } catch (CouldNotPerformException e) {
+            Log.e(TAG, "Error while adding measurement");
+            e.printStackTrace();
+        }
     }
 
     public Wall getCurrentWall() {
@@ -78,19 +84,22 @@ public class Room {
         walls.remove(walls.size() - 1);
     }
 
-    public boolean isInFinishedState() {
-        if (walls.size() > 3) {
+    public boolean isFinishable() {
+        if (walls.size() > 3 && ground != null && ceiling != null) {
             for (Wall wall : walls) {
                 if (!wall.isFinished()) {
                     return false;
                 }
             }
-
             return true;
         }
         else {
             return false;
         }
+    }
+
+    public boolean isUndoable() {
+        return walls.size() != 0 || ceiling != null || ground != null;
     }
 
     public void finish() {
@@ -133,5 +142,69 @@ public class Room {
         return MathUtils.calc3PlaneIntersection(wall0.getPosition(), wall0.getNormal(),
                 wall1.getPosition(), wall1.getNormal(),
                 ceiling.getPosition(), ceiling.getNormal());
+    }
+
+    public void undoLastMeasurement() throws CouldNotPerformException {
+        if (walls.size() == 0) {
+            if (ceiling != null) {
+                clearCeiling();
+            }
+            else if (ground != null) {
+                clearGround();
+            }
+            else {
+                throw new CouldNotPerformException("Not able to undo measurement. This room does not contain any measurement!");
+            }
+        }
+        else {
+            getCurrentWall().removeRecentMeasurement();
+
+            if (getCurrentWall().getMeasurementCount() == 0) {
+                walls.remove(getCurrentWall());
+            }
+        }
+    }
+
+    public Measurer.MeasurerState getMeasurerState() {
+        if (ground == null) {
+            return Measurer.MeasurerState.MARK_GROUND;
+        }
+        if (ceiling == null) {
+            return Measurer.MeasurerState.MARK_CEILING;
+        }
+        if (isFinishable()) {
+            return Measurer.MeasurerState.ENOUGH_WALLS;
+        }
+        return Measurer.MeasurerState.MARK_WALLS;
+    }
+
+    public int getCurrentFinishedWallCount() {
+        if (walls.isEmpty()) return 0;
+
+        int currentFinishedWallCount = walls.size();
+        if (!getCurrentWall().isFinished()) {
+            currentFinishedWallCount--;
+        }
+        return currentFinishedWallCount;
+    }
+
+    public int getNeededFinishedWallCount() {
+        return 4;
+    }
+
+    public int getCurrentMeasurementCount() {
+        if (walls.isEmpty()) {
+            return 0;
+        }
+        else if (getCurrentWall().isFinished()) {
+            return 0;
+        }
+        else {
+            return getCurrentWall().getMeasurementCount();
+        }
+    }
+
+    public int getNeededMeasurementCount() {
+        return measurementsPerWall;
     }
 }

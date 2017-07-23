@@ -1,5 +1,6 @@
 package org.openbase.bco.bcomfy.activityInit.measure;
 
+import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -19,7 +20,10 @@ public class Wall {
         finished = false;
     }
 
-    public boolean addMeasurement(Plane measurement) {
+    public boolean addMeasurement(Plane measurement) throws CouldNotPerformException {
+        if (finished)
+            throw new CouldNotPerformException("Not able to add measurement. This wall is already finished!");
+
         measurements.add(measurement);
 
         if (measurements.size() == measurementsNeeded) {
@@ -52,6 +56,16 @@ public class Wall {
 
     public Plane getFinishedWall() {
         return finishedWall;
+    }
+
+    public void removeRecentMeasurement() throws CouldNotPerformException {
+        if (measurements.size() == 0) {
+            throw new CouldNotPerformException("Not able to undo measurement. This wall does not contain any measurement!");
+        }
+        else {
+            measurements.remove(measurements.size() - 1);
+            finished = false;
+        }
     }
 
 }
