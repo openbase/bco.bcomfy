@@ -159,7 +159,7 @@ public class Measurer {
     }
 
     private void initTransforms() {
-        Vector3 anchorPoint = currentRoom.getZeroPoint();
+        Vector3 anchorPoint = anchorRoom.getZeroPoint();
 
         double[][] glPoints = { {anchorPoint.x, anchorPoint.y, anchorPoint.z} ,
                 {anchorPoint.x + anchorNormals[1].x, anchorPoint.y + anchorNormals[1].y, anchorPoint.z + anchorNormals[1].z} ,
@@ -173,6 +173,8 @@ public class Measurer {
 
         glToBcoTransform = TangoSupport.findCorrespondenceSimilarityTransform(glPoints,  bcoPoints);
         bcoToGlTransform = new Matrix4(glToBcoTransform).inverse().getDoubleValues();
+
+        transformIsInit = true;
     }
 
     public void undoLastMeasurement() throws CouldNotPerformException {
