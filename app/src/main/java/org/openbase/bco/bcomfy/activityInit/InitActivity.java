@@ -254,7 +254,8 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     public void onFinishMeasurementClicked(View v) {
-        updateGuiButtons();
+        Log.i(TAG, "Measurement finished. Closing InitActivity...");
+        this.finish();
     }
 
     @Override
