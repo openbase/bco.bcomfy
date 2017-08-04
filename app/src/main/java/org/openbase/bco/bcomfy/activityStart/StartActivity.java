@@ -1,21 +1,27 @@
 package org.openbase.bco.bcomfy.activityStart;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
@@ -42,6 +48,10 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
 
     private static final String TAG = StartActivity.class.getSimpleName();
     private static Context applicationContext;
+
+    private static final int PERMISSION_CAMERA = 1;
+    private static final int PERMISSION_READ_EXTERNAL = 2;
+    private static final int PERMISSION_WRITE_EXTERNAL = 3;
 
     private StartActivityState state = StartActivityState.INIT_BCO;
 
@@ -81,11 +91,8 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         // Set system property. This workaround is needed for RSB.
         System.setProperty("sun.arch.data.model", "32");
 
-        // Ask for ADF loading and saving permissions.
-        if (!Tango.hasPermission(this, Tango.PERMISSIONTYPE_ADF_LOAD_SAVE)) {
-            startActivityForResult(
-                    Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
-        }
+        // Check for needed permissions
+        checkAndRequestPermissions();
 
         initBcoTask = new InitBcoTask(returnObject -> StartActivity.this.changeState(StartActivityState.INIT_TANGO));
         initBcoTask.execute();
@@ -99,6 +106,39 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    private void checkAndRequestPermissions() {
+        // Check camera permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_CAMERA);
+        }
+
+        // Check read external permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_READ_EXTERNAL);
+        }
+
+        // Check write external permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL);
+        }
+
+        // Check Tango related permission
+        if (!Tango.hasPermission(this, Tango.PERMISSIONTYPE_ADF_LOAD_SAVE)) {
+            startActivityForResult(
+                    Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_ADF_LOAD_SAVE), 0);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults.length == 0) {
+            Toast toast = Toast.makeText(this, R.string.toast_permission_not_granted, Toast.LENGTH_LONG);
+            toast.show();
+
+            this.finish();
+        }
     }
 
     /**
