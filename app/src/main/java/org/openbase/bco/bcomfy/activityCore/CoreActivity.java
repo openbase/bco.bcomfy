@@ -13,7 +13,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -56,6 +55,7 @@ import javax.vecmath.Vector3d;
 
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.location.LocationConfigType;
 import rst.geometry.PoseType;
 import rst.geometry.RotationType;
@@ -91,7 +91,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     boolean inEditMode = false;
     Vector3 currentEditPosition;
-    private UnitConfigType.UnitConfig currentDevice;
+    private UnitConfig currentDevice;
 
     private UnitListViewHolder unitListViewHolder;
 
@@ -101,7 +101,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private ScheduledThreadPoolExecutor sch;
     private Runnable fetchLocationLabelTask;
 
-    private TextView locationLabelView;
+    private Button locationLabelButton;
+    private UnitConfig currentLocation;
 
     private String adfUuid;
 
@@ -257,7 +258,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         updateLeftDrawer();
         setupRightDrawer();
 
-        locationLabelView = findViewById(R.id.locationLabelView);
+        locationLabelButton = findViewById(R.id.locationLabelButton);
         drawerLayout.setScrimColor(Color.TRANSPARENT);
 
         setSurfaceView(findViewById(R.id.surfaceview_core));
@@ -300,15 +301,16 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             try {
                 Registries.waitForData();
-                List<UnitConfigType.UnitConfig> unitConfigs = Registries.getLocationRegistry()
+                List<UnitConfig> unitConfigs = Registries.getLocationRegistry()
                         .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
 
                 if (unitConfigs.size() > 0) {
-                    runOnUiThread(() -> locationLabelView.setText(unitConfigs.get(0).getLabel()));
-                    runOnUiThread(() -> locationLabelView.setVisibility(View.VISIBLE));
+                    currentLocation = unitConfigs.get(0);
+                    runOnUiThread(() -> locationLabelButton.setText(unitConfigs.get(0).getLabel()));
+                    runOnUiThread(() -> locationLabelButton.setVisibility(View.VISIBLE));
                 }
                 else {
-                    runOnUiThread(() -> locationLabelView.setVisibility(View.INVISIBLE));
+                    runOnUiThread(() -> locationLabelButton.setVisibility(View.GONE));
                 }
 
             } catch (CouldNotPerformException | InterruptedException | ExecutionException | ConcurrentModificationException e) {
@@ -316,7 +318,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             }
         };
 
-        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
+        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 500, TimeUnit.MILLISECONDS);
     }
 
     @Deprecated
@@ -347,7 +349,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Override
-    public void onDeviceClicked(UnitConfigType.UnitConfig unitConfig) {
+    public void onDeviceClicked(UnitConfig unitConfig) {
         drawerLayout.closeDrawer(leftDrawer);
 
         currentDevice = unitConfig;
@@ -362,6 +364,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, rightDrawer);
         drawerLayout.openDrawer(rightDrawer);
+    }
+
+    public void onLocationLabelButtonClicked(View view) {
+        if (currentLocation != null) {
+            onDeviceClicked(currentLocation);
+        }
     }
 
     @Override
@@ -402,7 +410,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
 
             // Get location for that specific coordinate
-            List<UnitConfigType.UnitConfig> locations =
+            List<UnitConfig> locations =
                 Registries.getLocationRegistry().getLocationConfigsByCoordinate(
                     Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
 
@@ -411,7 +419,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 return;
             }
 
-            UnitConfigType.UnitConfig[] location = new UnitConfigType.UnitConfig[1];
+            UnitConfig[] location = new UnitConfig[1];
             // Get Region if there is any
             StreamSupport.stream(locations)
                     .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
@@ -456,7 +464,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     currentDevice.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
             PlacementConfigType.PlacementConfig placementConfig =
                     currentDevice.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
-            UnitConfigType.UnitConfig unitConfig =
+            UnitConfig unitConfig =
                     currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
@@ -475,7 +483,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             // Generate new protobuf unitConfig
             PlacementConfigType.PlacementConfig placementConfig =
                     currentDevice.getPlacementConfig().toBuilder().clearPosition().build();
-            UnitConfigType.UnitConfig unitConfig =
+            UnitConfig unitConfig =
                     currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
@@ -515,7 +523,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         this.getRenderer().addSphere(new Vector3(TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0})), Color.RED);
     }
 
-    private boolean isUnitLocationEditable(UnitConfigType.UnitConfig unitConfig) {
+    private boolean isUnitLocationEditable(UnitConfig unitConfig) {
         switch (unitConfig.getType()) {
             case DEVICE:
                 return true;

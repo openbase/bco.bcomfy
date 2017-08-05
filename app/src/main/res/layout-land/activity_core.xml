@@ -25,19 +25,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <TextView
-                android:id="@+id/locationLabelView"
+            <Button
+                android:id="@+id/locationLabelButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="29dp"
                 android:background="@color/background_gray_slightly_transparent"
+                android:onClick="onLocationLabelButtonClicked"
                 android:padding="10dp"
                 android:text="@android:string/untitled"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="24sp"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="match_parent"

@@ -195,6 +195,11 @@ public class Measurer {
         return bcoToGlTransform;
     }
 
+    public void setTransforms(double[] glToBcoTransform, double[] bcoToGlTransform) {
+        this.glToBcoTransform = glToBcoTransform;
+        this.bcoToGlTransform = bcoToGlTransform;
+    }
+
     public boolean isAnchorFinished() {
         if (anchorRoom == null) {
             return false;
