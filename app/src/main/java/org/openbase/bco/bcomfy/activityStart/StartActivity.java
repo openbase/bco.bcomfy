@@ -131,16 +131,6 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (grantResults.length == 0) {
-            Toast toast = Toast.makeText(this, R.string.toast_permission_not_granted, Toast.LENGTH_LONG);
-            toast.show();
-
-            this.finish();
-        }
-    }
-
     /**
      * Initialize Tango Service as a normal Android Service.
      */
