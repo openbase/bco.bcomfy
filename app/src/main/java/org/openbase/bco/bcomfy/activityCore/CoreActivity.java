@@ -318,7 +318,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             }
         };
 
-        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 500, TimeUnit.MILLISECONDS);
+        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 500, 500, TimeUnit.MILLISECONDS);
     }
 
     @Deprecated
