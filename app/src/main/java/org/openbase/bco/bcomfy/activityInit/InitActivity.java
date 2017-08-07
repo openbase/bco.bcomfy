@@ -97,7 +97,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 }
 
                 if (planeFit != null) {
-                    Measurer.MeasureType lastMeasureType = measurer.addPlaneMeasurement(planeFit);
+                    Measurer.MeasureType lastMeasureType = measurer.addPlaneMeasurement(planeFit, currentPose.translation);
                     updateGuiAfterPlaneMeasurement(planeFit, lastMeasureType);
                 }
 

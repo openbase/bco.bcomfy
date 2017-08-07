@@ -75,7 +75,7 @@ public class Measurer {
         measurerState = MeasurerState.INIT;
     }
 
-    public MeasureType addPlaneMeasurement(Plane plane) {
+    public MeasureType addPlaneMeasurement(Plane plane, double[] currentPosition) {
         switch (measurerState) {
             case INIT:
                 return MeasureType.INVALID;
@@ -91,7 +91,7 @@ public class Measurer {
                 return MeasureType.CEILING;
             case MARK_WALLS:
             case ENOUGH_WALLS:
-                addWallMeasurement(plane);
+                addWallMeasurement(plane, currentPosition);
                 measurerState = currentRoom.getMeasurerState();
                 return MeasureType.WALL;
         }
@@ -115,7 +115,14 @@ public class Measurer {
         return roomList.get(roomList.size()-1).getCeilingVertices();
     }
 
-    private void addWallMeasurement(Plane plane) {
+    private void addWallMeasurement(Plane plane, double[] currentPosition) {
+        // Check if wall was measured by clicking on the ground
+        if (plane.getNormal().dot(GROUND_NORMAL) > 0.90) {
+            // In that case, use the vector that points from the measured point to the users position
+            Log.i(TAG, "Detected ground measurement while scanning for walls. Applying fix...");
+            plane.setNormal(plane.getPosition().clone().subtract(new Vector3(currentPosition)));
+        }
+
         // Use the constraint that walls are perpendicular to the ground
         plane.setNormal(new Vector3(plane.getNormal().x, 0.0, plane.getNormal().z));
 
