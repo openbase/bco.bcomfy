@@ -244,7 +244,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
             getRenderer().removeRecentPlane();
             updateGuiButtons();
         } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 
@@ -302,7 +302,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
             transformsMap = (HashMap<String, double[]>) objectInputStream.readObject();
             objectInputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
             transformsMap = new HashMap<>();
         }
 
@@ -319,7 +319,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                     Arrays.toString(measurer.getBcoToGlTransform()) + "\n" +
                     "Total transforms in database: " + transformsMap.size());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

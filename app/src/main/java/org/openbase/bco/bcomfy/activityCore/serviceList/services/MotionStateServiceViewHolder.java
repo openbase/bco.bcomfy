@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -76,7 +77,7 @@ public class MotionStateServiceViewHolder extends AbstractServiceViewHolder {
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

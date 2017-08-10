@@ -314,7 +314,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 }
 
             } catch (CouldNotPerformException | InterruptedException | ExecutionException | ConcurrentModificationException e) {
-                e.printStackTrace();
+                Log.e(TAG, Log.getStackTraceString(e));
             }
         };
 
@@ -344,7 +344,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     Arrays.toString(bcoToGlTransform) + "\n" +
                     "Total transforms in database: " + transformsMap.size());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 
@@ -473,8 +473,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             uiOverlayHolder.checkAndAddNewUnit(unitConfig);
             leaveEditMode();
         } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
-            e.printStackTrace();
+            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice + "\n" + Log.getStackTraceString(e));
         }
     }
 
@@ -492,8 +491,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             uiOverlayHolder.removeUnit(unitConfig);
             leaveEditMode();
         } catch (CouldNotPerformException | InterruptedException  e) {
-            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice);
-            e.printStackTrace();
+            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice + "\n" + Log.getStackTraceString(e));
         }
     }
 

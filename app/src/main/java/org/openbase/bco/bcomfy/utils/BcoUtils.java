@@ -94,8 +94,8 @@ public final class BcoUtils {
 
                 // Update the locationConfig
                 Registries.getLocationRegistry().updateLocationConfig(newLocationConfig);
-            } catch (InterruptedException | CouldNotPerformException ex) {
-                ex.printStackTrace();
+            } catch (InterruptedException | CouldNotPerformException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
             } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
                 Log.w(TAG, "No PID information available.");
             }
@@ -135,15 +135,13 @@ public final class BcoUtils {
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
                             } catch (CouldNotPerformException | InterruptedException e) {
-                                Log.e(TAG, "Error while updating unitConfig!");
-                                e.printStackTrace();
+                                Log.e(TAG, "Error while updating unitConfig!" + "\n" + Log.getStackTraceString(e));
                             }
                         });
 
                 successful = Boolean.TRUE;
             } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unitConfigs!");
-                e.printStackTrace();
+                Log.e(TAG, "Error while fetching unitConfigs!" + "\n" + Log.getStackTraceString(e));
             }
 
             return null;
@@ -182,15 +180,13 @@ public final class BcoUtils {
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
                             } catch (CouldNotPerformException | InterruptedException e) {
-                                Log.e(TAG, "Error while updating unitConfig!");
-                                e.printStackTrace();
+                                Log.e(TAG, "Error while updating unitConfig!" + "\n" + Log.getStackTraceString(e));
                             }
                         });
 
                 successful = Boolean.TRUE;
             } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unitConfigs!");
-                e.printStackTrace();
+                Log.e(TAG, "Error while fetching unitConfigs!" + "\n" + Log.getStackTraceString(e));
             }
 
             return null;

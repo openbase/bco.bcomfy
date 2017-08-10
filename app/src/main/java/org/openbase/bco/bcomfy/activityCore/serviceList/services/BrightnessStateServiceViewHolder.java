@@ -43,8 +43,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
                         Service$.invokeOperationServiceMethod(ServiceType.BRIGHTNESS_STATE_SERVICE, unitRemote,
                                 BrightnessState.newBuilder().setBrightness(progress).build());
                     } catch (CouldNotPerformException e) {
-                        Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId());
-                        e.printStackTrace();
+                        Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                     }
                 }
 
@@ -72,7 +71,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
             activity.runOnUiThread(() -> seekBar.setProgress((int) brightnessState.getBrightness()));
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

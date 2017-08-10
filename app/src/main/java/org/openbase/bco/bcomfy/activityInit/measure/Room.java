@@ -62,8 +62,7 @@ public class Room {
         try {
             getCurrentWall().addMeasurement(measurement);
         } catch (CouldNotPerformException e) {
-            Log.e(TAG, "Error while adding measurement");
-            e.printStackTrace();
+            Log.e(TAG, "Error while adding measurement" + "\n" + Log.getStackTraceString(e));
         }
     }
 

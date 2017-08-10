@@ -50,8 +50,7 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
                                 PowerState.newBuilder().setValue(PowerState.State.OFF).build());
                     }
                 } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while changing the power state of unit: " + serviceConfig.getUnitId());
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while changing the power state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                 }
             });
         } else {
@@ -70,7 +69,7 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
                 activity.runOnUiThread(() -> powerStateSwitch.setChecked(false));
             }
         } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

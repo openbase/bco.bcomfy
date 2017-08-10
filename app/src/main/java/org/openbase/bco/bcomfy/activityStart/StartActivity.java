@@ -384,9 +384,8 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
 
                 // Initiate registries
                 Registries.waitForData();
-            } catch (CouldNotPerformException | InterruptedException ex) {
-                Log.e(TAG, "Error while initializing BCO!");
-                ex.printStackTrace();
+            } catch (CouldNotPerformException | InterruptedException e) {
+                Log.e(TAG, "Error while initializing BCO!" + "\n" + Log.getStackTraceString(e));
             }
             return null;
         }

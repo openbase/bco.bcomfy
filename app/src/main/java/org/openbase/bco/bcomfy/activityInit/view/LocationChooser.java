@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.registry.remote.Registries;
@@ -16,6 +17,8 @@ import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 
 public class LocationChooser extends DialogFragment {
+
+    private static final String TAG = LocationChooser.class.getSimpleName();
 
     public interface LocationChooserListener {
         void onLocationSelected(String locationId);
@@ -57,7 +60,7 @@ public class LocationChooser extends DialogFragment {
 
             return builder.create();
         } catch (InterruptedException | CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
             return null;
         }
     }

@@ -47,8 +47,7 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
                                 ActivationState.newBuilder().setValue(ActivationState.State.DEACTIVE).build());
                     }
                 } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while changing the activation state of unit: " + serviceConfig.getUnitId());
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while changing the activation state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                 }
             });
         } else {
@@ -70,7 +69,7 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
                     break;
             }
         } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

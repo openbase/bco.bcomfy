@@ -60,8 +60,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
                     Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.DOWN).build());
                 } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId());
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                 }
             });
 
@@ -70,8 +69,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
                     Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.STOP).build());
                 } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId());
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                 }
             });
 
@@ -80,8 +78,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
                     Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.UP).build());
                 } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId());
-                    e.printStackTrace();
+                    Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
                 }
             });
         } else {
@@ -125,7 +122,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
                 }
             });
         } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

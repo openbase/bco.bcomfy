@@ -119,7 +119,7 @@ public class PowerConsumptionStateServiceViewHolder extends AbstractServiceViewH
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

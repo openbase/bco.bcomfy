@@ -2,6 +2,7 @@ package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +84,7 @@ public class TamperStateServiceViewHolder extends AbstractServiceViewHolder {
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

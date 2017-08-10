@@ -67,7 +67,7 @@ public class ContactStateServiceViewHolder extends AbstractServiceViewHolder {
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

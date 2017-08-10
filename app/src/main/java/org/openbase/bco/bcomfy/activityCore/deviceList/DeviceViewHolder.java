@@ -75,8 +75,7 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
                 UnitRemote remote = Units.getFutureUnit(device.getUnitConfig().getId(), true).get(1, TimeUnit.SECONDS);
                 remote.addConfigObserver((observable, unitConfig) -> deviceViewHolder.updateNoPositionIcon((UnitConfigType.UnitConfig) unitConfig));
             } catch (InterruptedException | ExecutionException | TimeoutException | NotAvailableException e) {
-                Log.e(TAG, "Unable to get unitRemote of unit " + device.getUnitConfig().getId());
-                e.printStackTrace();
+                Log.e(TAG, "Unable to get unitRemote of unit " + device.getUnitConfig().getId() + "\n" + Log.getStackTraceString(e));
             }
 
             return null;

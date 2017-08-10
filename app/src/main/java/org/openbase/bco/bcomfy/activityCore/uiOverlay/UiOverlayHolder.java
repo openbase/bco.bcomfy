@@ -57,7 +57,7 @@ public class UiOverlayHolder {
 //                updateUiOverlay();
 //            });
 //        } catch (NotAvailableException | InterruptedException e) {
-//            e.printStackTrace();
+//            Log.e(TAG, Log.getStackTraceString(e));
 //        }
     }
 
@@ -118,8 +118,7 @@ public class UiOverlayHolder {
             try {
                 onDeviceClickedListener.onDeviceClicked(holder.getUnitHostConfig());
             } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unit config of unit " + holder.getUnitHostId());
-                e.printStackTrace();
+                Log.e(TAG, "Error while fetching unit config of unit " + holder.getUnitHostId() + "\n" + Log.getStackTraceString(e));
             }
         });
         uiOverlay.addView(holder.getView());
@@ -147,11 +146,11 @@ public class UiOverlayHolder {
                                 Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
                                 newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
                             } catch (InterruptedException | CouldNotPerformException | ExecutionException | TimeoutException e) {
-                                e.printStackTrace();
+                                Log.e(TAG, Log.getStackTraceString(e));
                             }
                         });
             } catch (CouldNotPerformException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, Log.getStackTraceString(e));
             }
 
             return null;

@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.text.method.NumberKeyListener;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -192,7 +193,7 @@ public class SettingsActivity extends Activity {
                     Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, "80")));
             JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
         } catch (JPNotAvailableException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 

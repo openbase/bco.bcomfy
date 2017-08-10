@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore.serviceList;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,6 +26,8 @@ import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
 public class UnitListViewHolder {
+
+    private static final String TAG = UnitListViewHolder.class.getSimpleName();
 
     private LinearLayout serviceList;
     private LinearLayout unitList;
@@ -102,7 +105,7 @@ public class UnitListViewHolder {
                 }
 
             } catch (CouldNotPerformException | InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
+                Log.e(TAG, Log.getStackTraceString(e));
             }
             return null;
         }

@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore.serviceList.services;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,7 +62,7 @@ public class IlluminanceStateServiceViewHolder extends AbstractServiceViewHolder
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

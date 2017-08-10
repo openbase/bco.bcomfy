@@ -49,7 +49,7 @@ public class AnchorRoom extends Room {
                 rectifyAndFinishAnchor();
             }
         } catch (CouldNotPerformException e) {
-            e.printStackTrace();
+            Log.e(TAG, Log.getStackTraceString(e));
         }
 
     }
