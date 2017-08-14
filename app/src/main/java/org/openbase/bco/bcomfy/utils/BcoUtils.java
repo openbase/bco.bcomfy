@@ -55,7 +55,7 @@ public final class BcoUtils {
             int originVertexIndex = -1;
             double originVertexCoordinateSum = Double.MAX_VALUE;
             for (int currentVertexIndex = 0; currentVertexIndex < transformedGround.size(); currentVertexIndex++) {
-                double currentVertexCoordinateSum = transformedGround.get(currentVertexIndex).x + transformedGround.get(currentVertexIndex).z;
+                double currentVertexCoordinateSum = transformedGround.get(currentVertexIndex).x + transformedGround.get(currentVertexIndex).y;
 
                 if (currentVertexCoordinateSum < originVertexCoordinateSum) {
                     originVertexIndex = currentVertexIndex;
