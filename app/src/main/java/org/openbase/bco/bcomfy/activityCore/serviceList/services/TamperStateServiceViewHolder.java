@@ -17,7 +17,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Service;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -61,7 +61,7 @@ public class TamperStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            TamperState tamperState = (TamperState) Service$.invokeProviderServiceMethod(ServiceType.TAMPER_STATE_SERVICE, unitRemote);
+            TamperState tamperState = (TamperState) Service.invokeProviderServiceMethod(ServiceType.TAMPER_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
 

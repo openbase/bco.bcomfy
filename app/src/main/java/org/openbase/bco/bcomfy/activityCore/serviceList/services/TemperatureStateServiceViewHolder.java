@@ -13,7 +13,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Service;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -55,7 +55,7 @@ public class TemperatureStateServiceViewHolder extends AbstractServiceViewHolder
     @Override
     public void updateDynamicContent() {
         try {
-            TemperatureState temperatureState = (TemperatureState) Service$.invokeProviderServiceMethod(ServiceType.TEMPERATURE_STATE_SERVICE, unitRemote);
+            TemperatureState temperatureState = (TemperatureState) Service.invokeProviderServiceMethod(ServiceType.TEMPERATURE_STATE_SERVICE, unitRemote);
 
             double temperatureValue = (Math.round(temperatureState.getTemperature() * 10.0d)) / 10.0d;
 

@@ -14,7 +14,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Service;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -51,7 +51,7 @@ public class ContactStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            ContactState contactState = (ContactState) Service$.invokeProviderServiceMethod(ServiceType.CONTACT_STATE_SERVICE, unitRemote);
+            ContactState contactState = (ContactState) Service.invokeProviderServiceMethod(ServiceType.CONTACT_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
                 switch (contactState.getValue()) {

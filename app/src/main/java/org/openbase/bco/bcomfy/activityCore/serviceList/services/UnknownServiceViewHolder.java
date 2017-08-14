@@ -24,7 +24,7 @@ public class UnknownServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_unknown, viewParent, false);
-        ((TextView) serviceView.findViewById(R.id.service_unknown_textview)).setText(serviceConfig.getServiceTemplate().getType().toString());
+        ((TextView) serviceView.findViewById(R.id.service_unknown_textview)).setText(serviceConfig.getServiceDescription().getType().toString());
     }
 
     @Override

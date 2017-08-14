@@ -13,7 +13,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Service;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -52,7 +52,7 @@ public class IlluminanceStateServiceViewHolder extends AbstractServiceViewHolder
     @Override
     public void updateDynamicContent() {
         try {
-            IlluminanceState illuminanceState = (IlluminanceState) Service$.invokeProviderServiceMethod(ServiceType.ILLUMINANCE_STATE_SERVICE, unitRemote);
+            IlluminanceState illuminanceState = (IlluminanceState) Service.invokeProviderServiceMethod(ServiceType.ILLUMINANCE_STATE_SERVICE, unitRemote);
 
             double illuminanceValue = illuminanceState.getIlluminance();
 

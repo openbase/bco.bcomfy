@@ -15,7 +15,7 @@ public class ServiceViewHolderFactory {
     private static final String TAG = ServiceViewHolderFactory.class.getSimpleName();
 
     public static AbstractServiceViewHolder createServiceViewHolder(Activity activity, ViewGroup parent, UnitRemote unitRemote, ServiceConfig serviceConfig, boolean operation, boolean provider, boolean consumer) throws CouldNotPerformException, InterruptedException {
-        switch (serviceConfig.getServiceTemplate().getType()) {
+        switch (serviceConfig.getServiceDescription().getType()) {
             case POWER_STATE_SERVICE:
                 return new PowerStateServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
             case COLOR_STATE_SERVICE:
@@ -49,7 +49,7 @@ public class ServiceViewHolderFactory {
                     return new UnknownServiceViewHolder(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
                 }
                 else {
-                    throw new CouldNotPerformException("Service " + serviceConfig.getServiceTemplate().getType().name() + " ignored since it is not supported!");
+                    throw new CouldNotPerformException("Service " + serviceConfig.getServiceDescription().getType().name() + " ignored since it is not supported!");
                 }
         }
     }

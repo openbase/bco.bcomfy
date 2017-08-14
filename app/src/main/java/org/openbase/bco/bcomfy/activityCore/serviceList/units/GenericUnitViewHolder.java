@@ -45,7 +45,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
         // Sort all the ServiceConfigs by type and place them into a new list
         List<ServiceConfig> sortedServiceConfigs =
                 StreamSupport.stream(unitConfig.getServiceConfigList())
-                        .sorted((o1, o2) -> o1.getServiceTemplate().getType().compareTo(o2.getServiceTemplate().getType()))
+                        .sorted((o1, o2) -> o1.getServiceDescription().getType().compareTo(o2.getServiceDescription().getType()))
                         .collect(Collectors.toList());
 
         // These booleans are used to determine what kind of patterns are associated to a single service
@@ -60,7 +60,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
         // the serviceList.
         for (ServiceConfig currentServiceConfig : sortedServiceConfigs) {
             // Compare type to previous service
-            if (!currentServiceConfig.getServiceTemplate().getType().equals(previousServiceConfig.getServiceTemplate().getType())) {
+            if (!currentServiceConfig.getServiceDescription().getType().equals(previousServiceConfig.getServiceDescription().getType())) {
                 createAndAddServiceView(activity, previousServiceConfig, operation, provider, consumer);
 
                 operation = false;
@@ -71,7 +71,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
             }
 
             // Set the pattern flag
-            switch (currentServiceConfig.getServiceTemplate().getPattern()) {
+            switch (currentServiceConfig.getServiceDescription().getPattern()) {
                 case PROVIDER:
                     provider = true;
                 case OPERATION:
