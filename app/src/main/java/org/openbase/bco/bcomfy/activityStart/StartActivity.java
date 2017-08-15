@@ -93,7 +93,11 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
 
         // Check for needed permissions
         checkAndRequestPermissions();
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
         initBcoTask = new InitBcoTask(returnObject -> StartActivity.this.changeState(StartActivityState.INIT_TANGO));
         initBcoTask.execute();
     }
