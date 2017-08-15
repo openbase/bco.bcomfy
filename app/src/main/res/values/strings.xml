@@ -25,9 +25,9 @@
     <string name="toast_location_loaded">Location loaded.</string>
     <string name="record_location">Record</string>
     <string name="load_location">Load</string>
-    <string name="init_mark_ground">Please mark the ground</string>
-    <string name="init_mark_ceiling">Please mark the ceiling</string>
-    <string name="init_mark_walls">Please mark the walls clockwise</string>
+    <string name="init_mark_ground">Mark the ground by tapping the display at the according point</string>
+    <string name="init_mark_ceiling">Mark the ceiling by tapping the display at the according point</string>
+    <string name="init_mark_walls">Mark the walls by tapping the display at the according point</string>
     <string name="choose_location">Select the location</string>
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_initialize">Initialize</string>

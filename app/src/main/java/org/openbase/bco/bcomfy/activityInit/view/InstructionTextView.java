@@ -1,20 +1,36 @@
 package org.openbase.bco.bcomfy.activityInit.view;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
 
 public class InstructionTextView {
 
     private TextView textView;
+    private Animation pulseFast;
 
     public enum Instruction {
         EMPTY, MARK_GROUND, MARK_CEILING, MARK_WALLS
     }
 
-    public InstructionTextView(TextView textView) {
+    public InstructionTextView(TextView textView, Context context) {
         this.textView = textView;
+
+        textView.setCompoundDrawables(new IconicsDrawable(context)
+                .icon(GoogleMaterial.Icon.gmd_touch_app)
+                .color(Color.WHITE)
+                .sizeDp(64), null, null, null);
+
+        pulseFast = AnimationUtils.loadAnimation(context, R.anim.pulse_fast);
+        pulseFast.setFillAfter(false);
     }
 
     public void updateInstruction(Instruction instruction) {
@@ -36,6 +52,8 @@ public class InstructionTextView {
                 textView.setVisibility(View.VISIBLE);
                 break;
         }
+
+        textView.startAnimation(pulseFast);
     }
 
     public void updateInstruction(Instruction instruction, int wallNumber, int measurementsFinished, int measurementsNeeded) {
@@ -58,11 +76,11 @@ public class InstructionTextView {
         }
 
         if (measurementsNeeded > 1) {
-            textView.setText("Please mark the " + nextWallNumberString + " wall in a clockwise order\n\n" +
-                                "Measurements left: " + (measurementsNeeded - measurementsFinished));
+            textView.setText("Mark the " + nextWallNumberString + " wall by tapping the display at the according point\n\n" +
+                                "This wall needs " + (measurementsNeeded - measurementsFinished) + " remaining taps");
         }
         else {
-            textView.setText("Please mark the " + nextWallNumberString + " wall in a clockwise order");
+            textView.setText("Mark the " + nextWallNumberString + " wall by tapping the display at the according point");
         }
     }
 }

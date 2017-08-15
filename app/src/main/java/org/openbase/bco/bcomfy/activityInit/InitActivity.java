@@ -144,7 +144,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     protected void setupGui() {
-        instructionTextView = new InstructionTextView(findViewById(R.id.instructionTextView));
+        instructionTextView = new InstructionTextView(findViewById(R.id.instructionTextView), this);
 
         buttonAddRoom = findViewById(R.id.buttonAddRoom);
         buttonAddRoom.setCompoundDrawables(new IconicsDrawable(this)
@@ -195,6 +195,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 buttonUndoMeasurement.setEnabled(false);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(measurer.hasFinishedRoom());
+                instructionTextView.updateInstruction(InstructionTextView.Instruction.EMPTY);
                 break;
             case MARK_GROUND:
                 buttonAddRoom.setEnabled(false);
