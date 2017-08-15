@@ -414,35 +414,37 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 Registries.getLocationRegistry().getLocationConfigsByCoordinate(
                     Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
 
-            if (locations.size() == 0) {
-                Log.w(TAG, "No location found for current unit position!");
-                return;
-            }
-
             UnitConfig[] location = new UnitConfig[1];
-            // Get Region if there is any
-            StreamSupport.stream(locations)
-                    .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
-                    .findAny()
-                    .ifPresent(unitConfig -> location[0] = unitConfig);
-            // Otherwise use tile if there is any
-            if (location[0] == null) {
+
+            if (locations.size() == 0) {
+                location[0] = Registries.getLocationRegistry().getLocationConfigById(currentDevice.getPlacementConfig().getLocationId());
+                Log.w(TAG, "No location found for current unit position! Retaining old location information...");
+            }
+            else {
+                // Get Region if there is any
                 StreamSupport.stream(locations)
-                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
+                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
                         .findAny()
                         .ifPresent(unitConfig -> location[0] = unitConfig);
-            }
-            // Otherwise use zone if there is any
-            if (location[0] == null) {
-                StreamSupport.stream(locations)
-                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
-                        .findAny()
-                        .ifPresent(unitConfig -> location[0] = unitConfig);
-            }
-            // Otherwise return... Unknown LocationType...
-            if (location[0] == null) {
-                Log.w(TAG, "No valid location found for selected position!");
-                return;
+                // Otherwise use tile if there is any
+                if (location[0] == null) {
+                    StreamSupport.stream(locations)
+                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
+                            .findAny()
+                            .ifPresent(unitConfig -> location[0] = unitConfig);
+                }
+                // Otherwise use zone if there is any
+                if (location[0] == null) {
+                    StreamSupport.stream(locations)
+                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
+                            .findAny()
+                            .ifPresent(unitConfig -> location[0] = unitConfig);
+                }
+                // Otherwise return... Unknown LocationType...
+                if (location[0] == null) {
+                    location[0] = Registries.getLocationRegistry().getLocationConfigById(currentDevice.getPlacementConfig().getLocationId());
+                    Log.w(TAG, "No valid location found for selected position! Retaining old location information...");
+                }
             }
 
             // Transform BCO-Root position to BCO-Location-of-selected-point position
