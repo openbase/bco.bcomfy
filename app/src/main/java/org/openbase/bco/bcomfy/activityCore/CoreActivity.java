@@ -9,10 +9,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -54,7 +57,6 @@ import java.util.concurrent.TimeoutException;
 import javax.vecmath.Vector3d;
 
 import java8.util.stream.StreamSupport;
-import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.location.LocationConfigType;
 import rst.geometry.PoseType;
@@ -75,6 +77,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private FloatingActionButton fabExpandDrawer;
     private FloatingActionButton fabSettings;
     private FloatingActionButton fabEditLocation;
+    private TextView locationEditHelpText;
 
     private SettingValue currentUnitSetting;
     private SettingValue currentLocationSetting;
@@ -106,6 +109,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private String adfUuid;
 
+    private Animation shakeAnimation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_core);
@@ -115,6 +120,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         super.onCreate(savedInstanceState);
 
         adfUuid = getIntent().getStringExtra("adfUuid");
+        shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake);
 
         loadLocalTransform();
         initFetchLocationLabelTask();
@@ -194,6 +200,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         recyclerView          = findViewById(R.id.recycler_view);
         progressBarLeftDrawer = findViewById(R.id.progress_bar_left_drawer);
         rightDrawer           = findViewById(R.id.right_drawer);
+        locationEditHelpText  = findViewById(R.id.location_edit_help_text);
 
         fabExpandDrawer = findViewById(R.id.fab_expand_drawer);
         fabExpandDrawer.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
@@ -218,6 +225,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     fabSettings.setTranslationX(leftDrawer.getMeasuredWidth() * slideOffset);
                 }
                 else {
+                    locationEditHelpText.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
+                    locationEditHelpText.setAlpha(slideOffset);
                     fabEditLocation.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
                     fabEditLocation.setAlpha(slideOffset);
                 }
@@ -294,6 +303,10 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         sch = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
 
         fetchLocationLabelTask = () -> {
+            if (inEditMode) {
+                return;
+            }
+
             double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentPose.translation);
 
             Vec3DDoubleType.Vec3DDouble vec3DDouble = Vec3DDoubleType.Vec3DDouble.newBuilder()
@@ -357,9 +370,17 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
         if (isUnitLocationEditable(unitConfig)) {
             fabEditLocation.setVisibility(View.VISIBLE);
+            if (!unitConfig.getPlacementConfig().hasPosition()) {
+                fabEditLocation.startAnimation(shakeAnimation);
+                locationEditHelpText.setVisibility(View.VISIBLE);
+            }
+            else {
+                locationEditHelpText.setVisibility(View.INVISIBLE);
+            }
         }
         else {
             fabEditLocation.setVisibility(View.GONE);
+            locationEditHelpText.setVisibility(View.INVISIBLE);
         }
 
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, rightDrawer);
@@ -388,15 +409,15 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         inEditMode = true;
         drawerLayout.closeDrawers();
         buttonsEdit.setVisibility(View.VISIBLE);
+        locationLabelButton.setVisibility(View.GONE);
         uiOverlayHolder.setUiOverlayVisibility(View.INVISIBLE);
-
-        addDebugSphere();
     }
 
     private void leaveEditMode() {
         inEditMode = false;
         drawerLayout.openDrawer(rightDrawer);
         buttonsEdit.setVisibility(View.INVISIBLE);
+        locationLabelButton.setVisibility(View.VISIBLE);
         uiOverlayHolder.setUiOverlayVisibility(View.VISIBLE);
 
         getRenderer().clearSpheres();
@@ -517,10 +538,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     protected boolean callPostPreFrame() {
         return true;
-    }
-
-    private void addDebugSphere() {
-        this.getRenderer().addSphere(new Vector3(TangoSupport.doubleTransformPoint(bcoToGlTransform, new double[]{0, 0, 0})), Color.RED);
     }
 
     private boolean isUnitLocationEditable(UnitConfig unitConfig) {

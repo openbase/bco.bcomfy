@@ -29,14 +29,14 @@
                 android:id="@+id/locationLabelButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="29dp"
+                android:layout_marginBottom="29dp"
                 android:background="@color/background_gray_slightly_transparent"
                 android:onClick="onLocationLabelButtonClicked"
                 android:padding="10dp"
                 android:text="@android:string/untitled"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@android:color/white"
                 android:textSize="24sp"
                 android:visibility="gone" />
 
@@ -199,13 +199,25 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:alpha="0"
-        app:fab_colorNormal="#000000"
-        app:fab_colorPressed="#101010"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginRight="16dp"/>
+        android:alpha="0"
+        fab:fab_colorNormal="#000000"
+        fab:fab_colorPressed="#101010" />
 
-
+    <TextView
+        android:id="@+id/location_edit_help_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="35dp"
+        android:layout_toLeftOf="@+id/fab_location_edit"
+        android:background="@color/background_gray_slightly_transparent"
+        android:padding="5dp"
+        android:text="@string/button_edit_help"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:visibility="invisible" />
 
 
 </RelativeLayout>
