@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.atap.tangoservice.TangoException;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -23,6 +22,7 @@ import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
+import org.openbase.bco.bcomfy.utils.AndroidUtils;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -98,19 +98,27 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
                 if (planeFit != null) {
                     Measurer.MeasureType lastMeasureType = measurer.addPlaneMeasurement(planeFit, currentPose.translation);
+
+                    if (lastMeasureType == Measurer.MeasureType.INVALID) {
+                        runOnUiThread(() -> instructionTextView.animateNegative());
+                        AndroidUtils.showShortToastTop(getApplicationContext(), R.string.init_invalid_wall);
+                        Log.w(TAG, getString(R.string.init_invalid_wall), new CouldNotPerformException(getString(R.string.init_invalid_wall)));
+                    }
+                    else {
+                        runOnUiThread(() -> instructionTextView.animatePositive());
+                    }
+
                     updateGuiAfterPlaneMeasurement(planeFit, lastMeasureType);
                 }
 
             } catch (TangoException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.tango_error,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.tango_error), t);
+                runOnUiThread(() -> instructionTextView.animateNegative());
+                AndroidUtils.showShortToastTop(getApplicationContext(), R.string.tango_error);
+                Log.w(TAG, getString(R.string.tango_error), t);
             } catch (SecurityException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.no_permissions,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.no_permissions), t);
+                runOnUiThread(() -> instructionTextView.animateNegative());
+                AndroidUtils.showShortToastTop(getApplicationContext(), R.string.no_permissions);
+                Log.w(TAG, getString(R.string.no_permissions), t);
             }
         }
         return true;

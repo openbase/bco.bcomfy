@@ -91,7 +91,9 @@ public class Measurer {
                 return MeasureType.CEILING;
             case MARK_WALLS:
             case ENOUGH_WALLS:
-                addWallMeasurement(plane, currentPosition);
+                if (!addWallMeasurement(plane, currentPosition)) {
+                    return MeasureType.INVALID;
+                }
                 measurerState = currentRoom.getMeasurerState();
                 return MeasureType.WALL;
         }
@@ -115,7 +117,7 @@ public class Measurer {
         return roomList.get(roomList.size()-1).getCeilingVertices();
     }
 
-    private void addWallMeasurement(Plane plane, double[] currentPosition) {
+    private boolean addWallMeasurement(Plane plane, double[] currentPosition) {
         // Check if wall was measured by clicking on the ground
         if (plane.getNormal().dot(GROUND_NORMAL) > 0.90) {
             // In that case, use the vector that points from the measured point to the users position
@@ -134,7 +136,10 @@ public class Measurer {
         }
 
         // Add the measurement to the current room
-        currentRoom.addWallMeasurement(plane);
+        if (!currentRoom.addWallMeasurement(plane)) {
+            return false;
+        }
+
 
         // Check whether the anchor normals are finished
         if (alignToAnchor) {
@@ -143,6 +148,8 @@ public class Measurer {
                 initTransforms();
             }
         }
+
+        return true;
     }
 
     private void align(Vector3 normal) {

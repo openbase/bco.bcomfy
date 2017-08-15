@@ -49,7 +49,11 @@ public class Room {
         return ceiling;
     }
 
-    public void addWallMeasurement(Plane measurement) {
+    public boolean addWallMeasurement(Plane measurement) {
+        // First check, whether the measurement is valid which means that its normal needs to differ
+        // from the previous one
+        if (!isValidMeasurement(measurement)) return false;
+
         // Add new wall if it is the first wall, or the previous one has enough measurements
         if (walls.size() == 0) {
             walls.add(new Wall(measurementsPerWall));
@@ -64,10 +68,39 @@ public class Room {
         } catch (CouldNotPerformException e) {
             Log.e(TAG, "Error while adding measurement" + "\n" + Log.getStackTraceString(e));
         }
+
+        return true;
+    }
+
+    protected boolean isValidMeasurement(Plane measurement) {
+        Wall latestFinishedWall = getLatestFinishedWall();
+
+        // Measurement can not be invalid if there is no finished wall yet
+        if (latestFinishedWall == null) {
+            return true;
+        }
+
+        // Measurement is invalid if the normal is too similar to the normal of the previous wall
+        return !(Math.abs(latestFinishedWall.getFinishedWall().getNormal().dot(measurement.getNormal())) > 0.8);
     }
 
     public Wall getCurrentWall() {
         return walls.get(walls.size() - 1);
+    }
+
+    private Wall getLatestFinishedWall() {
+        if (walls.size() == 0) {
+            return null;
+        }
+        else if (getCurrentWall().isFinished()) {
+            return getCurrentWall();
+        }
+        else if (walls.size() > 1) {
+            return walls.get(walls.size() - 2);
+        }
+        else {
+            return null;
+        }
     }
 
     public boolean isFinishable() {

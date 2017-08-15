@@ -1,5 +1,7 @@
 package org.openbase.bco.bcomfy.activityInit.view;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
@@ -14,15 +16,26 @@ import org.openbase.bco.bcomfy.R;
 
 public class InstructionTextView {
 
+    private Context context;
+
     private TextView textView;
     private Animation pulseFast;
+
+    private int colorDefault;
+    private int colorPositive;
+    private int colorNegative;
 
     public enum Instruction {
         EMPTY, MARK_GROUND, MARK_CEILING, MARK_WALLS
     }
 
     public InstructionTextView(TextView textView, Context context) {
+        this.context = context;
         this.textView = textView;
+
+        colorDefault = context.getColor(R.color.background_gray_slightly_transparent);
+        colorPositive = context.getColor(R.color.background_green_slightly_transparent);
+        colorNegative = context.getColor(R.color.background_red_slightly_transparent);
 
         textView.setCompoundDrawables(new IconicsDrawable(context)
                 .icon(GoogleMaterial.Icon.gmd_touch_app)
@@ -76,11 +89,26 @@ public class InstructionTextView {
         }
 
         if (measurementsNeeded > 1) {
-            textView.setText("Mark the " + nextWallNumberString + " wall by tapping the display at the according point\n\n" +
-                                "This wall needs " + (measurementsNeeded - measurementsFinished) + " remaining taps");
+            textView.setText(context.getString(R.string.init_mark_walls_number_measurements, nextWallNumberString, (measurementsNeeded - measurementsFinished)));
         }
         else {
-            textView.setText("Mark the " + nextWallNumberString + " wall by tapping the display at the according point");
+            textView.setText(context.getString(R.string.init_mark_walls_number, nextWallNumberString));
         }
+    }
+
+    public void animatePositive() {
+        ObjectAnimator objectAnimator = ObjectAnimator.ofArgb(textView, "backgroundColor", colorDefault, colorPositive)
+                .setDuration(200);
+        objectAnimator.setRepeatCount(1);
+        objectAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        objectAnimator.start();
+    }
+
+    public void animateNegative() {
+        ObjectAnimator objectAnimator = ObjectAnimator.ofArgb(textView, "backgroundColor", colorDefault, colorNegative)
+                .setDuration(200);
+        objectAnimator.setRepeatCount(1);
+        objectAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        objectAnimator.start();
     }
 }

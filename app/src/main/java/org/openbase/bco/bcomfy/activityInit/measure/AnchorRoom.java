@@ -21,8 +21,11 @@ public class AnchorRoom extends Room {
     }
 
     @Override
-    public void addWallMeasurement(Plane measurement) {
-        Log.i(TAG, "addWallMeasurement");
+    public boolean addWallMeasurement(Plane measurement) {
+        // First check, whether the measurement is valid which means that its normal needs to differ
+        // from the previous one
+        if (!isValidMeasurement(measurement)) return false;
+
         // Add new anchorWall if it is the first wall, or the previous one has enough measurements
         if (walls.size() == 0) {
             walls.add(new Wall(measurementsPerWallAnchor));
@@ -52,6 +55,7 @@ public class AnchorRoom extends Room {
             Log.e(TAG, Log.getStackTraceString(e));
         }
 
+        return true;
     }
 
     public boolean isAnchorFinished() {

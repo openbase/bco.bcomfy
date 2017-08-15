@@ -5,4 +5,6 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorDivider">#DDDDDD</color>
     <color name="background_gray_slightly_transparent">#aa888888</color>
+    <color name="background_green_slightly_transparent">#aa008800</color>
+    <color name="background_red_slightly_transparent">#aa880000</color>
 </resources>

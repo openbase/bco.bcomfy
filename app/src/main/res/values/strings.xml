@@ -28,6 +28,9 @@
     <string name="init_mark_ground">Mark the ground by tapping the display at the according point</string>
     <string name="init_mark_ceiling">Mark the ceiling by tapping the display at the according point</string>
     <string name="init_mark_walls">Mark the walls by tapping the display at the according point</string>
+    <string name="init_mark_walls_number_measurements">Mark the %1$s wall by tapping the display at the according point\n\nThis wall needs %2$d remaining taps</string>
+    <string name="init_mark_walls_number">Mark the %1$s wall by tapping the display at the according point</string>
+    <string name="init_invalid_wall">Invalid wall measurement. Please try again.</string>
     <string name="choose_location">Select the location</string>
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_initialize">Initialize</string>
