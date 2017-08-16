@@ -39,12 +39,12 @@ public class Measurer {
         INVALID, GROUND, CEILING, WALL
     }
 
-    public Measurer(int measurementsPerWallDefault, boolean alignToAnchor, int measurementsPerWallAnchor, boolean recalcTransform) {
+    public Measurer(int measurementsPerWallDefault, boolean alignToAnchor,
+                    int measurementsPerWallAnchor, boolean recalcTransform) {
         measurerState = MeasurerState.INIT;
         roomList = new ArrayList<>();
 
         anchorNormals = new Vector3[4];
-
         transformIsInit = false;
 
         this.measurementsPerWallDefault = measurementsPerWallDefault;
@@ -56,8 +56,19 @@ public class Measurer {
         }
     }
 
+    public Measurer(int measurementsPerWallDefault, boolean alignToAnchor,
+                    int measurementsPerWallAnchor, boolean recalcTransform,
+                    Vector3[] anchorNormals, double[] glToBcoTransform, double[] bcoToGlTransform) {
+        this(measurementsPerWallDefault, alignToAnchor, measurementsPerWallAnchor, recalcTransform);
+
+        this.transformIsInit = true;
+        this.anchorNormals = anchorNormals;
+        this.glToBcoTransform = glToBcoTransform;
+        this.bcoToGlTransform = bcoToGlTransform;
+    }
+
     public void startNewRoom() {
-        if (alignToAnchor && anchorRoom == null) {
+        if (alignToAnchor && anchorRoom == null && !transformIsInit) {
             anchorRoom = new AnchorRoom(measurementsPerWallDefault, measurementsPerWallAnchor);
             currentRoom = anchorRoom;
         }
@@ -129,7 +140,7 @@ public class Measurer {
         plane.setNormal(new Vector3(plane.getNormal().x, 0.0, plane.getNormal().z));
 
         // Align the normal to the anchor if necessary/possible
-        if (alignToAnchor && anchorRoom.isAnchorFinished()) {
+        if (alignToAnchor && isAnchorFinished()) {
             Vector3 alignedNormal = plane.getNormal();
             align(alignedNormal);
             plane.setNormal(alignedNormal);
@@ -143,7 +154,7 @@ public class Measurer {
 
         // Check whether the anchor normals are finished
         if (alignToAnchor) {
-            if (anchorRoom.isAnchorFinished() && !transformIsInit) {
+            if (isAnchorFinished() && !transformIsInit) {
                 anchorNormals = anchorRoom.getAnchorNormals();
                 initTransforms();
             }
@@ -209,13 +220,15 @@ public class Measurer {
         return bcoToGlTransform;
     }
 
-    public void setTransforms(double[] glToBcoTransform, double[] bcoToGlTransform) {
-        this.glToBcoTransform = glToBcoTransform;
-        this.bcoToGlTransform = bcoToGlTransform;
+    public Vector3[] getAnchorNormals() {
+        return anchorNormals;
     }
 
     public boolean isAnchorFinished() {
-        if (anchorRoom == null) {
+        if (transformIsInit) {
+            return true;
+        }
+        else if (anchorRoom == null) {
             return false;
         }
         else {

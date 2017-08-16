@@ -17,12 +17,14 @@ import com.mikepenz.iconics.IconicsDrawable;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
+import org.openbase.bco.bcomfy.activityInit.measure.AnchorRoom;
 import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
 import org.openbase.bco.bcomfy.activityInit.view.LocationChooser;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.utils.AndroidUtils;
+import org.openbase.bco.bcomfy.utils.AndroidUtils.RoomData;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -48,6 +50,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     private Measurer measurer;
 
     private boolean recalcTransform;
+    private boolean scanContinue;
     private String adfUuid;
 
     @Override
@@ -56,13 +59,40 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         super.onCreate(savedInstanceState);
 
         recalcTransform = getIntent().getBooleanExtra("recalcTransform", false);
+        scanContinue = getIntent().getBooleanExtra("scanContinue", false);
         adfUuid = getIntent().getStringExtra("adfUuid");
 
-        measurer = new Measurer(
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
-                PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.KEY_PREF_INIT_ALIGN, true),
-                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")),
-                recalcTransform);
+        if (scanContinue) {
+            try {
+                RoomData roomData = AndroidUtils.loadLocalData(adfUuid, this);
+
+                Vector3[] anchorNormals = new Vector3[4];
+                anchorNormals[0] = new Vector3(roomData.anchorNormal0);
+                anchorNormals[1] = new Vector3(roomData.anchorNormal1);
+                anchorNormals[2] = new Vector3(roomData.anchorNormal2);
+                anchorNormals[3] = new Vector3(roomData.anchorNormal3);
+
+                measurer = new Measurer(
+                        Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
+                        PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.KEY_PREF_INIT_ALIGN, true),
+                        Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")),
+                        recalcTransform,
+                        anchorNormals,
+                        roomData.glToBcoTransform,
+                        roomData.bcoToGlTransform);
+            } catch (CouldNotPerformException e) {
+                Log.e(TAG, "Unable to load room data for selected adf!", e);
+                onStop();
+                finish();
+            }
+        }
+        else {
+            measurer = new Measurer(
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_DEFAULT, "1")),
+                    PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsActivity.KEY_PREF_INIT_ALIGN, true),
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_INIT_ANCHOR, "3")),
+                    recalcTransform);
+        }
     }
 
     @Override
@@ -129,7 +159,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
      */
     private void updateGuiAfterPlaneMeasurement(Plane plane, Measurer.MeasureType lastMeasureType) {
         if (recalcTransform && measurer.isAnchorFinished()) {
-            updateLocalTransforms();
+            updateLocalData();
             finish();
         }
 
@@ -272,7 +302,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         measurer.finishRoom();
         updateGuiButtons();
 
-        updateLocalTransforms();
+        updateLocalData();
 
         ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();
         final ArrayList<Vector3> ground  = measurer.getLatestGroundVertices();
@@ -294,41 +324,18 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 .execute();
     }
 
-    @Deprecated
-    private void updateLocalTransforms() {
-        String filename = "transforms.dat";
-        FileInputStream inputStream;
-        ObjectInputStream objectInputStream;
-        FileOutputStream outputStream;
-        ObjectOutputStream objectOutputStream;
-
-        HashMap<String, double[]> transformsMap;
-
+    private void updateLocalData() {
         try {
-            inputStream = openFileInput(filename);
-            objectInputStream = new ObjectInputStream(inputStream);
-
-            transformsMap = (HashMap<String, double[]>) objectInputStream.readObject();
-            objectInputStream.close();
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            transformsMap = new HashMap<>();
-        }
-
-        try {
-            transformsMap.put(adfUuid, measurer.getGlToBcoTransform());
-
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(transformsMap);
-            objectOutputStream.close();
-
-            Log.i(TAG, "Transform for uuid " + adfUuid + " saved:\n" +
-                    Arrays.toString(measurer.getGlToBcoTransform()) + "\n" +
-                    Arrays.toString(measurer.getBcoToGlTransform()) + "\n" +
-                    "Total transforms in database: " + transformsMap.size());
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            RoomData roomData = new RoomData();
+            roomData.glToBcoTransform = measurer.getGlToBcoTransform();
+            roomData.bcoToGlTransform = measurer.getBcoToGlTransform();
+            roomData.anchorNormal0 = measurer.getAnchorNormals()[0].toArray();
+            roomData.anchorNormal1 = measurer.getAnchorNormals()[1].toArray();
+            roomData.anchorNormal2 = measurer.getAnchorNormals()[2].toArray();
+            roomData.anchorNormal3 = measurer.getAnchorNormals()[3].toArray();
+            AndroidUtils.updateLocalData(adfUuid, roomData, this);
+        } catch (CouldNotPerformException e) {
+            Log.e(TAG, "Error while saving room data to local storage!", e);
         }
     }
 }

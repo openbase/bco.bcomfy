@@ -36,6 +36,7 @@ import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.bcomfy.utils.AndroidUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -122,7 +123,16 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         adfUuid = getIntent().getStringExtra("adfUuid");
         shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake);
 
-        loadLocalTransform();
+        try {
+            AndroidUtils.RoomData roomData = AndroidUtils.loadLocalData(adfUuid, this);
+
+            glToBcoTransform = roomData.glToBcoTransform;
+            bcoToGlTransform = roomData.bcoToGlTransform;
+        } catch (CouldNotPerformException e) {
+            Log.e(TAG, "Unable to load data for adf " + adfUuid, e);
+            onStop();
+            finish();
+        }
         initFetchLocationLabelTask();
     }
 
@@ -332,33 +342,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         };
 
         sch.scheduleWithFixedDelay(fetchLocationLabelTask, 500, 500, TimeUnit.MILLISECONDS);
-    }
-
-    @Deprecated
-    private void loadLocalTransform() {
-        String filename = "transforms.dat";
-        FileInputStream inputStream;
-        ObjectInputStream objectInputStream;
-
-        try {
-            inputStream = openFileInput(filename);
-            objectInputStream = new ObjectInputStream(inputStream);
-
-            HashMap<String, double[]> transformsMap = (HashMap<String, double[]>) objectInputStream.readObject();
-            objectInputStream.close();
-
-            glToBcoTransform = transformsMap.get(adfUuid);
-            bcoToGlTransform = new Matrix4(glToBcoTransform).inverse().getDoubleValues();
-
-            objectInputStream.close();
-
-            Log.i(TAG, "Transform for uuid " + adfUuid + " loaded:\n" +
-                    Arrays.toString(glToBcoTransform) + "\n" +
-                    Arrays.toString(bcoToGlTransform) + "\n" +
-                    "Total transforms in database: " + transformsMap.size());
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
     }
 
     @Override

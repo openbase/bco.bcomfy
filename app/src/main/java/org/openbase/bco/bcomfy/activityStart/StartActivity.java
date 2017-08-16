@@ -9,10 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -21,7 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoAreaDescriptionMetaData;
@@ -59,7 +55,8 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
 
     private ProgressBar progressBar;
     private TextView infoMessage;
-    private Button buttonInitialize;
+    private Button buttonScanInit;
+    private Button buttonScanContinue;
     private Button buttonCancel;
     private Button buttonRetry;
     private Button buttonSettings;
@@ -70,6 +67,7 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
     private Button buttonDebugRecalc;
 
     private boolean debugRecalc;
+    private boolean scanContinue;
 
     public static Tango tango;
     private TangoConfig tangoConfig;
@@ -84,6 +82,7 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         initGui();
 
         debugRecalc = false;
+        scanContinue = false;
 
         // Set default preferences if not already set.
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -206,41 +205,49 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         switch (state) {
             case INIT_BCO:
                 infoMessage.setText(R.string.gui_connect_bco);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO:
                 infoMessage.setText(R.string.gui_init_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 initTangoService();
                 break;
             case GET_ADF:
                 infoMessage.setText(R.string.gui_update_adf);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 fetchLocalAdf(); //TODO: implement ADF registry fetching
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
+                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
                 break;
             case CONNECT_TANGO_TO_INIT:
             case CONNECT_TANGO_TO_CORE:
                 infoMessage.setText(R.string.gui_connect_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO_FAILED:
                 infoMessage.setText(R.string.gui_init_tango_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case SETTINGS:
-                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE);
                 break;
             default:
                 break;
         }
     }
 
-    public void onButtonInitializeClicked(View view) {
+    public void onButtonScanInitClicked(View view) {
         debugRecalc = false;
+        scanContinue = false;
+        changeState(StartActivityState.CONNECT_TANGO_TO_INIT);
+        connectTangoService();
+    }
+
+    public void onButtonScanContinueClicked(View view) {
+        debugRecalc = false;
+        scanContinue = true;
         changeState(StartActivityState.CONNECT_TANGO_TO_INIT);
         connectTangoService();
     }
@@ -300,10 +307,11 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         connectTangoService();
     }
 
-    private void setVisibilities(int progress, int info, int init, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart, int debugCalc) {
+    private void setVisibilities(int progress, int info, int init, int cont, int cancel, int retry, int settings, int publish, int record, int manage, int debugStart, int debugCalc) {
         progressBar.setVisibility(progress);
         infoMessage.setVisibility(info);
-        buttonInitialize.setVisibility(init);
+        buttonScanInit.setVisibility(init);
+        buttonScanContinue.setVisibility(cont);
         buttonCancel.setVisibility(cancel);
         buttonRetry.setVisibility(retry);
         buttonSettings.setVisibility(settings);
@@ -315,17 +323,18 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
     }
 
     private void initGui() {
-        progressBar      = findViewById(R.id.progressBar);
-        infoMessage      = findViewById(R.id.infoMessage);
-        buttonInitialize = findViewById(R.id.button_initialize);
-        buttonCancel     = findViewById(R.id.button_cancel);
-        buttonRetry      = findViewById(R.id.button_retry);
-        buttonSettings   = findViewById(R.id.button_settings);
-        buttonPublish    = findViewById(R.id.button_publish);
-        buttonRecord     = findViewById(R.id.button_record);
-        buttonManage     = findViewById(R.id.button_manage);
-        buttonDebugStart = findViewById(R.id.button_debug_start);
-        buttonDebugRecalc= findViewById(R.id.button_debug_calc_transform);
+        progressBar        = findViewById(R.id.progressBar);
+        infoMessage        = findViewById(R.id.infoMessage);
+        buttonScanInit     = findViewById(R.id.button_scan_init);
+        buttonScanContinue = findViewById(R.id.button_scan_continue);
+        buttonCancel       = findViewById(R.id.button_cancel);
+        buttonRetry        = findViewById(R.id.button_retry);
+        buttonSettings     = findViewById(R.id.button_settings);
+        buttonPublish      = findViewById(R.id.button_publish);
+        buttonRecord       = findViewById(R.id.button_record);
+        buttonManage       = findViewById(R.id.button_manage);
+        buttonDebugStart   = findViewById(R.id.button_debug_start);
+        buttonDebugRecalc  = findViewById(R.id.button_debug_calc_transform);
     }
 
     private void fetchLocalAdf() {
@@ -362,6 +371,7 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
     private void startInitActivity() {
         Intent intent = new Intent(this, InitActivity.class);
         intent.putExtra("recalcTransform", debugRecalc);
+        intent.putExtra("scanContinue", scanContinue);
         intent.putExtra("adfUuid", adfUuid);
         startActivity(intent);
     }

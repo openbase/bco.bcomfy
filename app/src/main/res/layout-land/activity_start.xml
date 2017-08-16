@@ -49,12 +49,22 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/button_initialize"
+            android:id="@+id/button_scan_init"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:onClick="onButtonInitializeClicked"
-            android:text="@string/gui_initialize"
+            android:onClick="onButtonScanInitClicked"
+            android:text="@string/gui_scan_init"
+            android:textAlignment="center"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/button_scan_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onButtonScanContinueClicked"
+            android:text="@string/gui_scan_continue"
             android:textAlignment="center"
             android:visibility="gone" />
 
