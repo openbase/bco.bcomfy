@@ -13,7 +13,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.jul.exception.NotAvailableException;
@@ -41,9 +41,9 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
         noPositionIcon.setImageDrawable(new IconicsDrawable(itemView.getContext(), GoogleMaterial.Icon.gmd_location_off).color(Color.WHITE).sizeDp(16));
     }
 
-    public void bind(Device device, OnDeviceClickedListener onDeviceClickedListener) {
+    public void bind(Device device, OnDeviceSelectedListener onDeviceSelectedListener) {
         deviceTextView.setText(device.getUnitConfig().getLabel());
-        deviceView.setOnClickListener(v -> onDeviceClickedListener.onDeviceClicked(device.getUnitConfig()));
+        deviceView.setOnClickListener(v -> onDeviceSelectedListener.onDeviceSelected(device.getUnitConfig()));
         updateNoPositionIcon(device.getUnitConfig());
 
         new ConnectRemoteTask(this, device).execute((Void) null);

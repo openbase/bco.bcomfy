@@ -10,16 +10,15 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder.AbstractUnitSelectorHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder.SelectorHolderFactory;
-import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -27,25 +26,27 @@ import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
-public class UiOverlayHolder {
+public class UiOverlayHolder implements OnDeviceSelectedListener {
     private static final String TAG = UiOverlayHolder.class.getSimpleName();
 
     private RelativeLayout uiOverlay;
     private Context context;
-    private OnDeviceClickedListener onDeviceClickedListener;
+    private OnDeviceSelectedListener onDeviceSelectedListener;
 
-    private List<AbstractUnitSelectorHolder> holderList;
+    private HashMap<String, AbstractUnitSelectorHolder> holderMap;
+    private AbstractUnitSelectorHolder selectedHolder;
 
-    public UiOverlayHolder(Context context, OnDeviceClickedListener onDeviceClickedListener) {
-        this.uiOverlay               = ((Activity) context).findViewById(R.id.ui_container);
-        this.context                 = context;
-        this.onDeviceClickedListener = onDeviceClickedListener;
+    public UiOverlayHolder(Context context, OnDeviceSelectedListener onDeviceSelectedListener) {
+        this.uiOverlay                = ((Activity) context).findViewById(R.id.ui_container);
+        this.context                  = context;
+        this.onDeviceSelectedListener = onDeviceSelectedListener;
 
-        holderList = new ArrayList<>();
+        holderMap = new HashMap<>();
+        selectedHolder = null;
     }
 
     public void updateBcoToPixelTransform(Matrix4 bcoToPixelTransform) {
-        StreamSupport.stream(holderList).forEach(unit ->
+        StreamSupport.stream(holderMap.values()).forEach(unit ->
                 unit.alignViewToPixel(context, bcoToPixelTransform));
     }
 
@@ -65,32 +66,25 @@ public class UiOverlayHolder {
         new fetchNewUnitMapTask(returnObject -> {
             clearUiOverlay();
 
-            holderList = returnObject;
+            holderMap = returnObject;
 
-            StreamSupport.stream(holderList).forEach(this::initUnitSelector);
+            StreamSupport.stream(holderMap.values()).forEach(this::initUnitSelector);
         }).execute();
     }
 
     public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException, TimeoutException {
-        if (!StreamSupport.stream(holderList)
-                .anyMatch(abstractUnitSelectorHolder -> abstractUnitSelectorHolder.getUnitHostId().equals(unitConfig.getId()))) {
+        if (!holderMap.containsKey(unitConfig.getId())) {
             AbstractUnitSelectorHolder holder = SelectorHolderFactory.createUnitSelectorHolder(unitConfig);
 
-            holderList.add(holder);
+            holderMap.put(unitConfig.getId(), holder);
             initUnitSelector(holder);
         }
     }
 
     public void removeUnit(UnitConfigType.UnitConfig unitConfig) {
-        Iterator<AbstractUnitSelectorHolder> iterator = holderList.iterator();
-        while (iterator.hasNext()) {
-            AbstractUnitSelectorHolder holder =  iterator.next();
-
-            if (holder.getUnitHostId().equals(unitConfig.getId())) {
-                uiOverlay.removeView(holder.getView());
-                iterator.remove();
-                break;
-            }
+        if (!holderMap.containsKey(unitConfig.getId())) {
+            uiOverlay.removeView(holderMap.get(unitConfig.getId()).getView());
+            holderMap.remove(unitConfig.getId());
         }
     }
 
@@ -99,7 +93,7 @@ public class UiOverlayHolder {
     }
 
     private void clearUiOverlay() {
-        StreamSupport.stream(holderList).forEach(unit ->
+        StreamSupport.stream(holderMap.values()).forEach(unit ->
                 ((Activity) context).runOnUiThread(() -> uiOverlay.removeView(unit.getView())));
     }
 
@@ -116,7 +110,7 @@ public class UiOverlayHolder {
         holder.setParentHeight(uiOverlay.getHeight());
         holder.getView().setOnClickListener(v -> {
             try {
-                onDeviceClickedListener.onDeviceClicked(holder.getUnitHostConfig());
+                onDeviceSelectedListener.onDeviceSelected(holder.getUnitHostConfig());
             } catch (CouldNotPerformException | InterruptedException e) {
                 Log.e(TAG, "Error while fetching unit config of unit " + holder.getUnitHostId() + "\n" + Log.getStackTraceString(e));
             }
@@ -124,14 +118,26 @@ public class UiOverlayHolder {
         uiOverlay.addView(holder.getView());
     }
 
+    @Override
+    public void onDeviceSelected(UnitConfigType.UnitConfig unitConfig) {
+        if (selectedHolder != null) selectedHolder.setSelected(false);
+
+        if (holderMap.containsKey(unitConfig.getId())) {
+            AbstractUnitSelectorHolder holder = holderMap.get(unitConfig.getId());
+
+            selectedHolder = holder;
+            holder.setSelected(true);
+        }
+    }
+
     private static class fetchNewUnitMapTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = UiOverlayHolder.fetchNewUnitMapTask.class.getSimpleName();
-        private OnTaskFinishedListener<List<AbstractUnitSelectorHolder>> listener;
-        private List<AbstractUnitSelectorHolder> newUnitList;
+        private OnTaskFinishedListener<HashMap<String, AbstractUnitSelectorHolder>> listener;
+        private HashMap<String, AbstractUnitSelectorHolder> newUnitMap;
 
-        fetchNewUnitMapTask(OnTaskFinishedListener<List<AbstractUnitSelectorHolder>> listener) {
+        fetchNewUnitMapTask(OnTaskFinishedListener<HashMap<String, AbstractUnitSelectorHolder>> listener) {
             this.listener = listener;
-            this.newUnitList = new ArrayList<>();
+            this.newUnitMap = new HashMap<>();
         }
 
         @Override
@@ -144,7 +150,7 @@ public class UiOverlayHolder {
                         .forEach(unitConfig -> {
                             try {
                                 Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
-                                newUnitList.add(SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
+                                newUnitMap.put(unitConfig.getId(), SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
                             } catch (InterruptedException | CouldNotPerformException | ExecutionException | TimeoutException e) {
                                 Log.e(TAG, Log.getStackTraceString(e));
                             }
@@ -158,7 +164,7 @@ public class UiOverlayHolder {
 
         @Override
         protected void onPostExecute(Void v) {
-            listener.taskFinishedCallback(newUnitList);
+            listener.taskFinishedCallback(newUnitMap);
         }
     }
 

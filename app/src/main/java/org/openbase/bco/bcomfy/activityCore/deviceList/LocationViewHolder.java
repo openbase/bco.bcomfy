@@ -1,7 +1,6 @@
 package org.openbase.bco.bcomfy.activityCore.deviceList;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -12,10 +11,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
-import org.openbase.bco.registry.remote.Registries;
-
-import java.util.concurrent.TimeUnit;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 
 
 public class LocationViewHolder extends ParentViewHolder<Location, Device> {
@@ -25,14 +21,14 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
     private View divider;
     private TextView label;
     private ImageView indicator;
-    private OnDeviceClickedListener onDeviceClickedListener;
+    private OnDeviceSelectedListener onDeviceSelectedListener;
 
-    public LocationViewHolder(View itemView, OnDeviceClickedListener onDeviceClickedListener) {
+    public LocationViewHolder(View itemView, OnDeviceSelectedListener onDeviceSelectedListener) {
         super(itemView);
         divider = itemView.findViewById(R.id.location_divider_top);
         label = itemView.findViewById(R.id.location_textview);
         indicator = itemView.findViewById(R.id.location_indicator);
-        this.onDeviceClickedListener = onDeviceClickedListener;
+        this.onDeviceSelectedListener = onDeviceSelectedListener;
 
         indicator.setImageDrawable(new IconicsDrawable(itemView.getContext(), GoogleMaterial.Icon.gmd_chevron_left).color(Color.WHITE).sizeDp(12));
     }
@@ -44,7 +40,7 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
         }
 
         itemView.setOnLongClickListener(view -> {
-            onDeviceClickedListener.onDeviceClicked(location.getUnitConfig());
+            onDeviceSelectedListener.onDeviceSelected(location.getUnitConfig());
             return true;
         });
     }

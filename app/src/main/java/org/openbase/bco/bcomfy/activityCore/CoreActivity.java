@@ -35,7 +35,7 @@ import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
-import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.bcomfy.utils.AndroidUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
@@ -43,11 +43,7 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -66,7 +62,7 @@ import rst.geometry.TranslationType;
 import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 
-public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceClickedListener, ListSettingsDialogFragment.OnSettingsChosenListener {
+public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, ListSettingsDialogFragment.OnSettingsChosenListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
@@ -345,11 +341,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Override
-    public void onDeviceClicked(UnitConfig unitConfig) {
+    public void onDeviceSelected(UnitConfig unitConfig) {
         drawerLayout.closeDrawer(leftDrawer);
 
         currentDevice = unitConfig;
         unitListViewHolder.displayUnit(this, unitConfig);
+        uiOverlayHolder.onDeviceSelected(unitConfig);
 
         if (isUnitLocationEditable(unitConfig)) {
             fabEditLocation.setVisibility(View.VISIBLE);
@@ -372,7 +369,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     public void onLocationLabelButtonClicked(View view) {
         if (currentLocation != null) {
-            onDeviceClicked(currentLocation);
+            onDeviceSelected(currentLocation);
         }
     }
 

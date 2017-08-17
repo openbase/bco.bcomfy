@@ -1,11 +1,14 @@
-package org.openbase.bco.bcomfy.activityCore.uiOverlay;
+package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.IIcon;
@@ -36,10 +39,13 @@ public abstract class AbstractUnitSelectorHolder {
 
     private IIcon icon;
     private View view;
+    private RelativeLayout circleShape;
     private boolean isMainSelector;
     private Vector3 positionFromRoot;
     private int parentWidth;
     private int parentHeight;
+
+    private boolean selected;
 
     private UnitConfigType.UnitConfig unitConfig;
     private UnitRemote unitRemote;
@@ -90,6 +96,7 @@ public abstract class AbstractUnitSelectorHolder {
 
     public void setView(View view) {
         this.view = view;
+        circleShape = view.findViewById(R.id.circleShape);
     }
 
     public Vector3 getPositionFromRoot() {
@@ -152,6 +159,21 @@ public abstract class AbstractUnitSelectorHolder {
     public void initIcon() {
         ImageView imageView = this.getView().findViewById(R.id.iconView);
         imageView.setImageBitmap(new IconicsDrawable(imageView.getContext()).icon(icon).color(Color.BLACK).sizeDp(48).toBitmap());
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+
+        if (selected) {
+            circleShape.getBackground().setColorFilter(Color.parseColor("#FF88CC88"), PorterDuff.Mode.MULTIPLY);
+        }
+        else {
+            circleShape.getBackground().clearColorFilter();
+        }
+    }
+
+    public boolean isSelected() {
+        return selected;
     }
 
     private void updateConnectionState(Remote.ConnectionState connectionState) {

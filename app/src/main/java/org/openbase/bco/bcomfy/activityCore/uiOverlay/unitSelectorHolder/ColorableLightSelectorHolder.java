@@ -2,7 +2,6 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
-import org.openbase.bco.bcomfy.activityCore.uiOverlay.AbstractUnitSelectorHolder;
 import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.concurrent.ExecutionException;

@@ -9,27 +9,27 @@ import android.view.ViewGroup;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.bcomfy.interfaces.OnDeviceClickedListener;
+import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 
 import java.util.List;
 
 public class LocationAdapter extends ExpandableRecyclerAdapter<Location, Device, LocationViewHolder, DeviceViewHolder> {
 
     private LayoutInflater inflater;
-    private OnDeviceClickedListener onDeviceClickedListener;
+    private OnDeviceSelectedListener onDeviceSelectedListener;
 
 
-    public LocationAdapter(Context context, @NonNull List<Location> locationList, OnDeviceClickedListener onDeviceClickedListener) {
+    public LocationAdapter(Context context, @NonNull List<Location> locationList, OnDeviceSelectedListener onDeviceSelectedListener) {
         super(locationList);
         inflater = LayoutInflater.from(context);
-        this.onDeviceClickedListener = onDeviceClickedListener;
+        this.onDeviceSelectedListener = onDeviceSelectedListener;
     }
 
     @NonNull
     @Override
     public LocationViewHolder onCreateParentViewHolder(@NonNull ViewGroup parentViewGroup, int viewType) {
         View locationView = inflater.inflate(R.layout.location_textview, parentViewGroup, false);
-        return new LocationViewHolder(locationView, onDeviceClickedListener);
+        return new LocationViewHolder(locationView, onDeviceSelectedListener);
     }
 
     @NonNull
@@ -46,6 +46,6 @@ public class LocationAdapter extends ExpandableRecyclerAdapter<Location, Device,
 
     @Override
     public void onBindChildViewHolder(@NonNull DeviceViewHolder deviceViewHolder, int i, int i1, @NonNull Device device) {
-        deviceViewHolder.bind(device, onDeviceClickedListener);
+        deviceViewHolder.bind(device, onDeviceSelectedListener);
     }
 }

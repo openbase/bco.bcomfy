@@ -2,7 +2,6 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 
 import android.util.Log;
 
-import org.openbase.bco.bcomfy.activityCore.uiOverlay.AbstractUnitSelectorHolder;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
