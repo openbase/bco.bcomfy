@@ -31,6 +31,7 @@
     <string name="init_mark_walls_number_measurements">Mark the %1$s wall by tapping the display at the according point\n\nThis wall needs %2$d remaining taps</string>
     <string name="init_mark_walls_number">Mark the %1$s wall by tapping the display at the according point</string>
     <string name="init_invalid_wall">Invalid wall measurement. Please try again.</string>
+    <string name="init_too_close">Too close to measured point. Please increase your distance.</string>
     <string name="choose_location">Select the location</string>
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_scan_init">Initialize scanning</string>
@@ -61,6 +62,6 @@
     <string name="list_settings_units_unlocated">Show only unlocated units</string>
     <string name="list_settings_locations_all">Show all locations</string>
     <string name="list_settings_locations_located">Show only located locations</string>
-    <string name="toast_permission_not_granted">Necessary permission was denied. Closing app...</string>
+    <string name="toast_permission_not_granted">Necessary permission was denied. Closing app…</string>
     <string name="toast_loading_error">Error while loading local dataset for selected adf!</string>
 </resources>

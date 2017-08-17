@@ -134,6 +134,11 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                         AndroidUtils.showShortToastTop(getApplicationContext(), R.string.init_invalid_wall);
                         Log.w(TAG, getString(R.string.init_invalid_wall), new CouldNotPerformException(getString(R.string.init_invalid_wall)));
                     }
+                    else if (lastMeasureType == Measurer.MeasureType.TOO_CLOSE) {
+                        runOnUiThread(() -> instructionTextView.animateNegative());
+                        AndroidUtils.showShortToastTop(getApplicationContext(), R.string.init_too_close);
+                        Log.w(TAG, getString(R.string.init_too_close), new CouldNotPerformException(getString(R.string.init_too_close)));
+                    }
                     else {
                         runOnUiThread(() -> instructionTextView.animatePositive());
                     }

@@ -36,7 +36,7 @@ public class Measurer {
     }
 
     public enum MeasureType {
-        INVALID, GROUND, CEILING, WALL
+        INVALID, GROUND, CEILING, WALL, TOO_CLOSE
     }
 
     public Measurer(int measurementsPerWallDefault, boolean alignToAnchor,
@@ -87,6 +87,10 @@ public class Measurer {
     }
 
     public MeasureType addPlaneMeasurement(Plane plane, double[] currentPosition) {
+        if (plane.getPosition().distanceTo(new Vector3(currentPosition)) < 1.0) {
+            return MeasureType.TOO_CLOSE;
+        }
+
         switch (measurerState) {
             case INIT:
                 return MeasureType.INVALID;
