@@ -149,9 +149,7 @@ public class TangoRenderer extends Renderer {
     public void addGroundPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x330000ff);
-        planeMaterial.enableLighting(true);
-        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+        planeMaterial.enableLighting(false);
 
         addPlane(position, normal, planeMaterial);
     }
@@ -159,9 +157,7 @@ public class TangoRenderer extends Renderer {
     public void addCeilingPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x33ff0000);
-        planeMaterial.enableLighting(true);
-        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+        planeMaterial.enableLighting(false);
 
         addPlane(position, normal, planeMaterial);
     }
@@ -169,9 +165,7 @@ public class TangoRenderer extends Renderer {
     public void addWallPlane(Vector3 position, Vector3 normal) {
         Material planeMaterial = new Material();
         planeMaterial.setColor(0x3300ff00);
-        planeMaterial.enableLighting(true);
-        planeMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
-        planeMaterial.setSpecularMethod(new SpecularMethod.Phong());
+        planeMaterial.enableLighting(false);
 
         addPlane(position, normal, planeMaterial);
     }
