@@ -238,28 +238,28 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 buttonUndoMeasurement.setEnabled(false);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(measurer.hasFinishedRoom());
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.EMPTY);
+                instructionTextView.updateInstruction(Measurer.MeasurerState.INIT);
                 break;
             case MARK_GROUND:
                 buttonAddRoom.setEnabled(false);
                 buttonUndoMeasurement.setEnabled(false);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_GROUND);
+                instructionTextView.updateInstruction(Measurer.MeasurerState.MARK_GROUND);
                 break;
             case MARK_CEILING:
                 buttonAddRoom.setEnabled(false);
                 buttonUndoMeasurement.setEnabled(true);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_CEILING);
+                instructionTextView.updateInstruction(Measurer.MeasurerState.MARK_CEILING);
                 break;
             case MARK_WALLS:
                 buttonAddRoom.setEnabled(false);
                 buttonUndoMeasurement.setEnabled(true);
                 buttonFinishRoom.setEnabled(false);
                 buttonFinishMeasuring.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS,
+                instructionTextView.updateInstruction(Measurer.MeasurerState.MARK_WALLS,
                         measurer.getCurrentFinishedWallCount(),
                         measurer.getCurrentMeasurementCount(),
                         measurer.getNeededMeasurementCount());
@@ -269,7 +269,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 buttonUndoMeasurement.setEnabled(true);
                 buttonFinishRoom.setEnabled(true);
                 buttonFinishMeasuring.setEnabled(false);
-                instructionTextView.updateInstruction(InstructionTextView.Instruction.MARK_WALLS,
+                instructionTextView.updateInstruction(Measurer.MeasurerState.ENOUGH_WALLS,
                         measurer.getCurrentFinishedWallCount(),
                         measurer.getCurrentMeasurementCount(),
                         measurer.getNeededMeasurementCount());

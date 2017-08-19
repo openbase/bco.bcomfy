@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -13,6 +15,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
 
 public class InstructionTextView {
 
@@ -24,10 +27,6 @@ public class InstructionTextView {
     private int colorDefault;
     private int colorPositive;
     private int colorNegative;
-
-    public enum Instruction {
-        EMPTY, MARK_GROUND, MARK_CEILING, MARK_WALLS
-    }
 
     public InstructionTextView(TextView textView, Context context) {
         this.context = context;
@@ -46,31 +45,32 @@ public class InstructionTextView {
         pulseFast.setFillAfter(false);
     }
 
-    public void updateInstruction(Instruction instruction) {
-        switch (instruction) {
-            case EMPTY:
-                textView.setText(R.string.no_text);
+    public void updateInstruction(Measurer.MeasurerState measurerState) {
+        switch (measurerState) {
+            case INIT:
                 textView.setVisibility(View.INVISIBLE);
+                textView.setText(R.string.no_text);
                 break;
             case MARK_GROUND:
                 textView.setText(R.string.init_mark_ground);
                 textView.setVisibility(View.VISIBLE);
+                textView.startAnimation(pulseFast);
                 break;
             case MARK_CEILING:
                 textView.setText(R.string.init_mark_ceiling);
                 textView.setVisibility(View.VISIBLE);
+                textView.startAnimation(pulseFast);
                 break;
             case MARK_WALLS:
                 textView.setText(R.string.init_mark_walls);
                 textView.setVisibility(View.VISIBLE);
+                textView.startAnimation(pulseFast);
                 break;
         }
-
-        textView.startAnimation(pulseFast);
     }
 
-    public void updateInstruction(Instruction instruction, int wallNumber, int measurementsFinished, int measurementsNeeded) {
-        updateInstruction(instruction);
+    public void updateInstruction(Measurer.MeasurerState measurerState, int wallNumber, int measurementsFinished, int measurementsNeeded) {
+        updateInstruction(measurerState);
         String nextWallNumberString;
         int nextWallNumber = wallNumber + 1;
 
@@ -89,10 +89,20 @@ public class InstructionTextView {
         }
 
         if (measurementsNeeded > 1) {
-            textView.setText(context.getString(R.string.init_mark_walls_number_measurements, nextWallNumberString, (measurementsNeeded - measurementsFinished)));
+            if (measurerState == Measurer.MeasurerState.MARK_WALLS) {
+                textView.setText(Html.fromHtml(context.getString(R.string.init_mark_walls_number_measurements, nextWallNumberString, (measurementsNeeded - measurementsFinished))));
+            }
+            else if (measurerState == Measurer.MeasurerState.ENOUGH_WALLS) {
+                textView.setText(Html.fromHtml(context.getString(R.string.init_mark_walls_number_measurements_enough, nextWallNumberString, (measurementsNeeded - measurementsFinished))));
+            }
         }
         else {
-            textView.setText(context.getString(R.string.init_mark_walls_number, nextWallNumberString));
+            if (measurerState == Measurer.MeasurerState.MARK_WALLS) {
+                textView.setText(Html.fromHtml(context.getString(R.string.init_mark_walls_number, nextWallNumberString)));
+            }
+            else if (measurerState == Measurer.MeasurerState.ENOUGH_WALLS) {
+                textView.setText(Html.fromHtml(context.getString(R.string.init_mark_walls_number_enough, nextWallNumberString)));
+            }
         }
     }
 

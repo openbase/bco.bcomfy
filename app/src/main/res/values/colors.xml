@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorDivider">#DDDDDD</color>
-    <color name="background_gray_slightly_transparent">#aa888888</color>
-    <color name="background_green_slightly_transparent">#aa008800</color>
-    <color name="background_red_slightly_transparent">#aa880000</color>
+    <color name="background_gray_slightly_transparent">#bb666666</color>
+    <color name="background_green_slightly_transparent">#bb006600</color>
+    <color name="background_red_slightly_transparent">#bb660000</color>
 </resources>
