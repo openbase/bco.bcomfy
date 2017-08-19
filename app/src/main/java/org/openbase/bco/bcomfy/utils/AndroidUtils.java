@@ -25,6 +25,12 @@ public final class AndroidUtils {
         toast.show();
     }
 
+    public static void showLongToastTop(Context context, int resId) {
+        Toast toast = Toast.makeText(context, resId, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP, 0, 100);
+        toast.show();
+    }
+
     public static void showShortToastBottom(Context context, int resId) {
         Toast toast = Toast.makeText(context, resId, Toast.LENGTH_SHORT);
         toast.show();

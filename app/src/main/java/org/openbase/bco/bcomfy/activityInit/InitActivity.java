@@ -131,12 +131,12 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
                     if (lastMeasureType == Measurer.MeasureType.INVALID) {
                         runOnUiThread(() -> instructionTextView.animateNegative());
-                        AndroidUtils.showShortToastTop(getApplicationContext(), R.string.init_invalid_wall);
+                        AndroidUtils.showLongToastTop(getApplicationContext(), R.string.init_invalid_wall);
                         Log.w(TAG, getString(R.string.init_invalid_wall), new CouldNotPerformException(getString(R.string.init_invalid_wall)));
                     }
                     else if (lastMeasureType == Measurer.MeasureType.TOO_CLOSE) {
                         runOnUiThread(() -> instructionTextView.animateNegative());
-                        AndroidUtils.showShortToastTop(getApplicationContext(), R.string.init_too_close);
+                        AndroidUtils.showLongToastTop(getApplicationContext(), R.string.init_too_close);
                         Log.w(TAG, getString(R.string.init_too_close), new CouldNotPerformException(getString(R.string.init_too_close)));
                     }
                     else {
@@ -148,7 +148,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
             } catch (TangoException t) {
                 runOnUiThread(() -> instructionTextView.animateNegative());
-                AndroidUtils.showShortToastTop(getApplicationContext(), R.string.tango_error);
+                AndroidUtils.showLongToastTop(getApplicationContext(), R.string.tango_error);
                 Log.w(TAG, getString(R.string.tango_error), t);
             } catch (SecurityException t) {
                 runOnUiThread(() -> instructionTextView.animateNegative());
