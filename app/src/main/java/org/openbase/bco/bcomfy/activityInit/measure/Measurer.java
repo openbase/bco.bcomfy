@@ -138,6 +138,8 @@ public class Measurer {
             // In that case, use the vector that points from the measured point to the users position
             Log.i(TAG, "Detected ground measurement while scanning for walls. Applying fix...");
             plane.setNormal(plane.getPosition().clone().subtract(new Vector3(currentPosition)));
+            // Furthermore move the position 0.5 meters upwards to prevent planes that go through the ground
+            plane.setPosition(plane.getPosition().clone().add(0.0, 0.25, 0.0));
         }
 
         // Use the constraint that walls are perpendicular to the ground
