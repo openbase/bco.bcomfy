@@ -75,6 +75,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private FloatingActionButton fabSettings;
     private FloatingActionButton fabEditLocation;
     private TextView locationEditHelpText;
+    private TextView noPoseTextView;
 
     private SettingValue currentUnitSetting;
     private SettingValue currentLocationSetting;
@@ -207,6 +208,16 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         progressBarLeftDrawer = findViewById(R.id.progress_bar_left_drawer);
         rightDrawer           = findViewById(R.id.right_drawer);
         locationEditHelpText  = findViewById(R.id.location_edit_help_text);
+
+        noPoseTextView        = findViewById(R.id.noPoseTextView);
+        noPoseTextView.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_warning)
+                        .color(Color.WHITE)
+                        .sizeDp(64),null,
+                new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_warning)
+                        .color(Color.WHITE)
+                        .sizeDp(64),null);
 
         fabExpandDrawer = findViewById(R.id.fab_expand_drawer);
         fabExpandDrawer.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
@@ -518,6 +529,16 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     protected boolean callPostPreFrame() {
         return true;
+    }
+
+    @Override
+    protected void onPoseAvailableChange(boolean poseAvailable) {
+        if (poseAvailable) {
+            noPoseTextView.setVisibility(View.INVISIBLE);
+        }
+        else {
+            noPoseTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     private boolean isUnitLocationEditable(UnitConfig unitConfig) {

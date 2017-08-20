@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.atap.tangoservice.TangoException;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -46,6 +47,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     private Button buttonFinishRoom;
     private Button buttonFinishMeasuring;
     private InstructionTextView instructionTextView;
+    private TextView noPoseTextView;
 
     private Measurer measurer;
 
@@ -189,6 +191,16 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     protected void setupGui() {
         instructionTextView = new InstructionTextView(findViewById(R.id.instructionTextView), this);
 
+        noPoseTextView = findViewById(R.id.noPoseTextView);
+        noPoseTextView.setCompoundDrawables(new IconicsDrawable(this)
+                    .icon(GoogleMaterial.Icon.gmd_warning)
+                    .color(Color.WHITE)
+                    .sizeDp(64),null,
+                new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_warning)
+                        .color(Color.WHITE)
+                        .sizeDp(64),null);
+
         buttonAddRoom = findViewById(R.id.buttonAddRoom);
         buttonAddRoom.setCompoundDrawables(new IconicsDrawable(this)
                         .icon(GoogleMaterial.Icon.gmd_add_circle_outline)
@@ -226,6 +238,18 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         setSurfaceView(findViewById(R.id.surfaceview));
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
+    }
+
+    @Override
+    protected void onPoseAvailableChange(boolean poseAvailable) {
+        if (poseAvailable) {
+            noPoseTextView.setVisibility(View.INVISIBLE);
+            updateGuiButtons();
+        }
+        else {
+            noPoseTextView.setVisibility(View.VISIBLE);
+            instructionTextView.updateInstruction(Measurer.MeasurerState.INIT);
+        }
     }
 
     /**

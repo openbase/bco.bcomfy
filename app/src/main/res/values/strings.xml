@@ -4,6 +4,7 @@
     <string name="tango_out_of_date_exception">Tango Service outdated!</string>
     <string name="tango_error">Error during measuring! Please try again from a different position or on another material.</string>
     <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
+    <string name="tango_no_pose">Lost orientation!\nPlease move the device\naround a bit in order to\nallow for relocalization</string>
     <string name="no_permissions">Permission not granted!</string>
     <string name="gui_connect_bco">Connecting to BCO…</string>
     <string name="gui_update_adf">Updating Area Description…</string>

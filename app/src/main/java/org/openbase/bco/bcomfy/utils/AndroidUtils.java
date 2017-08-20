@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.utils;
 import android.content.Context;
 import android.util.Log;
 import android.view.Gravity;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -22,17 +23,23 @@ public final class AndroidUtils {
     public static void showShortToastTop(Context context, int resId) {
         Toast toast = Toast.makeText(context, resId, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP, 0, 100);
+        TextView v = toast.getView().findViewById(android.R.id.message);
+        if (v != null) v.setGravity(Gravity.CENTER);
         toast.show();
     }
 
     public static void showLongToastTop(Context context, int resId) {
         Toast toast = Toast.makeText(context, resId, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.TOP, 0, 100);
+        TextView v = toast.getView().findViewById(android.R.id.message);
+        if (v != null) v.setGravity(Gravity.CENTER);
         toast.show();
     }
 
     public static void showShortToastBottom(Context context, int resId) {
         Toast toast = Toast.makeText(context, resId, Toast.LENGTH_SHORT);
+        TextView v = toast.getView().findViewById(android.R.id.message);
+        if (v != null) v.setGravity(Gravity.CENTER);
         toast.show();
     }
 

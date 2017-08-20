@@ -166,11 +166,14 @@ public abstract class TangoActivity extends Activity {
                         if (pose.statusCode == TangoPoseData.POSE_VALID) {
                             if (statusBarAnimator.isRunning()) {
                                 runOnUiThread(() -> statusBarAnimator.end());
+                                runOnUiThread(() -> onPoseAvailableChange(true));
                             }
                             runOnUiThread(() -> getWindow().setStatusBarColor(0xFF000000));
+
                         } else {
                             if (!statusBarAnimator.isRunning()) {
                                 runOnUiThread(() -> statusBarAnimator.start());
+                                runOnUiThread(() -> onPoseAvailableChange(false));
                             }
                         }
                     }
@@ -209,8 +212,6 @@ public abstract class TangoActivity extends Activity {
                                             displayRotation);
                             renderer.setProjectionMatrix(
                                     TangoUtils.projectionMatrixFromCameraIntrinsics(intrinsics));
-//                            projectionMatrix = TangoUtils.projectionMatrixFromCameraIntrinsics(intrinsics);
-//                            renderer.setProjectionMatrix(projectionMatrix);
                         }
 
                         // Connect the camera texture to the OpenGL Texture if necessary
@@ -321,5 +322,7 @@ public abstract class TangoActivity extends Activity {
     protected boolean callPostPreFrame() {
         return false;
     }
+
+    protected abstract void onPoseAvailableChange(boolean poseAvailable);
 
 }
