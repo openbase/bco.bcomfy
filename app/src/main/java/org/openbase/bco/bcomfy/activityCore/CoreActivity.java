@@ -75,6 +75,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private FloatingActionButton fabSettings;
     private FloatingActionButton fabEditLocation;
     private TextView locationEditHelpText;
+    private TextView relocationInstructionTextView;
     private TextView noPoseTextView;
 
     private SettingValue currentUnitSetting;
@@ -186,15 +187,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 }
 
             } catch (TangoException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.tango_error,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.tango_error), t);
+                AndroidUtils.showLongToastTop(getApplicationContext(), R.string.tango_error);
+                Log.w(TAG, getString(R.string.tango_error), t);
             } catch (SecurityException t) {
-                Toast.makeText(getApplicationContext(),
-                        R.string.no_permissions,
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, getString(R.string.no_permissions), t);
+                AndroidUtils.showShortToastTop(getApplicationContext(), R.string.no_permissions);
+                Log.w(TAG, getString(R.string.no_permissions), t);
             }
         }
         return true;
@@ -218,6 +215,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                         .icon(GoogleMaterial.Icon.gmd_warning)
                         .color(Color.WHITE)
                         .sizeDp(64),null);
+
+        relocationInstructionTextView = findViewById(R.id.relocation_instruction);
+        relocationInstructionTextView.setCompoundDrawables(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_touch_app)
+                .color(Color.WHITE)
+                .sizeDp(64), null, null, null);
 
         fabExpandDrawer = findViewById(R.id.fab_expand_drawer);
         fabExpandDrawer.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_menu).color(Color.WHITE).sizeDp(24));
@@ -399,15 +402,23 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private void enterEditMode() {
         inEditMode = true;
         drawerLayout.closeDrawers();
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, leftDrawer);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, rightDrawer);
+        fabExpandDrawer.setVisibility(View.INVISIBLE);
         buttonsEdit.setVisibility(View.VISIBLE);
+        relocationInstructionTextView.setVisibility(View.VISIBLE);
         locationLabelButton.setVisibility(View.GONE);
         uiOverlayHolder.setUiOverlayVisibility(View.INVISIBLE);
     }
 
     private void leaveEditMode() {
         inEditMode = false;
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, leftDrawer);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, rightDrawer);
         drawerLayout.openDrawer(rightDrawer);
+        fabExpandDrawer.setVisibility(View.VISIBLE);
         buttonsEdit.setVisibility(View.INVISIBLE);
+        relocationInstructionTextView.setVisibility(View.INVISIBLE);
         locationLabelButton.setVisibility(View.VISIBLE);
         uiOverlayHolder.setUiOverlayVisibility(View.VISIBLE);
 
@@ -535,9 +546,14 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     protected void onPoseAvailableChange(boolean poseAvailable) {
         if (poseAvailable) {
             noPoseTextView.setVisibility(View.INVISIBLE);
+
+            if (inEditMode) {
+                relocationInstructionTextView.setVisibility(View.VISIBLE);
+            }
         }
         else {
             noPoseTextView.setVisibility(View.VISIBLE);
+            relocationInstructionTextView.setVisibility(View.INVISIBLE);
         }
     }
 

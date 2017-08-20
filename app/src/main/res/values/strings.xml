@@ -35,6 +35,7 @@
     <string name="init_mark_walls_number_enough"><![CDATA[ Mark the <b><font color=\'#d1e24a\'>%1$s</font></b> wall by tapping the display at the according point or finish the room]]></string>
     <string name="init_invalid_wall">Error! The room border needs to be perpendicular to the previous one.</string>
     <string name="init_too_close">Too close to measured point. Please increase your distance.</string>
+    <string name="relocate_instruction">Tap the display at the according point and confirm your modification</string>
     <string name="choose_location">Select the location</string>
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_scan_init">Initialize scanning</string>
