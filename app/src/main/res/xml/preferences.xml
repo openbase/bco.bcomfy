@@ -17,7 +17,7 @@
             android:title="@string/pref_port" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Location Initialization">
+    <PreferenceCategory android:title="@string/pref_location_scanning">
         <EditTextPreference
             android:defaultValue="1"
             android:key="pref_init_default"
@@ -38,23 +38,23 @@
             android:title="@string/pref_init_anchor" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Miscellaneous settings">
+    <PreferenceCategory android:title="@string/pref_miscellaneous_settings">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_misc_unknown_service"
             android:title="@string/pref_misc_unknown_service" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Registry Utilities (use with caution!)">
+    <PreferenceCategory android:title="@string/pref_registry_utilities">
         <Preference
             android:key="pref_delete_device_poses"
-            android:title="Delete Device Poses"
-            android:summary="This deletes the poses of all devices" />
+            android:title="@string/pref_delete_device_poses"
+            android:summary="@string/pref_delete_device_poses_sum" />
 
         <Preference
             android:key="pref_delete_location_shapes"
-            android:title="Delete Location Shapes"
-            android:summary="This deletes the shapes and poses of all locations (and Doors, Connections...)" />
+            android:title="@string/pref_delete_location_shapes"
+            android:summary="@string/pref_delete_location_shapes_sum" />
     </PreferenceCategory>
 
 </PreferenceScreen>

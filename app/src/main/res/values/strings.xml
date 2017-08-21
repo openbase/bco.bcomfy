@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">BComfy</string>
-    <string name="no_text">NO TEXT</string>
+    <string name="no_text" translatable="false">NO TEXT</string>
     <string name="tango_out_of_date_exception">Tango Service outdated!</string>
     <string name="tango_error">Error during measuring! Please try again from a different position or on another material.</string>
     <string name="tango_invalid">Tango Invalid Exception! Try again!</string>
-    <string name="tango_no_pose">Lost orientation!\nPlease move the device\naround a bit in order to\nallow for relocalization</string>
+    <string name="tango_no_pose">Lost orientation!\nPlease move the device around in order to allow for localization</string>
     <string name="no_permissions">Permission not granted!</string>
     <string name="gui_connect_bco">Connecting to BCO…</string>
     <string name="gui_update_adf">Updating Area Description…</string>
@@ -14,18 +14,10 @@
     <string name="gui_update_adf_failed">Location not initialized!</string>
     <string name="gui_cancel">Cancel</string>
     <string name="gui_apply">Apply</string>
-    <string name="gui_place_sphere">Place Sphere</string>
-    <string name="gui_save_location">Save Location</string>
-    <string name="gui_load_location">Load Location</string>
-    <string name="gui_add_ground">Add Ground</string>
     <string name="gui_add_room">Add\nRoom</string>
     <string name="gui_undo_measurement">Undo last\nmeasurement</string>
     <string name="gui_finish_room">Finish\nRoom</string>
     <string name="gui_finish_measuring">Finish\nMeasuring</string>
-    <string name="toast_location_saved">Location saved.</string>
-    <string name="toast_location_loaded">Location loaded.</string>
-    <string name="record_location">Record</string>
-    <string name="load_location">Load</string>
     <string name="init_mark_ground">Mark the ground by tapping the display at the according point</string>
     <string name="init_mark_ceiling">Mark the ceiling by tapping the display at the according point</string>
     <string name="init_mark_walls">Mark the walls by tapping the display at the according point</string>
@@ -34,9 +26,9 @@
     <string name="init_mark_walls_number"><![CDATA[ Mark the <b><font color=\'#d1e24a\'>%1$s</font></b> wall by tapping the display at the according point]]></string>
     <string name="init_mark_walls_number_enough"><![CDATA[ Mark the <b><font color=\'#d1e24a\'>%1$s</font></b> wall by tapping the display at the according point or finish the room]]></string>
     <string name="init_invalid_wall">Error! The room border needs to be perpendicular to the previous one.</string>
-    <string name="init_too_close">Too close to measured point. Please increase your distance.</string>
+    <string name="init_too_close">Error! Too close to measured point. Please increase your distance.</string>
     <string name="relocate_instruction">Tap the display at the according point and confirm your modification</string>
-    <string name="choose_location">Select the location</string>
+    <string name="choose_location">Which location did you just measure?</string>
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_scan_init">Initialize scanning</string>
     <string name="gui_scan_continue">Continue scanning</string>
@@ -53,6 +45,13 @@
     <string name="pref_init_anchor">Measurements per wall (anchor point)</string>
     <string name="pref_init_align">Use anchor alignment</string>
     <string name="pref_misc_unknown_service">Display unknown services</string>
+    <string name="pref_location_scanning">Location Scanning</string>
+    <string name="pref_miscellaneous_settings">Miscellaneous settings</string>
+    <string name="pref_registry_utilities">BCO Utilities (use with caution!)</string>
+    <string name="pref_delete_device_poses">Delete device poses</string>
+    <string name="pref_delete_device_poses_sum">This deletes the poses of all devices</string>
+    <string name="pref_delete_location_shapes">Delete location shapes</string>
+    <string name="pref_delete_location_shapes_sum">This deletes the shapes and poses of all locations (and Doors, Connections…)</string>
     <string name="button_apply">{gmd-check} Apply</string>
     <string name="button_cancel">{gmd-close} Cancel</string>
     <string name="button_clear">{gmd-location-off} Clear</string>
@@ -66,6 +65,6 @@
     <string name="list_settings_units_unlocated">Show only unlocated units</string>
     <string name="list_settings_locations_all">Show all locations</string>
     <string name="list_settings_locations_located">Show only located locations</string>
-    <string name="toast_permission_not_granted">Necessary permission was denied. Closing app…</string>
+    <string name="toast_permission_not_granted">Necessary permission was denied. Closing BComfy…</string>
     <string name="toast_loading_error">Error while loading local dataset for selected adf!</string>
 </resources>

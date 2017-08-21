@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BComfy</string>
+    <string name="tango_out_of_date_exception">Der Tango Dienst benötigt ein Update!</string>
+    <string name="tango_error">Fehler bei der Messung! Bitte versuchen Sie es von einer anderen Position aus erneut.</string>
+    <string name="tango_invalid">Interner Tango Fehler! Bitte versuchen Sie es erneut.</string>
+    <string name="tango_no_pose">Nicht lokalisiert!\nBitte bewegen Sie das Gerät umher um die Lokalisierung zu ermöglichen</string>
+    <string name="no_permissions">Fehlende Autorisierung!</string>
+    <string name="gui_connect_bco">Verbinde zu BCO…</string>
+    <string name="gui_update_adf">Aktualisiere Lokalisierungsdateien…</string>
+    <string name="gui_connect_tango">Verbinde zu Tango Dienst…\nBitte halten Sie das Gerät aufrecht!</string>
+    <string name="gui_init_tango">Initialisiere Tango Dienst…</string>
+    <string name="gui_init_tango_failed">Initialisierung des Tango Dienstes fehlgeschlagen!</string>
+    <string name="gui_update_adf_failed">Umgebung ist nicht initialisiert!</string>
+    <string name="gui_cancel">Abbruch</string>
+    <string name="gui_apply">Übernehmen</string>
+    <string name="gui_add_room">Neuer\nRaum</string>
+    <string name="gui_undo_measurement">Rückgängig</string>
+    <string name="gui_finish_room">Raummessung\nabschließen</string>
+    <string name="gui_finish_measuring">Scanvorgang\nabschließen</string>
+    <string name="init_mark_ground">Markieren Sie den Boden, indem Sie den Bildschirm an der entsprechenden Stelle antippen</string>
+    <string name="init_mark_ceiling">Markieren Sie die Decke, indem Sie den Bildschirm an der entsprechenden Stelle antippen</string>
+    <string name="init_mark_walls">Markieren Sie die Raumgrenzen, indem Sie den Bildschirm an der entsprechenden Stelle antippen</string>
+    <string name="init_mark_walls_number_measurements"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen<br><br>Diese Raumgrenze benötigt noch <b><font color=\'#d1e24a\'>%2$d</font></b> Messungen]]></string>
+    <string name="init_mark_walls_number_measurements_enough"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen oder schließen Sie die Messung ab<br><br>Die nächste Raumgrenze würde <b><font color=\'#d1e24a\'>%2$d</font></b> Messungen benötigen]]></string>
+    <string name="init_mark_walls_number"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen oder schließen Sie die Messung ab]]></string>
+    <string name="init_mark_walls_number_enough"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen]]></string>
+    <string name="init_invalid_wall">Fehler! Die Raumgrenze muss immer im rechten Winkel zu der vorherigen Raumgrenze sein.</string>
+    <string name="init_too_close">Fehler! Sie befinden sich zu nah an dem Messpunkt. Bitte erhöhen Sie ihre Entfernung.</string>
+    <string name="relocate_instruction">Tippen Sie den Bildschirm an der Stelle an, an der Sie das Gerät verorten möchten und bestätigen Sie ihre Aktion</string>
+    <string name="choose_location">Welchen Raum haben Sie soeben vermessen?</string>
+    <string name="choose_adf">Bitte wählen sie die passende Umgebungsdatei</string>
+    <string name="gui_scan_init">Scanvorgang initialisieren</string>
+    <string name="gui_scan_continue">Scanvorgang fortsetzen</string>
+    <string name="gui_retry">Erneut versuchen</string>
+    <string name="gui_settings">Einstellungen</string>
+    <string name="gui_publish_depth">Tiefeninformationen veröffentlichen</string>
+    <string name="gui_record_adf">Umgebungsdateien aufnehmen</string>
+    <string name="gui_manage_adf">Umgebungsdateien verwalten</string>
+    <string name="pref_group_bco">BCO Verbindung</string>
+    <string name="pref_ip">IP-Adresse</string>
+    <string name="pref_port">Port</string>
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="pref_init_default">Messpunkte pro Raumgrenze</string>
+    <string name="pref_init_anchor">Messpunkte pro Raumgrenze (Ankerpunkt)</string>
+    <string name="pref_init_align">Richte Raumgrenzen an Ankerpunkt aus</string>
+    <string name="pref_misc_unknown_service">Zeige unbekannte Services an</string>
+    <string name="button_apply">{gmd-check} Übernehmen</string>
+    <string name="button_cancel">{gmd-close} Abbrechen</string>
+    <string name="button_clear">{gmd-location-off} Löschen</string>
+    <string name="button_blind_down">{gmd-arrow-downward}\nRunter</string>
+    <string name="button_blind_stop">{gmd-stop}\nStop</string>
+    <string name="button_blind_up">{gmd-arrow-upward}\nHoch</string>
+    <string name="button_edit_help">Gerätekoordinaten aktualiseren -></string>
+    <string name="list_settings_title">Geräteliste</string>
+    <string name="list_settings_units_all">Zeige alle Geräte</string>
+    <string name="list_settings_units_located">Zeige nur Geräte mit Koordinaten</string>
+    <string name="list_settings_units_unlocated">Zeige nur Geräte ohne Koordinaten</string>
+    <string name="list_settings_locations_all">Zeige alle Räume</string>
+    <string name="list_settings_locations_located">Zeige nur Räume mit Koordinaten</string>
+    <string name="toast_permission_not_granted">Erforderliche Berechtigung fehlt! BComfy wird beendet…</string>
+    <string name="toast_loading_error">Fehler beim Laden von lokalen Umgebungsdaten aufgetreten!</string>
+    <string name="pref_location_scanning">Raumvermessung</string>
+    <string name="pref_miscellaneous_settings">Verschiedene Einstellungen</string>
+    <string name="pref_registry_utilities">BCO Werkzeuge (mit Vorsicht zu verwenden!)</string>
+    <string name="pref_delete_device_poses">Gerätekoordinaten entfernen</string>
+    <string name="pref_delete_device_poses_sum">Dies entfernt die Koordinaten sämtlicher Geräte</string>
+    <string name="pref_delete_location_shapes">Raumkoordinaten entfernen</string>
+    <string name="pref_delete_location_shapes_sum">Dies entfernt die Koordinaten sämtlicher Räume, Türen und Fenster</string>
+</resources>
