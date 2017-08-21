@@ -276,9 +276,27 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         });
 
         buttonsEdit         = findViewById(R.id.buttons_edit);
+
         buttonEditApply     = findViewById(R.id.button_apply);
+        buttonEditApply.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_check)
+                        .color(Color.WHITE)
+                        .sizeDp(18)
+                , null, null, null);
+
         buttonEditCancel    = findViewById(R.id.button_cancel);
+        buttonEditCancel.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_close)
+                        .color(Color.WHITE)
+                        .sizeDp(18)
+                , null, null, null);
+
         buttonEditClear     = findViewById(R.id.button_clear);
+        buttonEditClear.setCompoundDrawables(new IconicsDrawable(this)
+                        .icon(GoogleMaterial.Icon.gmd_location_off)
+                        .color(Color.WHITE)
+                        .sizeDp(18)
+                , null, null, null);
 
         buttonEditApply.setOnClickListener(v -> editApply());
         buttonEditCancel.setOnClickListener(v -> leaveEditMode());

@@ -45,9 +45,9 @@
     <string name="pref_init_anchor">Messpunkte pro Raumgrenze (Ankerpunkt)</string>
     <string name="pref_init_align">Richte Raumgrenzen an Ankerpunkt aus</string>
     <string name="pref_misc_unknown_service">Zeige unbekannte Services an</string>
-    <string name="button_apply">{gmd-check} Übernehmen</string>
-    <string name="button_cancel">{gmd-close} Abbrechen</string>
-    <string name="button_clear">{gmd-location-off} Löschen</string>
+    <string name="button_apply">" Übernehmen"</string>
+    <string name="button_cancel">" Abbrechen"</string>
+    <string name="button_clear">" Löschen"</string>
     <string name="button_blind_down">{gmd-arrow-downward}\nRunter</string>
     <string name="button_blind_stop">{gmd-stop}\nStop</string>
     <string name="button_blind_up">{gmd-arrow-upward}\nHoch</string>

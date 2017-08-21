@@ -52,9 +52,9 @@
     <string name="pref_delete_device_poses_sum">This deletes the poses of all devices</string>
     <string name="pref_delete_location_shapes">Delete location shapes</string>
     <string name="pref_delete_location_shapes_sum">This deletes the shapes and poses of all locations (and Doors, Connections…)</string>
-    <string name="button_apply">{gmd-check} Apply</string>
-    <string name="button_cancel">{gmd-close} Cancel</string>
-    <string name="button_clear">{gmd-location-off} Clear</string>
+    <string name="button_apply">" Apply"</string>
+    <string name="button_cancel">" Cancel"</string>
+    <string name="button_clear">" Clear"</string>
     <string name="button_blind_down">{gmd-arrow-downward}\nDown</string>
     <string name="button_blind_stop">{gmd-stop}\nStop</string>
     <string name="button_blind_up">{gmd-arrow-upward}\nUp</string>
