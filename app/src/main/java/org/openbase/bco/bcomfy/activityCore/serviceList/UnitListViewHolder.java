@@ -4,13 +4,16 @@ package org.openbase.bco.bcomfy.activityCore.serviceList;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.serviceList.units.AbstractUnitViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.units.GenericUnitViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.units.UnitViewHolderFactory;
+import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.device.lib.DeviceRegistry;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.lib.UnitRegistry;
@@ -25,7 +28,7 @@ import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
-public class UnitListViewHolder {
+public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
 
     private static final String TAG = UnitListViewHolder.class.getSimpleName();
 
@@ -33,6 +36,7 @@ public class UnitListViewHolder {
     private LinearLayout unitList;
     private TextView labelText;
     private TextView typeText;
+    private ProgressBar deviceLoadingProgressBar;
     private Activity activity;
     private UnitConfigType.UnitConfig unitConfig;
 
@@ -46,6 +50,7 @@ public class UnitListViewHolder {
         unitList  = serviceList.findViewById(R.id.unit_list);
         labelText = serviceList.findViewById(R.id.device_label);
         typeText  = serviceList.findViewById(R.id.device_type);
+        deviceLoadingProgressBar = serviceList.findViewById(R.id.device_loading_progress_bar);
 
         unitViewHolderList = new ArrayList<>();
     }
@@ -53,16 +58,29 @@ public class UnitListViewHolder {
     public void displayUnit(Activity activity, UnitConfigType.UnitConfig unitConfig) {
         this.activity = activity;
         this.unitConfig = unitConfig;
+
+        labelText.setText(R.string.loading_device);
+        typeText.setText("");
+
+        activity.runOnUiThread(() -> unitList.removeAllViews());
+        unitViewHolderList.clear();
+
+        deviceLoadingProgressBar.setVisibility(View.VISIBLE);
+
         new displayUnitTask().execute(this);
     }
 
+    @Override
+    public void taskFinishedCallback(Void returnObject) {
+        deviceLoadingProgressBar.setVisibility(View.GONE);
+    }
+
     private static class displayUnitTask extends AsyncTask<UnitListViewHolder, Void, Void> {
+        private UnitListViewHolder unitListViewHolder;
+
         @Override
         protected Void doInBackground(UnitListViewHolder... unitListViewHolders) {
-            UnitListViewHolder unitListViewHolder = unitListViewHolders[0];
-            unitListViewHolder.activity.runOnUiThread(() ->
-                    unitListViewHolder.unitList.removeAllViews());
-            unitListViewHolder.unitViewHolderList.clear();
+            unitListViewHolder = unitListViewHolders[0];
 
             try {
                 unitListViewHolder.deviceRegistry = Registries.getDeviceRegistry();
@@ -109,6 +127,10 @@ public class UnitListViewHolder {
             }
             return null;
         }
-    }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            unitListViewHolder.taskFinishedCallback(null);
+        }
+    }
 }
