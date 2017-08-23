@@ -72,7 +72,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         }).execute();
     }
 
-    public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, CouldNotPerformException, TimeoutException {
+    public void checkAndAddNewUnit(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException {
         if (!holderMap.containsKey(unitConfig.getId())) {
             AbstractUnitSelectorHolder holder = SelectorHolderFactory.createUnitSelectorHolder(unitConfig);
 
@@ -151,7 +151,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
                             try {
                                 Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
                                 newUnitMap.put(unitConfig.getId(), SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
-                            } catch (InterruptedException | CouldNotPerformException | ExecutionException | TimeoutException e) {
+                            } catch (InterruptedException | CouldNotPerformException e) {
                                 Log.e(TAG, Log.getStackTraceString(e));
                             }
                         });

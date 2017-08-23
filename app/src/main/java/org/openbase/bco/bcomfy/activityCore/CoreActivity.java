@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.google.atap.tangoservice.TangoException;
@@ -51,7 +50,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.vecmath.Vector3d;
+import javax.vecmath.Point3d;
 
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
@@ -489,7 +488,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             }
 
             // Transform BCO-Root position to BCO-Location-of-selected-point position
-            Vector3d transformedBcoPosition = new Vector3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
+            Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
             Registries.getLocationRegistry().waitForData();
             Registries.getLocationRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
@@ -511,7 +510,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 
             // Update unitConfig
-            Registries.getUnitRegistry().updateUnitConfig(unitConfig);
+            Registries.getUnitRegistry().updateUnitConfig(unitConfig).get();
 
             uiOverlayHolder.checkAndAddNewUnit(unitConfig);
             leaveEditMode();

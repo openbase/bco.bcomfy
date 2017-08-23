@@ -3,7 +3,6 @@ package org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.util.Log;
 import android.view.View;
@@ -18,21 +17,22 @@ import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.pattern.Remote;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Point3d;
 
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
-import rst.geometry.TranslationType;
 
 public abstract class AbstractUnitSelectorHolder {
     private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
@@ -50,26 +50,29 @@ public abstract class AbstractUnitSelectorHolder {
     private UnitConfigType.UnitConfig unitConfig;
     private UnitRemote unitRemote;
 
-    public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws NotAvailableException, InterruptedException, ExecutionException, TimeoutException {
-        this.icon = icon;
-        this.unitConfig = unitConfig;
-        this.isMainSelector = isMainSelector;
+    public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws InstantiationException, InterruptedException {
+        try {
+            this.icon = icon;
+            this.unitConfig = unitConfig;
+            this.isMainSelector = isMainSelector;
 
-        if (isMainSelector) {
-            updatePositionFromRoot();
+            if (isMainSelector) {
+                updatePositionFromRoot();
+            }
+
+            this.parentWidth = 0;
+            this.parentHeight = 0;
+
+            unitRemote = Units.getFutureUnit(unitConfig, true).get(10, TimeUnit.SECONDS);
+            unitRemote.addConfigObserver((observable, newUnitConfig) -> {
+                this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
+                this.updatePositionFromRoot();
+            });
+            unitRemote.addConnectionStateObserver((observable, connectionState) ->
+                    updateConnectionState((Remote.ConnectionState) connectionState));
+        } catch (CancellationException | ExecutionException | TimeoutException | CouldNotPerformException ex) {
+            throw new InstantiationException(this, ex);
         }
-
-        this.parentWidth = 0;
-        this.parentHeight = 0;
-
-
-        unitRemote = Units.getFutureUnit(unitConfig, true).get(1, TimeUnit.SECONDS);
-        unitRemote.addConfigObserver((observable, newUnitConfig) -> {
-            this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
-            this.updatePositionFromRoot();
-        });
-        unitRemote.addConnectionStateObserver((observable, connectionState) ->
-                updateConnectionState((Remote.ConnectionState) connectionState));
     }
 
     public String getUnitHostId() {
@@ -187,14 +190,18 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
-    private void updatePositionFromRoot() throws NotAvailableException, InterruptedException, ExecutionException, TimeoutException {
-        TranslationType.Translation unitPosition = unitConfig.getPlacementConfig().getPosition().getTranslation();
-        Vector3d unitVector = new Vector3d(unitPosition.getX(), unitPosition.getY(), unitPosition.getZ());
+    private void updatePositionFromRoot() throws InterruptedException, TimeoutException, CouldNotPerformException {
+        try {
+            Point3d unitVector = new Point3d(0, 0, 0);
 
-        Transform3D transform3D = Units.getUnitTransformation(unitConfig).get(1, TimeUnit.SECONDS).getTransform();
-        transform3D.invert();
-        transform3D.transform(unitVector);
+            Transform3D transform3D = Units.getUnitTransformation(unitConfig).get(10, TimeUnit.SECONDS).getTransform();
+            transform3D.invert();
+            transform3D.transform(unitVector);
 
-        positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
+            positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
+        } catch (CancellationException | NotAvailableException | ExecutionException ex) {
+            throw new CouldNotPerformException("Could not update position from root!", ex);
+        }
+
     }
 }

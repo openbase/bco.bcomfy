@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.concurrent.ExecutionException;
@@ -16,7 +17,7 @@ public class SelectorHolderFactory {
     private static final String TAG = SelectorHolderFactory.class.getSimpleName();
 
 
-    public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException, ExecutionException, TimeoutException {
+    public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException {
         AbstractUnitSelectorHolder unitSelectorHolder;
 
         switch (unitConfig.getType()) {
@@ -41,7 +42,7 @@ public class SelectorHolderFactory {
         return unitSelectorHolder;
     }
 
-    public static AbstractUnitSelectorHolder createUnitSelectorHolderGroup(UnitConfigType.UnitConfig unitConfig) throws InterruptedException, ExecutionException, NotAvailableException, TimeoutException {
+    public static AbstractUnitSelectorHolder createUnitSelectorHolderGroup(UnitConfigType.UnitConfig unitConfig) throws InstantiationException, InterruptedException {
         Log.e(TAG, "unitSelectorHolderGroup not supported yet! Falling back to generic device visualization...");
         return new GenericSelectorHolder(unitConfig, true);
     }
