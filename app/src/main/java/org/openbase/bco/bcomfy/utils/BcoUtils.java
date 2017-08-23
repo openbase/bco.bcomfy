@@ -8,6 +8,8 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.MetaConfigVariableProvider;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -27,6 +29,12 @@ import rst.spatial.ShapeType;
 public final class BcoUtils {
 
     private static final String TAG = BcoUtils.class.getSimpleName();
+    private static final String BCOMFY_STUDY_KEY = "BCOMFY_STUDY";
+
+    public static boolean containsStudyMetaData(UnitConfigType.UnitConfig unitConfig) throws NotAvailableException {
+        MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
+        return Boolean.parseBoolean(mcvp.getValue(BCOMFY_STUDY_KEY));
+    }
 
     public static class UpdateLocationShapeTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = UpdateLocationShapeTask.class.getSimpleName();

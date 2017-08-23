@@ -84,6 +84,10 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
+    public UnitConfigType.UnitConfig getUnitConfig() {
+        return unitConfig;
+    }
+
     public UnitConfigType.UnitConfig getUnitHostConfig() throws CouldNotPerformException, InterruptedException {
         if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
             return unitConfig;

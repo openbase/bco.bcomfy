@@ -6,14 +6,17 @@ import com.bignerdranch.expandablerecyclerview.model.Parent;
 
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment;
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import java8.util.Comparators;
 import java8.util.stream.StreamSupport;
+import rst.domotic.state.EnablingStateType;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
@@ -30,10 +33,19 @@ public class Location implements Parent<Device> {
 
         try {
             StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), true))
+                    .filter(unitConfig -> {
+                        try {
+                            return BcoUtils.containsStudyMetaData(unitConfig);
+                        } catch (NotAvailableException ex) {
+                            Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
+                            return false;
+                        }
+                    })
+                    .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||
                                           (unitSetting == SettingValue.UNLOCATED && !unitConfig.getPlacementConfig().hasPosition())))
-                    .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
+                    .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
                     .sorted(Comparators.thenComparing(Comparators.comparing(UnitConfigType.UnitConfig::getType), UnitConfigType.UnitConfig::getLabel))
                     .forEachOrdered(unitConfig -> deviceList.add(new Device(unitConfig)));
         } catch (CouldNotPerformException e) {

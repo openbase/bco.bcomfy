@@ -14,8 +14,11 @@ import org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder.Abstrac
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.unitSelectorHolder.SelectorHolderFactory;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.MetaConfigVariableProvider;
 import org.rajawali3d.math.Matrix4;
 
 import java.util.HashMap;
@@ -23,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.StreamSupport;
+import rst.domotic.state.EnablingStateType;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
@@ -108,13 +112,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         holder.initIcon();
         holder.setParentWidth(uiOverlay.getWidth());
         holder.setParentHeight(uiOverlay.getHeight());
-        holder.getView().setOnClickListener(v -> {
-            try {
-                onDeviceSelectedListener.onDeviceSelected(holder.getUnitHostConfig());
-            } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unit config of unit " + holder.getUnitHostId() + "\n" + Log.getStackTraceString(e));
-            }
-        });
+        holder.getView().setOnClickListener(v -> onDeviceSelectedListener.onDeviceSelected(holder.getUnitConfig()));
         uiOverlay.addView(holder.getView());
     }
 
@@ -143,10 +141,21 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.DEVICE))
-                        .filter(unitConfig -> unitConfig.getPlacementConfig().getPosition().getTranslation().getX() != 0 ||
-                                unitConfig.getPlacementConfig().getPosition().getTranslation().getY() != 0 ||
-                                unitConfig.getPlacementConfig().getPosition().getTranslation().getZ() != 0)
+                StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
+                        .filter(unitConfig -> {
+                            try {
+                                return BcoUtils.containsStudyMetaData(unitConfig);
+                            } catch (NotAvailableException ex) {
+                                Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
+                                return false;
+                            }
+                        })
+                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
+                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
+                                (!unitConfig.getBoundToUnitHost() &&
+                                        unitConfig.getType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION &&
+                                        unitConfig.getType() != UnitTemplateType.UnitTemplate.UnitType.CONNECTION))
+                        .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
                         .forEach(unitConfig -> {
                             try {
                                 Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");

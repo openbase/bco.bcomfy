@@ -51,7 +51,7 @@
     <string name="button_blind_down">{gmd-arrow-downward}\nRunter</string>
     <string name="button_blind_stop">{gmd-stop}\nStop</string>
     <string name="button_blind_up">{gmd-arrow-upward}\nHoch</string>
-    <string name="button_edit_help">Gerätekoordinaten aktualiseren -></string>
+    <string name="button_edit_help">Hier klicken um das Gerät im System zu verorten -></string>
     <string name="list_settings_title">Geräteliste</string>
     <string name="list_settings_units_all">Zeige alle Geräte</string>
     <string name="list_settings_units_located">Zeige nur Geräte mit Koordinaten</string>

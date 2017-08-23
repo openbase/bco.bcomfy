@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.openbase.bco.bcomfy.R;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
 
 import java8.util.Comparators;
 import java8.util.J8Arrays;
@@ -47,6 +49,14 @@ public class LocationChooser extends DialogFragment {
         try {
             Registries.getLocationRegistry().waitForData();
             locations = StreamSupport.stream(Registries.getLocationRegistry().getLocationConfigs())
+                    .filter(unitConfig -> {
+                        try {
+                            return BcoUtils.containsStudyMetaData(unitConfig);
+                        } catch (NotAvailableException ex) {
+                            Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
+                            return false;
+                        }
+                    })
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
                     .toArray(UnitConfigType.UnitConfig[]::new);
 
