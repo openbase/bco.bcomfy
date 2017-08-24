@@ -112,7 +112,13 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         holder.initIcon();
         holder.setParentWidth(uiOverlay.getWidth());
         holder.setParentHeight(uiOverlay.getHeight());
-        holder.getView().setOnClickListener(v -> onDeviceSelectedListener.onDeviceSelected(holder.getUnitConfig()));
+        holder.getView().setOnClickListener(v -> {
+            try {
+                onDeviceSelectedListener.onDeviceSelected(holder.getCorrespondingUnitConfig());
+            } catch (CouldNotPerformException | InterruptedException ex) {
+                Log.e(TAG, "Error while trying to get corresponding unitConfig of unit " + holder.getUnitHostId(), ex);
+            }
+        });
         uiOverlay.addView(holder.getView());
     }
 

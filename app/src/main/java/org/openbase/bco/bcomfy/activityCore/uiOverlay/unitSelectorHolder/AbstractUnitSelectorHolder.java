@@ -84,12 +84,8 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
-    public UnitConfigType.UnitConfig getUnitConfig() {
-        return unitConfig;
-    }
-
-    public UnitConfigType.UnitConfig getUnitHostConfig() throws CouldNotPerformException, InterruptedException {
-        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+    public UnitConfigType.UnitConfig getCorrespondingUnitConfig() throws CouldNotPerformException, InterruptedException {
+        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost()) {
             return unitConfig;
         }
         else {
