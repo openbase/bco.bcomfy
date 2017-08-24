@@ -13,12 +13,20 @@ import org.openbase.jul.extension.rst.processing.MetaConfigVariableProvider;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.vecmath.Point3d;
 
 import java8.util.stream.StreamSupport;
 import rsb.introspection.LacksOsInformationException;
 import rsb.util.os.RuntimeOsUtilities;
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType;
+import rst.domotic.unit.location.LocationConfigType;
 import rst.geometry.PoseType;
 import rst.geometry.RotationType;
 import rst.geometry.TranslationType;
@@ -31,9 +39,109 @@ public final class BcoUtils {
     private static final String TAG = BcoUtils.class.getSimpleName();
     private static final String BCOMFY_STUDY_KEY = "BCOMFY_STUDY";
 
-    public static boolean containsStudyMetaData(UnitConfigType.UnitConfig unitConfig) throws NotAvailableException {
+    public static boolean containsStudyMetaData(UnitConfig unitConfig) throws NotAvailableException {
         MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
         return Boolean.parseBoolean(mcvp.getValue(BCOMFY_STUDY_KEY));
+    }
+
+    public static class UpdateUnitPositionTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = UpdateLocationShapeTask.class.getSimpleName();
+        private UnitConfig unitConfig;
+        private double[] glToBcoTransform;
+        private double[] newPosition;
+        private OnTaskFinishedListener<Boolean> listener;
+        private boolean updateSuccessful;
+
+        public UpdateUnitPositionTask(UnitConfig unitConfig, double[] glToBcoTransform, double[] newPosition, OnTaskFinishedListener<Boolean> listener) {
+            this.unitConfig = unitConfig;
+            this.glToBcoTransform = glToBcoTransform;
+            this.newPosition = newPosition;
+            this.listener = listener;
+            this.updateSuccessful = false;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                // Transform OpenGL position to BCO Position
+                double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, newPosition);
+//                double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
+
+                // Get location for that specific coordinate
+                List<UnitConfig> locations =
+                        Registries.getLocationRegistry().getLocationConfigsByCoordinate(
+                                Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
+
+                UnitConfig[] location = new UnitConfig[1];
+
+                if (locations.size() == 0) {
+                    location[0] = Registries.getLocationRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                    Log.w(TAG, "No location found for current unit position! Retaining old location information...");
+                }
+                else {
+                    // Get Region if there is any
+                    StreamSupport.stream(locations)
+                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
+                            .findAny()
+                            .ifPresent(unitConfig -> location[0] = unitConfig);
+                    // Otherwise use tile if there is any
+                    if (location[0] == null) {
+                        StreamSupport.stream(locations)
+                                .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
+                                .findAny()
+                                .ifPresent(unitConfig -> location[0] = unitConfig);
+                    }
+                    // Otherwise use zone if there is any
+                    if (location[0] == null) {
+                        StreamSupport.stream(locations)
+                                .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
+                                .findAny()
+                                .ifPresent(unitConfig -> location[0] = unitConfig);
+                    }
+                    // Otherwise return... Unknown LocationType...
+                    if (location[0] == null) {
+                        location[0] = Registries.getLocationRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                        Log.w(TAG, "No valid location found for selected position! Retaining old location information...");
+                    }
+                }
+
+                // Transform BCO-Root position to BCO-Location-of-selected-point position
+                Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
+                Registries.getLocationRegistry().waitForData();
+                Registries.getLocationRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+
+                // Generate new protobuf unitConfig
+                TranslationType.Translation translation =
+                        unitConfig.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
+                RotationType.Rotation rotation;
+                if (unitConfig.getPlacementConfig().hasPosition()) {
+                    rotation = unitConfig.getPlacementConfig().getPosition().getRotation();
+                }
+                else {
+                    rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
+                }
+                PoseType.Pose pose  =
+                        unitConfig.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
+                PlacementConfigType.PlacementConfig placementConfig =
+                        unitConfig.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
+                UnitConfig newUnitConfig =
+                        unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
+
+                // Update unitConfig
+                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get();
+
+                updateSuccessful = true;
+            } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
+                Log.e(TAG, "Error while updating locationConfig of unit: " + unitConfig, e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            listener.taskFinishedCallback(updateSuccessful);
+        }
     }
 
     public static class UpdateLocationShapeTask extends AsyncTask<Void, Void, Void> {
@@ -78,7 +186,7 @@ public final class BcoUtils {
             // Publish the result to the locationRegistry
             try {
                 // Fetch the UnitConfig of the target location
-                UnitConfigType.UnitConfig locationConfig = Registries.getLocationRegistry().getLocationConfigById(locationId);
+                UnitConfig locationConfig = Registries.getLocationRegistry().getLocationConfigById(locationId);
 
                 // Build the pose
                 TranslationType.Translation.Builder translationBuilder = TranslationType.Translation.getDefaultInstance().toBuilder();
@@ -98,7 +206,7 @@ public final class BcoUtils {
 
                 // Build the locationConfig
                 PlacementConfigType.PlacementConfig placementConfig = locationConfig.getPlacementConfig().toBuilder().clearShape().setShape(shapeBuilder.build()).setPosition(pose).build();
-                UnitConfigType.UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
+                UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
                 // Update the locationConfig
                 Registries.getLocationRegistry().updateLocationConfig(newLocationConfig);
@@ -138,18 +246,18 @@ public final class BcoUtils {
                                 PlacementConfigType.PlacementConfig placementConfig =
                                     unitConfig.getPlacementConfig().toBuilder().clearPosition().build();
 
-                                UnitConfigType.UnitConfig newUnitConfig =
+                                UnitConfig newUnitConfig =
                                     unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
                             } catch (CouldNotPerformException | InterruptedException e) {
-                                Log.e(TAG, "Error while updating unitConfig!" + "\n" + Log.getStackTraceString(e));
+                                Log.e(TAG, "Error while updating unitConfig!", e);
                             }
                         });
 
                 successful = Boolean.TRUE;
             } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unitConfigs!" + "\n" + Log.getStackTraceString(e));
+                Log.e(TAG, "Error while fetching unitConfigs!", e);
             }
 
             return null;
@@ -183,18 +291,18 @@ public final class BcoUtils {
                                 PlacementConfigType.PlacementConfig placementConfig =
                                         unitConfig.getPlacementConfig().toBuilder().clearShape().clearPosition().build();
 
-                                UnitConfigType.UnitConfig newUnitConfig =
+                                UnitConfig newUnitConfig =
                                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
                             } catch (CouldNotPerformException | InterruptedException e) {
-                                Log.e(TAG, "Error while updating unitConfig!" + "\n" + Log.getStackTraceString(e));
+                                Log.e(TAG, "Error while updating unitConfig!", e);
                             }
                         });
 
                 successful = Boolean.TRUE;
             } catch (CouldNotPerformException | InterruptedException e) {
-                Log.e(TAG, "Error while fetching unitConfigs!" + "\n" + Log.getStackTraceString(e));
+                Log.e(TAG, "Error while fetching unitConfigs!", e);
             }
 
             return null;

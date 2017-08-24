@@ -68,4 +68,6 @@
     <string name="pref_delete_location_shapes">Raumkoordinaten entfernen</string>
     <string name="pref_delete_location_shapes_sum">Dies entfernt die Koordinaten sämtlicher Räume, Türen und Fenster</string>
     <string name="loading_device">Lade Geräteinformationen…</string>
+    <string name="toast_position_update_error">Fehler beim Aktualisieren der Gerätekoordinaten aufgetreten!</string>
+    <string name="gui_updating_device_position">Gerätekoordinaten werden aktualisiert…</string>
 </resources>

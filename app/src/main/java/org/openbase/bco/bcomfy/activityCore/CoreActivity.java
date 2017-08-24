@@ -28,6 +28,7 @@ import com.projecttango.tangosupport.TangoSupport;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
+import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.OnSettingsChosenListener;
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.activityCore.deviceList.FetchDeviceListTask;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
@@ -35,7 +36,9 @@ import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
+import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.AndroidUtils;
+import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -48,20 +51,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import javax.vecmath.Point3d;
-
-import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.location.LocationConfigType;
-import rst.geometry.PoseType;
-import rst.geometry.RotationType;
-import rst.geometry.TranslationType;
 import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 
-public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, ListSettingsDialogFragment.OnSettingsChosenListener {
+public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, OnSettingsChosenListener, OnTaskFinishedListener<Boolean> {
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
@@ -82,6 +78,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private ListSettingsDialogFragment listSettings;
 
+    private LinearLayout updatingPositionView;
     private LinearLayout buttonsEdit;
     private Button buttonEditApply;
     private Button buttonEditCancel;
@@ -274,6 +271,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             public void onDrawerStateChanged(int newState) {}
         });
 
+        updatingPositionView = findViewById(R.id.updatingPositionView);
         buttonsEdit         = findViewById(R.id.buttons_edit);
 
         buttonEditApply     = findViewById(R.id.button_apply);
@@ -444,78 +442,38 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void editApply() {
-        // TODO: move to AsyncTask
-        try {
-            // Transform OpenGL position to BCO Position
-            double[] bcoPosition = TangoSupport.doubleTransformPoint(glToBcoTransform, currentEditPosition.toArray());
+        updatingPositionView.setVisibility(View.VISIBLE);
+        relocationInstructionTextView.setVisibility(View.INVISIBLE);
+        buttonEditApply.setEnabled(false);
+        buttonEditCancel.setEnabled(false);
+        buttonEditClear.setEnabled(false);
 
-            // Get location for that specific coordinate
-            List<UnitConfig> locations =
-                Registries.getLocationRegistry().getLocationConfigsByCoordinate(
-                    Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
+        new BcoUtils.UpdateUnitPositionTask(currentDevice, glToBcoTransform, currentEditPosition.toArray(), this).execute((Void) null);
+    }
 
-            UnitConfig[] location = new UnitConfig[1];
-
-            if (locations.size() == 0) {
-                location[0] = Registries.getLocationRegistry().getLocationConfigById(currentDevice.getPlacementConfig().getLocationId());
-                Log.w(TAG, "No location found for current unit position! Retaining old location information...");
-            }
-            else {
-                // Get Region if there is any
-                StreamSupport.stream(locations)
-                        .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
-                        .findAny()
-                        .ifPresent(unitConfig -> location[0] = unitConfig);
-                // Otherwise use tile if there is any
-                if (location[0] == null) {
-                    StreamSupport.stream(locations)
-                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
-                            .findAny()
-                            .ifPresent(unitConfig -> location[0] = unitConfig);
-                }
-                // Otherwise use zone if there is any
-                if (location[0] == null) {
-                    StreamSupport.stream(locations)
-                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
-                            .findAny()
-                            .ifPresent(unitConfig -> location[0] = unitConfig);
-                }
-                // Otherwise return... Unknown LocationType...
-                if (location[0] == null) {
-                    location[0] = Registries.getLocationRegistry().getLocationConfigById(currentDevice.getPlacementConfig().getLocationId());
-                    Log.w(TAG, "No valid location found for selected position! Retaining old location information...");
-                }
+    @Override
+    public void taskFinishedCallback(Boolean updateSuccessful) {
+        if (updateSuccessful) {
+            try {
+                uiOverlayHolder.checkAndAddNewUnit(currentDevice);
+            } catch (CouldNotPerformException | InterruptedException ex) {
+                Log.e(TAG, "Error while updating unit in overlay after updating its position!", ex);
             }
 
-            // Transform BCO-Root position to BCO-Location-of-selected-point position
-            Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
-            Registries.getLocationRegistry().waitForData();
-            Registries.getLocationRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+            updatingPositionView.setVisibility(View.GONE);
+            buttonEditCancel.setEnabled(true);
+            buttonEditClear.setEnabled(true);
 
-            // Generate new protobuf unitConfig
-            TranslationType.Translation translation =
-                    currentDevice.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
-            RotationType.Rotation rotation;
-            if (currentDevice.getPlacementConfig().hasPosition()) {
-                rotation = currentDevice.getPlacementConfig().getPosition().getRotation();
-            }
-            else {
-                rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
-            }
-            PoseType.Pose pose  =
-                    currentDevice.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
-            PlacementConfigType.PlacementConfig placementConfig =
-                    currentDevice.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
-            UnitConfig unitConfig =
-                    currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
-
-            // Update unitConfig
-            Registries.getUnitRegistry().updateUnitConfig(unitConfig).get();
-
-            uiOverlayHolder.checkAndAddNewUnit(unitConfig);
             leaveEditMode();
-        } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
-            Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice + "\n" + Log.getStackTraceString(e));
+        }
+        else {
+            updatingPositionView.setVisibility(View.GONE);
+            relocationInstructionTextView.setVisibility(View.VISIBLE);
+            buttonEditApply.setEnabled(true);
+            buttonEditCancel.setEnabled(true);
+            buttonEditClear.setEnabled(true);
+
+            AndroidUtils.showShortToastTop(this, R.string.toast_position_update_error);
         }
     }
 

@@ -146,9 +146,9 @@
 
         <Button
             android:id="@+id/button_apply"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:enabled="false"
             android:text="@string/button_apply"
             android:textSize="24sp" />
@@ -156,26 +156,26 @@
         <Space
             android:layout_width="20dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0" />
 
         <Button
             android:id="@+id/button_cancel"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:text="@string/button_cancel"
             android:textSize="24sp" />
 
         <Space
             android:layout_width="20dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0" />
 
         <Button
             android:id="@+id/button_clear"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:text="@string/button_clear"
             android:textSize="24sp" />
 
@@ -256,6 +256,28 @@
         android:textAlignment="center"
         android:textAppearance="@android:style/TextAppearance.Material.Large"
         android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/updatingPositionView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@color/background_gray_slightly_transparent"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gui_updating_device_position"
+            android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
 
 </RelativeLayout>
