@@ -148,14 +148,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         protected Void doInBackground(Void... voids) {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
-                        .filter(unitConfig -> {
-                            try {
-                                return BcoUtils.containsStudyMetaData(unitConfig);
-                            } catch (NotAvailableException ex) {
-                                Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
-                                return false;
-                            }
-                        })
+                        .filter(BcoUtils::containsStudyMetaData)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
                         .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
                                 (!unitConfig.getBoundToUnitHost() &&

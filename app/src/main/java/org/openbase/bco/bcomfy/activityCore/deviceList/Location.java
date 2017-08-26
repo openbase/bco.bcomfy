@@ -33,14 +33,7 @@ public class Location implements Parent<Device> {
 
         try {
             StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), true))
-                    .filter(unitConfig -> {
-                        try {
-                            return BcoUtils.containsStudyMetaData(unitConfig);
-                        } catch (NotAvailableException ex) {
-                            Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
-                            return false;
-                        }
-                    })
+                    .filter(BcoUtils::containsStudyMetaData)
                     .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||

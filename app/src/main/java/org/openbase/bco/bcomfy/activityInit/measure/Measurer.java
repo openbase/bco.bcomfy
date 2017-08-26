@@ -111,9 +111,10 @@ public class Measurer {
                 }
                 measurerState = currentRoom.getMeasurerState();
                 return MeasureType.WALL;
+            default:
+                Log.e(TAG, "Invalid state of measurer!", new CouldNotPerformException("State " + measurerState + " of measurer is not handled in this method!"));
+                return MeasureType.INVALID;
         }
-
-        return MeasureType.INVALID;
     }
 
     public MeasurerState getMeasurerState() {

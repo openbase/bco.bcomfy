@@ -71,22 +71,8 @@ public class InstructionTextView {
 
     public void updateInstruction(Measurer.MeasurerState measurerState, int wallNumber, int measurementsFinished, int measurementsNeeded) {
         updateInstruction(measurerState);
-        String nextWallNumberString;
         int nextWallNumber = wallNumber + 1;
-
-        switch (nextWallNumber) {
-            case 1:
-                nextWallNumberString = "1st";
-                break;
-            case 2:
-                nextWallNumberString = "2nd";
-                break;
-            case 3:
-                nextWallNumberString = "3rd";
-                break;
-            default:
-                nextWallNumberString = nextWallNumber + "th";
-        }
+        String nextWallNumberString = nextWallNumber + ".";
 
         if (measurementsNeeded > 1) {
             if (measurerState == Measurer.MeasurerState.MARK_WALLS) {

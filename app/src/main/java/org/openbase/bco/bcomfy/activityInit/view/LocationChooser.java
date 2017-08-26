@@ -49,14 +49,7 @@ public class LocationChooser extends DialogFragment {
         try {
             Registries.getLocationRegistry().waitForData();
             locations = StreamSupport.stream(Registries.getLocationRegistry().getLocationConfigs())
-                    .filter(unitConfig -> {
-                        try {
-                            return BcoUtils.containsStudyMetaData(unitConfig);
-                        } catch (NotAvailableException ex) {
-                            Log.e(TAG, "Error while checking for study meta data in Unit " + unitConfig.getId(), ex);
-                            return false;
-                        }
-                    })
+                    .filter(BcoUtils::containsStudyMetaData)
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
                     .toArray(UnitConfigType.UnitConfig[]::new);
 

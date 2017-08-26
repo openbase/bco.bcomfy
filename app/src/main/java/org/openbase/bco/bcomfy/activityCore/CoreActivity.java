@@ -539,12 +539,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             case LOCATION:
                 return false;
             default:
-                if (unitConfig.getBoundToUnitHost()) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
+                return !unitConfig.getBoundToUnitHost();
         }
     }
 

@@ -1,7 +1,6 @@
 package org.openbase.bco.bcomfy.activityInit;
 
 import android.app.DialogFragment;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,7 +17,6 @@ import com.mikepenz.iconics.IconicsDrawable;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.TangoActivity;
 import org.openbase.bco.bcomfy.TangoRenderer;
-import org.openbase.bco.bcomfy.activityInit.measure.AnchorRoom;
 import org.openbase.bco.bcomfy.activityInit.measure.Measurer;
 import org.openbase.bco.bcomfy.activityInit.measure.Plane;
 import org.openbase.bco.bcomfy.activityInit.view.InstructionTextView;
@@ -31,13 +29,7 @@ import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.rajawali3d.math.vector.Vector3;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class InitActivity extends TangoActivity implements View.OnTouchListener, LocationChooser.LocationChooserListener {
     private static final String TAG = InitActivity.class.getSimpleName();
@@ -182,6 +174,8 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
             case WALL:
                 getRenderer().addWallPlane(plane.getPosition(), plane.getNormal());
                 break;
+            default:
+                break;
         }
 
         updateGuiButtons();
@@ -297,6 +291,9 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                         measurer.getCurrentFinishedWallCount(),
                         measurer.getCurrentMeasurementCount(),
                         measurer.getNeededMeasurementCount());
+                break;
+            default:
+                Log.e(TAG, "Invalid state of measurer!", new CouldNotPerformException("State " + measurer.getMeasurerState().name() + " of measurer is not handled in this method!"));
                 break;
         }
     }

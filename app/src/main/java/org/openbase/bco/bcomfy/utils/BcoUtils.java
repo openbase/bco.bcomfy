@@ -39,9 +39,13 @@ public final class BcoUtils {
     private static final String TAG = BcoUtils.class.getSimpleName();
     private static final String BCOMFY_STUDY_KEY = "BCOMFY_STUDY";
 
-    public static boolean containsStudyMetaData(UnitConfig unitConfig) throws NotAvailableException {
-        MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
-        return Boolean.parseBoolean(mcvp.getValue(BCOMFY_STUDY_KEY));
+    public static boolean containsStudyMetaData(UnitConfig unitConfig) {
+        try {
+            MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
+            return Boolean.parseBoolean(mcvp.getValue(BCOMFY_STUDY_KEY));
+        } catch (NotAvailableException ex) {
+            return false;
+        }
     }
 
     public static class UpdateUnitPositionTask extends AsyncTask<Void, Void, Void> {
@@ -88,13 +92,6 @@ public final class BcoUtils {
                     if (location[0] == null) {
                         StreamSupport.stream(locations)
                                 .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
-                                .findAny()
-                                .ifPresent(unitConfig -> location[0] = unitConfig);
-                    }
-                    // Otherwise use zone if there is any
-                    if (location[0] == null) {
-                        StreamSupport.stream(locations)
-                                .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.ZONE)
                                 .findAny()
                                 .ifPresent(unitConfig -> location[0] = unitConfig);
                     }
