@@ -48,6 +48,7 @@
     <string name="pref_misc_unknown_service">Display unknown services</string>
     <string name="pref_location_scanning">Location Scanning</string>
     <string name="pref_miscellaneous_settings">Miscellaneous settings</string>
+    <string name="pref_adf_file">ADF ID</string>
     <string name="pref_registry_utilities">BCO Utilities (use with caution!)</string>
     <string name="pref_delete_device_poses">Delete device poses</string>
     <string name="pref_delete_device_poses_sum">This deletes the poses of all devices</string>

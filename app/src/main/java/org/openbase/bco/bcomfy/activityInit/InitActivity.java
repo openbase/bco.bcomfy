@@ -54,7 +54,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
         recalcTransform = getIntent().getBooleanExtra("recalcTransform", false);
         scanContinue = getIntent().getBooleanExtra("scanContinue", false);
-        adfUuid = getIntent().getStringExtra("adfUuid");
+        adfUuid = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_MISC_ADF, "INVALID!");
 
         if (scanContinue) {
             try {

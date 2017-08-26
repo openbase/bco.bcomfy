@@ -35,8 +35,12 @@ public class SettingsActivity extends Activity {
     public static final String KEY_PREF_INIT_ALIGN = "pref_init_align";
     public static final String KEY_PREF_INIT_ANCHOR = "pref_init_anchor";
     public static final String KEY_PREF_MISC_UNKONWN_SERVICE = "pref_misc_unknown_service";
+    public static final String KEY_PREF_MISC_ADF = "pref_misc_adf";
     public static final String KEY_PREF_DELETE_DEVICE_POSES = "pref_delete_device_poses";
     public static final String KEY_PREF_DELETE_LOCATION_SHAPES = "pref_delete_location_shapes";
+
+    private static String[] adfIdList;
+    private static String[] adfNameList;
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
         String stringValue = value.toString();
@@ -90,6 +94,10 @@ public class SettingsActivity extends Activity {
             CheckBoxPreference initAlignPreference = (CheckBoxPreference) findPreference(KEY_PREF_INIT_ALIGN);
             EditTextPreference initAnchorPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_ANCHOR);
 
+            ListPreference miscAdfPreference = (ListPreference) findPreference(KEY_PREF_MISC_ADF);
+            miscAdfPreference.setEntries(adfNameList);
+            miscAdfPreference.setEntryValues(adfIdList);
+
             Preference deleteDevicePosesUtil = findPreference(KEY_PREF_DELETE_DEVICE_POSES);
             Preference deleteLocationShapesUtil = findPreference(KEY_PREF_DELETE_LOCATION_SHAPES);
 
@@ -98,6 +106,7 @@ public class SettingsActivity extends Activity {
             bindPreferenceSummaryToValue(portPreference);
             bindPreferenceSummaryToValue(initDefaultPreference);
             bindPreferenceSummaryToValue(initAnchorPreference);
+            bindPreferenceSummaryToValue(miscAdfPreference);
 
 
             initAlignPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -200,6 +209,9 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        adfIdList = getIntent().getStringArrayExtra("adfIdList");
+        adfNameList = getIntent().getStringArrayExtra("adfNameList");
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()

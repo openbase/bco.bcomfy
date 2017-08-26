@@ -3,6 +3,7 @@ package org.openbase.bco.bcomfy.activityCore;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +36,7 @@ import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
+import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.AndroidUtils;
@@ -114,7 +116,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
         super.onCreate(savedInstanceState);
 
-        adfUuid = getIntent().getStringExtra("adfUuid");
+        adfUuid = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_MISC_ADF, "INVALID!");
         shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake);
 
         try {

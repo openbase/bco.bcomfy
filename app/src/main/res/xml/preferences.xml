@@ -39,6 +39,13 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_miscellaneous_settings">
+        <ListPreference
+            android:defaultValue="@null"
+            android:title="@string/pref_adf_file"
+            android:key="pref_misc_adf"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="pref_misc_unknown_service"

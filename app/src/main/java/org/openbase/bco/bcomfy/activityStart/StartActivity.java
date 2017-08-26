@@ -2,8 +2,6 @@ package org.openbase.bco.bcomfy.activityStart;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,10 +35,9 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import java8.util.stream.StreamSupport;
-
-public class StartActivity extends Activity implements AdfChooser.AdfChooserListener{
+public class StartActivity extends Activity {
 
     private static final String TAG = StartActivity.class.getSimpleName();
     private static Context applicationContext;
@@ -71,7 +68,9 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
 
     public static Tango tango;
     private TangoConfig tangoConfig;
-    private String adfUuid;
+    private List<Pair<String, String>> adfList;
+    private String[] adfNameList;
+    private String[] adfIdList;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -144,7 +143,8 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
             synchronized (StartActivity.this) {
                 try {
                     TangoSupport.initialize(tango);
-                    runOnUiThread(() -> changeState(StartActivityState.GET_ADF));
+                    fetchLocalAdfList();
+                    runOnUiThread(() -> changeState(StartActivityState.GET_ADF_FAILED));
                 } catch (TangoOutOfDateException e) {
                     Log.e(TAG, getString(R.string.tango_out_of_date_exception), e);
                     changeState(StartActivityState.INIT_TANGO_FAILED);
@@ -194,7 +194,7 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         //config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
         config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
         config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
-        config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, adfUuid);
+        config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_MISC_ADF, "INVALID!"));
 
         return config;
     }
@@ -215,7 +215,7 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
             case GET_ADF:
                 infoMessage.setText(R.string.gui_update_adf);
                 setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
-                fetchLocalAdf(); //implement ADF registry fetching here
+//                fetchLocalAdfList(); //implement ADF registry fetching here
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
@@ -265,10 +265,10 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
             initBcoTask.cancel(true);
         }
 
-        initBcoTask = new InitBcoTask(returnObject -> changeState(StartActivityState.GET_ADF));
-        initBcoTask.execute();
-
         changeState(StartActivityState.INIT_BCO);
+
+        initBcoTask = new InitBcoTask(returnObject -> changeState(StartActivityState.INIT_TANGO));
+        initBcoTask.execute();
     }
 
     public void onButtonSettingsClicked(View view) {
@@ -328,34 +328,22 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         buttonDebugRecalc  = findViewById(R.id.button_debug_calc_transform);
     }
 
-    private void fetchLocalAdf() {
-        DialogFragment dialogFragment = new AdfChooser();
-
+    private void fetchLocalAdfList() {
         ArrayList<String> uuidList = tango.listAreaDescriptions();
-        ArrayList<Pair<String, String>> adfList = new ArrayList<>();
 
-        StreamSupport.stream(uuidList)
-                .forEach(s -> adfList.add(new Pair<String, String>(
-                        s, new String(tango.loadAreaDescriptionMetaData(s).get(TangoAreaDescriptionMetaData.KEY_NAME)))));
+        adfIdList = new String[uuidList.size()];
+        adfNameList = new String[uuidList.size()];
 
-        Bundle args = new Bundle();
-        args.putSerializable("adfList", adfList);
-        dialogFragment.setArguments(args);
-
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(dialogFragment, null);
-        ft.commitAllowingStateLoss();
-    }
-
-    @Override
-    public void onAdfSelected(String adfUuid) {
-        this.adfUuid = adfUuid;
-        Log.e(TAG, "Selected adf " + adfUuid);
-        changeState(StartActivityState.GET_ADF_FAILED);
+        for (int i = 0; i < uuidList.size(); i++) {
+            adfIdList[i] = uuidList.get(i);
+            adfNameList[i] = new String(tango.loadAreaDescriptionMetaData(uuidList.get(i)).get(TangoAreaDescriptionMetaData.KEY_NAME));
+        }
     }
 
     private void startSettingsActivity() {
         Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra("adfIdList", adfIdList);
+        intent.putExtra("adfNameList", adfNameList);
         startActivity(intent);
     }
 
@@ -363,13 +351,11 @@ public class StartActivity extends Activity implements AdfChooser.AdfChooserList
         Intent intent = new Intent(this, InitActivity.class);
         intent.putExtra("recalcTransform", debugRecalc);
         intent.putExtra("scanContinue", scanContinue);
-        intent.putExtra("adfUuid", adfUuid);
         startActivity(intent);
     }
 
     private void startCoreActivity() {
         Intent intent = new Intent(this, CoreActivity.class);
-        intent.putExtra("adfUuid", adfUuid);
         startActivity(intent);
     }
 
