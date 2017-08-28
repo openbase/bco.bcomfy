@@ -95,8 +95,13 @@ public class SettingsActivity extends Activity {
             EditTextPreference initAnchorPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_ANCHOR);
 
             ListPreference miscAdfPreference = (ListPreference) findPreference(KEY_PREF_MISC_ADF);
-            miscAdfPreference.setEntries(adfNameList);
-            miscAdfPreference.setEntryValues(adfIdList);
+            if (adfNameList == null || adfIdList == null) {
+                miscAdfPreference.setEnabled(false);
+            }
+            else {
+                miscAdfPreference.setEntries(adfNameList);
+                miscAdfPreference.setEntryValues(adfIdList);
+            }
 
             Preference deleteDevicePosesUtil = findPreference(KEY_PREF_DELETE_DEVICE_POSES);
             Preference deleteLocationShapesUtil = findPreference(KEY_PREF_DELETE_LOCATION_SHAPES);
