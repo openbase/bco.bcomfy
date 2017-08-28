@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.openbase.bco.bcomfy.utils.MathUtils;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.VerificationFailedException;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -117,15 +118,21 @@ public class Room {
         }
     }
 
-    public void finish() {
-        Log.e(TAG, "Finishing Room with " + walls.size() + " walls.");
-        for (int i = 0; i < walls.size() - 1; i++) {
-            groundVertices.add(calcGroundIntersection(walls.get(i).getFinishedWall(), walls.get(i+1).getFinishedWall()));
-            ceilingVertices.add(calcCeilingIntersection(walls.get(i).getFinishedWall(), walls.get(i+1).getFinishedWall()));
+    public void finish() throws CouldNotPerformException {
+        if (verifyAlignmentOfLastWall()) {
+            Log.i(TAG, "Finishing Room with " + walls.size() + " walls.");
+            for (int i = 0; i < walls.size() - 1; i++) {
+                groundVertices.add(calcGroundIntersection(walls.get(i).getFinishedWall(), walls.get(i+1).getFinishedWall()));
+                ceilingVertices.add(calcCeilingIntersection(walls.get(i).getFinishedWall(), walls.get(i+1).getFinishedWall()));
+            }
+
+            groundVertices.add(calcGroundIntersection(walls.get(walls.size()-1).getFinishedWall(), walls.get(0).getFinishedWall()));
+            ceilingVertices.add(calcCeilingIntersection(walls.get(walls.size()-1).getFinishedWall(), walls.get(0).getFinishedWall()));
+        }
+        else {
+            throw new VerificationFailedException("Can not finish the room, since the first and the last wall are not rectangular to each other and this would result in an invalid shape");
         }
 
-        groundVertices.add(calcGroundIntersection(walls.get(walls.size()-1).getFinishedWall(), walls.get(0).getFinishedWall()));
-        ceilingVertices.add(calcCeilingIntersection(walls.get(walls.size()-1).getFinishedWall(), walls.get(0).getFinishedWall()));
     }
 
     public ArrayList<Vector3> getCeilingVertices() {
@@ -144,6 +151,18 @@ public class Room {
         }
         else {
             return groundVertices.get(0);
+        }
+    }
+
+    private boolean verifyAlignmentOfLastWall() {
+        try {
+            Plane firstWall = walls.get(0).getFinishedWall();
+            Plane lastWall = getLatestFinishedWall().getFinishedWall();
+
+            return !(Math.abs(firstWall.getNormal().dot(lastWall.getNormal())) > 0.8);
+        }
+        catch (NullPointerException ex) {
+            return false;
         }
     }
 

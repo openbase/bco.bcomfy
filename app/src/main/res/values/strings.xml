@@ -71,4 +71,5 @@
     <string name="toast_permission_not_granted">Necessary permission was denied. Closing BComfy…</string>
     <string name="toast_loading_error">Error while loading local dataset for selected adf!</string>
     <string name="toast_position_update_error">Error while updating position of unit!</string>
+    <string name="toast_invalid_last_wall">Not able to finish the room. The first and the last wall need to be perpendicular to each other. Are you missing a wall?</string>
 </resources>

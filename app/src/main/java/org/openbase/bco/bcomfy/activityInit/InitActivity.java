@@ -314,6 +314,14 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     public void onFinishRoomClicked(View v) {
+        try {
+            measurer.finishRoom();
+        } catch (CouldNotPerformException ex) {
+            AndroidUtils.showLongToastTop(this, R.string.toast_invalid_last_wall);
+            Log.e(TAG, "Could not finish room", ex);
+            return;
+        }
+
         DialogFragment dialogFragment = new LocationChooser();
         dialogFragment.show(getFragmentManager(), "locationChooser");
     }
@@ -325,9 +333,7 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     public void onLocationSelected(final String locationId) {
-        measurer.finishRoom();
         updateGuiButtons();
-
         updateLocalData();
 
         ArrayList<Vector3> ceiling = measurer.getLatestCeilingVertices();

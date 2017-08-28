@@ -79,7 +79,7 @@ public class Measurer {
         measurerState = MeasurerState.MARK_GROUND;
     }
 
-    public void finishRoom() {
+    public void finishRoom() throws CouldNotPerformException {
         currentRoom.finish();
         roomList.add(currentRoom);
         currentRoom = null;

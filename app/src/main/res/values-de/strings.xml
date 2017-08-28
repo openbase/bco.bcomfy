@@ -71,4 +71,5 @@
     <string name="toast_position_update_error">Fehler beim Aktualisieren der Gerätekoordinaten aufgetreten!</string>
     <string name="gui_updating_device_position">Gerätekoordinaten werden aktualisiert…</string>
     <string name="pref_adf_file">ADF ID</string>
+    <string name="toast_invalid_last_wall">Abschluss der Raummessung nicht möglich. Die erste und die letzte Wand müssen rechtwinklig zueinander sein. Haben Sie eine Wand vergessen?</string>
 </resources>
