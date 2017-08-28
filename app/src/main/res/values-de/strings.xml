@@ -22,9 +22,9 @@
     <string name="init_mark_ceiling">Markieren Sie die Decke, indem Sie den Bildschirm an der entsprechenden Stelle antippen</string>
     <string name="init_mark_walls">Markieren Sie die Raumgrenzen, indem Sie den Bildschirm an der entsprechenden Stelle antippen</string>
     <string name="init_mark_walls_number_measurements"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen<br><br>Diese Raumgrenze benötigt noch <b><font color=\'#d1e24a\'>%2$d</font></b> Messungen]]></string>
-    <string name="init_mark_walls_number_measurements_enough"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen oder schließen Sie die Messung ab<br><br>Die nächste Raumgrenze würde <b><font color=\'#d1e24a\'>%2$d</font></b> Messungen benötigen]]></string>
+    <string name="init_mark_walls_number_measurements_enough"><![CDATA[ Schließen Sie die Messung des aktuellen Raumes ab, oder fahren Sie mit der <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze fort<br><br>Die nächste Raumgrenze würde <b><font color=\'#d1e24a\'>%2$d</font></b> Messungen benötigen]]></string>
     <string name="init_mark_walls_number"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen]]></string>
-    <string name="init_mark_walls_number_enough"><![CDATA[ Markieren Sie die <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze, indem Sie den Bildschirm an der entsprechenden Stelle antippen oder schließen Sie die Messung ab]]></string>
+    <string name="init_mark_walls_number_enough"><![CDATA[ Schließen Sie die Messung des aktuellen Raumes ab, oder fahren Sie mit der <b><font color=\'#d1e24a\'>%1$s</font></b> Raumgrenze fort]]></string>
     <string name="init_invalid_wall">Fehler! Die Raumgrenze muss immer im rechten Winkel zu der vorherigen Raumgrenze sein.</string>
     <string name="init_too_close">Fehler! Sie befinden sich zu nah an dem Messpunkt. Bitte erhöhen Sie ihre Entfernung.</string>
     <string name="relocate_instruction">Tippen Sie den Bildschirm an der Stelle an, an der Sie das Gerät verorten möchten und bestätigen Sie ihre Aktion</string>
