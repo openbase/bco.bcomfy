@@ -1,6 +1,7 @@
 package org.openbase.bco.bcomfy.activityCore.deviceList;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -40,6 +41,7 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
         }
 
         itemView.setOnLongClickListener(view -> {
+            Log.i("BCOMFY_STUDY", "OPEN_LOCATION: " + label.getText());
             onDeviceSelectedListener.onDeviceSelected(location.getUnitConfig());
             return true;
         });

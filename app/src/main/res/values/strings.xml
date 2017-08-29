@@ -32,6 +32,7 @@
     <string name="choose_adf">Select the ADF</string>
     <string name="gui_scan_init">Initialize scanning</string>
     <string name="gui_scan_continue">Continue scanning</string>
+    <string name="gui_start_main_component">Start interaction</string>
     <string name="gui_retry">Retry</string>
     <string name="gui_settings">Settings</string>
     <string name="gui_publish_depth">Publish depth data</string>

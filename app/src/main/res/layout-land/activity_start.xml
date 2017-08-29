@@ -69,6 +69,26 @@
             android:visibility="gone" />
 
         <Button
+            android:id="@+id/button_debug_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onButtonDebugStartClicked"
+            android:text="@string/gui_start_main_component"
+            android:textAlignment="center"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/button_debug_calc_transform"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onButtonDebugTransformClicked"
+            android:text="DEBUG RECALC TRANSFORM"
+            android:textAlignment="center"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/button_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -126,28 +146,6 @@
             android:text="@string/gui_manage_adf"
             android:textAlignment="center"
             android:visibility="gone" />
-
-        <!-- TODO: REMOVE DEBUG_BUTTONS!-->
-        <Button
-            android:id="@+id/button_debug_start"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:onClick="onButtonDebugStartClicked"
-            android:text="DEBUG START"
-            android:textAlignment="center"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/button_debug_calc_transform"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:onClick="onButtonDebugTransformClicked"
-            android:text="DEBUG RECALC TRANSFORM"
-            android:textAlignment="center"
-            android:visibility="gone" />
-
     </LinearLayout>
 
 </LinearLayout>

@@ -47,6 +47,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
         if (operation) {
             colorPickerView.addOnColorChangedListener(color -> {
                 try {
+                    Log.i("BCOMFY_STUDY", "CHANGE_COLOR: " + this.unitRemote.getId());
                     HSBColorType.HSBColor hsbColor =
                             HSBColorToRGBColorTransformer.transform(
                                     RGBColor.newBuilder().setRed(Color.red(color)).setGreen(Color.green(color)).setBlue(Color.blue(color)).build());

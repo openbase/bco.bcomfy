@@ -205,33 +205,33 @@ public class StartActivity extends Activity {
         switch (state) {
             case INIT_BCO:
                 infoMessage.setText(R.string.gui_connect_bco);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO:
                 infoMessage.setText(R.string.gui_init_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 initTangoService();
                 break;
             case GET_ADF:
                 infoMessage.setText(R.string.gui_update_adf);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
 //                fetchLocalAdfList(); //implement ADF registry fetching here
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
-                setVisibilities(View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
+                setVisibilities(View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE);
                 break;
             case CONNECT_TANGO_TO_INIT:
             case CONNECT_TANGO_TO_CORE:
                 infoMessage.setText(R.string.gui_connect_tango);
-                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
+                setVisibilities(View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case INIT_TANGO_FAILED:
                 infoMessage.setText(R.string.gui_init_tango_failed);
                 setVisibilities(View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             case SETTINGS:
-                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE);
+                setVisibilities(View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE, View.GONE);
                 break;
             default:
                 break;
