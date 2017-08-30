@@ -217,6 +217,18 @@
         fab:fab_colorNormal="#000000"
         fab:fab_colorPressed="#101010" />
 
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fab_help_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        fab:fab_colorNormal="#000000"
+        fab:fab_colorPressed="#101010" />
+
     <TextView
         android:id="@+id/location_edit_help_text"
         android:layout_width="wrap_content"
@@ -277,8 +289,16 @@
             style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/helpView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/help_image"
+        android:scaleType="fitXY"
+        android:visibility="invisible" />
 
 </RelativeLayout>
 

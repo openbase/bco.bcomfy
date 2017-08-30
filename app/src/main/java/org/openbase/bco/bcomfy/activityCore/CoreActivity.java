@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -71,6 +72,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private FloatingActionButton fabExpandDrawer;
     private FloatingActionButton fabSettings;
     private FloatingActionButton fabEditLocation;
+    private FloatingActionButton fabHelpView;
     private TextView locationEditHelpText;
     private TextView relocationInstructionTextView;
     private TextView noPoseTextView;
@@ -85,6 +87,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     private Button buttonEditApply;
     private Button buttonEditCancel;
     private Button buttonEditClear;
+
+    private ImageView helpView;
 
     private Matrix4 bcoToPixelTransform;
     private UiOverlayHolder uiOverlayHolder;
@@ -237,6 +241,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         fabEditLocation.setOnClickListener(v -> enterEditMode());
         fabEditLocation.setClickable(false);
 
+        fabHelpView = findViewById(R.id.fab_help_view);
+        fabHelpView.setImageDrawable(new IconicsDrawable(getApplicationContext(), GoogleMaterial.Icon.gmd_help_outline).color(Color.WHITE).sizeDp(24));
+        fabHelpView.setOnClickListener(v -> showHelpView());
+
+        helpView = findViewById(R.id.helpView);
+        helpView.setOnClickListener(v -> hideHelpView());
+
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -250,6 +261,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     locationEditHelpText.setAlpha(slideOffset);
                     fabEditLocation.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
                     fabEditLocation.setAlpha(slideOffset);
+                    fabHelpView.setTranslationX(-rightDrawer.getMeasuredWidth() * slideOffset);
                 }
             }
             @Override
@@ -418,6 +430,16 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private void openSettingsDialog() {
         listSettings.show(getFragmentManager(), "ListSettingsDialogFragment");
+    }
+
+    private void showHelpView() {
+        Log.i("BCOMFY_STUDY", "OPENING_HELP_VIEW");
+        helpView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideHelpView() {
+        Log.i("BCOMFY_STUDY", "CLOSING_HELP_VIEW");
+        helpView.setVisibility(View.INVISIBLE);
     }
 
     private void enterEditMode() {

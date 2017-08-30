@@ -95,7 +95,8 @@
             android:layout_gravity="center_horizontal"
             android:onClick="onButtonCancelClicked"
             android:text="@android:string/cancel"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/button_retry"
@@ -115,7 +116,7 @@
             android:onClick="onButtonSettingsClicked"
             android:text="@string/gui_settings"
             android:textAlignment="center"
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <Button
             android:id="@+id/button_publish"
