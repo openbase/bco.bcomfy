@@ -12,6 +12,10 @@ import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Service$;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.schedule.RecurrenceEventFilter;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
@@ -20,6 +24,21 @@ import rst.domotic.state.BrightnessStateType.BrightnessState;
 public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder {
 
     private static final String TAG = BrightnessStateServiceViewHolder.class.getSimpleName();
+
+    private RecurrenceEventFilter<Integer> recurrenceEventFilter = new RecurrenceEventFilter<Integer>(500) {
+        @Override
+        public void relay() throws Exception {
+            try {
+                ((Future)Service$.invokeOperationServiceMethod(ServiceType.BRIGHTNESS_STATE_SERVICE, unitRemote,
+                        BrightnessState.newBuilder().setBrightness(getLastValue()).build())).get();
+            } catch (CouldNotPerformException | ExecutionException e) {
+                Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
+                Thread.currentThread().interrupt();
+            }
+        }
+    };
 
     private SeekBar seekBar;
 
@@ -39,12 +58,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (!fromUser) return;
 
-                    try {
-                        Service$.invokeOperationServiceMethod(ServiceType.BRIGHTNESS_STATE_SERVICE, unitRemote,
-                                BrightnessState.newBuilder().setBrightness(progress).build());
-                    } catch (CouldNotPerformException e) {
-                        Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
-                    }
+                    recurrenceEventFilter.trigger(progress);
                 }
 
                 @Override

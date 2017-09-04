@@ -16,6 +16,10 @@ import org.openbase.bco.dal.lib.layer.service.Service$;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.extension.rst.transform.HSBColorToRGBColorTransformer;
+import org.openbase.jul.schedule.RecurrenceEventFilter;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import rst.domotic.service.ServiceConfigType.ServiceConfig;
 import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
@@ -27,6 +31,26 @@ import rst.vision.RGBColorType.RGBColor;
 public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
 
     private static final String TAG = ColorStateServiceViewHolder.class.getSimpleName();
+
+    private RecurrenceEventFilter<Integer> recurrenceEventFilter = new RecurrenceEventFilter<Integer>(500) {
+        @Override
+        public void relay() throws Exception {
+            try {
+                Log.i("BCOMFY_STUDY", "CHANGE_COLOR: " + serviceConfig.getUnitId());
+                HSBColorType.HSBColor hsbColor =
+                        HSBColorToRGBColorTransformer.transform(
+                                RGBColor.newBuilder().setRed(Color.red(getLastValue())).setGreen(Color.green(getLastValue())).setBlue(Color.blue(getLastValue())).build());
+
+                ((Future)Service$.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
+                        ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build())).get();
+            } catch (CouldNotPerformException | ExecutionException e) {
+                Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
+                Thread.currentThread().interrupt();
+            }
+        }
+    };
 
     private ColorPickerView colorPickerView;
     private LightnessSlider lightnessSlider;
@@ -45,19 +69,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
         lightnessSlider.setOnTouchListener(new DrawerDisablingOnTouchListener());
 
         if (operation) {
-            colorPickerView.addOnColorChangedListener(color -> {
-                try {
-                    Log.i("BCOMFY_STUDY", "CHANGE_COLOR: " + this.unitRemote.getId());
-                    HSBColorType.HSBColor hsbColor =
-                            HSBColorToRGBColorTransformer.transform(
-                                    RGBColor.newBuilder().setRed(Color.red(color)).setGreen(Color.green(color)).setBlue(Color.blue(color)).build());
-
-                    Service$.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
-                            ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build());
-                } catch (CouldNotPerformException e) {
-                    Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
-                }
-            });
+            colorPickerView.addOnColorChangedListener(value -> recurrenceEventFilter.trigger(value));
         }
         else {
             colorPickerView.setClickable(false);
