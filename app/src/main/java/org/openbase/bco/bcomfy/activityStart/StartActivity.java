@@ -219,7 +219,7 @@ public class StartActivity extends Activity {
                 break;
             case GET_ADF_FAILED:
                 infoMessage.setText(R.string.gui_update_adf_failed);
-                setVisibilities(View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.GONE);
+                setVisibilities(View.GONE, View.GONE, View.VISIBLE, View.VISIBLE, View.GONE, View.GONE, View.VISIBLE, View.GONE, View.GONE, View.GONE, View.VISIBLE, View.VISIBLE);
                 break;
             case CONNECT_TANGO_TO_INIT:
             case CONNECT_TANGO_TO_CORE:

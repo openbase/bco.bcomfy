@@ -4,12 +4,10 @@ import android.util.Log;
 
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 
-import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment;
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,7 @@ public class Location implements Parent<Device> {
 
         try {
             StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), true))
-                    .filter(BcoUtils::containsStudyMetaData)
+                    .filter(BcoUtils::filterByMetaTag)
                     .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||

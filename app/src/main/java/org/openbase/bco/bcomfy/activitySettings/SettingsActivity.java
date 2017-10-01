@@ -36,6 +36,8 @@ public class SettingsActivity extends Activity {
     public static final String KEY_PREF_INIT_ANCHOR = "pref_init_anchor";
     public static final String KEY_PREF_MISC_UNKONWN_SERVICE = "pref_misc_unknown_service";
     public static final String KEY_PREF_MISC_ADF = "pref_misc_adf";
+    public static final String KEY_PREF_MISC_USE_META_FILTER = "pref_misc_use_meta_filter";
+    public static final String KEY_PREF_MISC_META_FILTER = "pref_misc_meta_filter";
     public static final String KEY_PREF_DELETE_DEVICE_POSES = "pref_delete_device_poses";
     public static final String KEY_PREF_DELETE_LOCATION_SHAPES = "pref_delete_location_shapes";
 
@@ -93,6 +95,7 @@ public class SettingsActivity extends Activity {
             EditTextPreference initDefaultPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_DEFAULT);
             CheckBoxPreference initAlignPreference = (CheckBoxPreference) findPreference(KEY_PREF_INIT_ALIGN);
             EditTextPreference initAnchorPreference = (EditTextPreference) findPreference(KEY_PREF_INIT_ANCHOR);
+            initAnchorPreference.setEnabled(initAlignPreference.isChecked());
 
             ListPreference miscAdfPreference = (ListPreference) findPreference(KEY_PREF_MISC_ADF);
             if (adfNameList == null || adfIdList == null) {
@@ -102,6 +105,9 @@ public class SettingsActivity extends Activity {
                 miscAdfPreference.setEntries(adfNameList);
                 miscAdfPreference.setEntryValues(adfIdList);
             }
+            CheckBoxPreference useMetaFilterPreference = (CheckBoxPreference) findPreference(KEY_PREF_MISC_USE_META_FILTER);
+            EditTextPreference metaFilterPreference = (EditTextPreference) findPreference(KEY_PREF_MISC_META_FILTER);
+            metaFilterPreference.setEnabled(useMetaFilterPreference.isChecked());
 
             Preference deleteDevicePosesUtil = findPreference(KEY_PREF_DELETE_DEVICE_POSES);
             Preference deleteLocationShapesUtil = findPreference(KEY_PREF_DELETE_LOCATION_SHAPES);
@@ -112,10 +118,15 @@ public class SettingsActivity extends Activity {
             bindPreferenceSummaryToValue(initDefaultPreference);
             bindPreferenceSummaryToValue(initAnchorPreference);
             bindPreferenceSummaryToValue(miscAdfPreference);
-
+            bindPreferenceSummaryToValue(metaFilterPreference);
 
             initAlignPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 initAnchorPreference.setEnabled((boolean) newValue);
+                return true;
+            });
+
+            useMetaFilterPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                metaFilterPreference.setEnabled((boolean) newValue);
                 return true;
             });
 

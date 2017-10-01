@@ -11,7 +11,6 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.NotAvailableException;
 
 import java8.util.Comparators;
 import java8.util.J8Arrays;
@@ -49,7 +48,7 @@ public class LocationChooser extends DialogFragment {
         try {
             Registries.getLocationRegistry().waitForData();
             locations = StreamSupport.stream(Registries.getLocationRegistry().getLocationConfigs())
-                    .filter(BcoUtils::containsStudyMetaData)
+                    .filter(BcoUtils::filterByMetaTag)
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
                     .toArray(UnitConfigType.UnitConfig[]::new);
 

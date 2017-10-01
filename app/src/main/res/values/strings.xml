@@ -30,9 +30,10 @@
     <string name="relocate_instruction">Tap the display at the according point and confirm your modification</string>
     <string name="choose_location">Which location did you just measure?</string>
     <string name="choose_adf">Select the ADF</string>
-    <string name="gui_scan_init">Initialize scanning</string>
-    <string name="gui_scan_continue">Continue scanning</string>
-    <string name="gui_start_main_component">Start interaction</string>
+    <string name="gui_scan_init">Create new environment</string>
+    <string name="gui_scan_continue">Modify environment</string>
+    <string name="gui_start_main_component">Start</string>
+    <string name="gui_new_transform">Recalibrate</string>
     <string name="gui_retry">Retry</string>
     <string name="gui_settings">Settings</string>
     <string name="gui_publish_depth">Publish depth data</string>
@@ -47,6 +48,8 @@
     <string name="pref_init_anchor">Measurements per wall (anchor point)</string>
     <string name="pref_init_align">Use anchor alignment</string>
     <string name="pref_misc_unknown_service">Display unknown services</string>
+    <string name="pref_misc_use_meta_filter">Filter devices and locations by meta tag</string>
+    <string name="pref_misc_meta_filter">Meta tag filter</string>
     <string name="pref_location_scanning">Location Scanning</string>
     <string name="pref_miscellaneous_settings">Miscellaneous settings</string>
     <string name="pref_adf_file">ADF ID</string>

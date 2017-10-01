@@ -50,6 +50,16 @@
             android:defaultValue="false"
             android:key="pref_misc_unknown_service"
             android:title="@string/pref_misc_unknown_service" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_misc_use_meta_filter"
+            android:title="@string/pref_misc_use_meta_filter" />
+        <EditTextPreference
+            android:defaultValue="CUSTOM_META_FILTER"
+            android:key="pref_misc_meta_filter"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_misc_meta_filter" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_registry_utilities">

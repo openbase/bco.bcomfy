@@ -30,8 +30,8 @@
     <string name="relocate_instruction">Tippen Sie den Bildschirm an der Stelle an, an der Sie das Gerät verorten möchten und bestätigen Sie ihre Aktion</string>
     <string name="choose_location">Welchen Raum haben Sie soeben vermessen?</string>
     <string name="choose_adf">Bitte wählen sie die passende Umgebungsdatei</string>
-    <string name="gui_scan_init">TEIL 1 - Einscannen</string>
-    <string name="gui_scan_continue">Scanvorgang fortsetzen</string>
+    <string name="gui_scan_init">Neue Umgebung einrichten</string>
+    <string name="gui_scan_continue">Umgebung überarbeiten</string>
     <string name="gui_retry">Erneut versuchen</string>
     <string name="gui_settings">Einstellungen</string>
     <string name="gui_publish_depth">Tiefeninformationen veröffentlichen</string>
@@ -72,5 +72,8 @@
     <string name="gui_updating_device_position">Gerätekoordinaten werden aktualisiert…</string>
     <string name="pref_adf_file">ADF ID</string>
     <string name="toast_invalid_last_wall">Abschluss der Raummessung nicht möglich. Die erste und die letzte Wand müssen rechtwinklig zueinander sein. Haben Sie eine Wand vergessen?</string>
-    <string name="gui_start_main_component">TEIL 2 - Verortung und Interaktion</string>
+    <string name="gui_start_main_component">Start</string>
+    <string name="gui_new_transform">Rekalibrierung</string>
+    <string name="pref_misc_use_meta_filter">Aktiviere das Filtern von Geräten und Orten nach Meta Tag</string>
+    <string name="pref_misc_meta_filter">Meta Tag Filter</string>
 </resources>

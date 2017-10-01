@@ -1,10 +1,15 @@
 package org.openbase.bco.bcomfy.utils;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.openbase.bco.bcomfy.BComfy;
+import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
@@ -23,7 +28,6 @@ import javax.vecmath.Point3d;
 import java8.util.stream.StreamSupport;
 import rsb.introspection.LacksOsInformationException;
 import rsb.util.os.RuntimeOsUtilities;
-import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitConfigType.UnitConfig;
 import rst.domotic.unit.UnitTemplateType;
 import rst.domotic.unit.location.LocationConfigType;
@@ -37,14 +41,24 @@ import rst.spatial.ShapeType;
 public final class BcoUtils {
 
     private static final String TAG = BcoUtils.class.getSimpleName();
-    private static final String BCOMFY_STUDY_KEY = "BCOMFY_STUDY";
 
-    public static boolean containsStudyMetaData(UnitConfig unitConfig) {
-        try {
-            MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
-            return Boolean.parseBoolean(mcvp.getValue(BCOMFY_STUDY_KEY));
-        } catch (NotAvailableException ex) {
-            return false;
+    public static boolean filterByMetaTag(UnitConfig unitConfig) {
+        boolean preferenceUseFilter = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
+                .getBoolean(SettingsActivity.KEY_PREF_MISC_USE_META_FILTER, false);
+
+        String preferenceFilterValue = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
+                .getString(SettingsActivity.KEY_PREF_MISC_META_FILTER, "CUSTOM_META_FILTER");
+
+        if (preferenceUseFilter) {
+            try {
+                MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
+                return Boolean.parseBoolean(mcvp.getValue(preferenceFilterValue));
+            } catch (NotAvailableException ex) {
+                return false;
+            }
+        }
+        else {
+            return true;
         }
     }
 
