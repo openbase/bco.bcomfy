@@ -41,7 +41,6 @@ public class LocationViewHolder extends ParentViewHolder<Location, Device> {
         }
 
         itemView.setOnLongClickListener(view -> {
-            Log.i("BCOMFY_STUDY", "OPEN_LOCATION: " + label.getText());
             onDeviceSelectedListener.onDeviceSelected(location.getUnitConfig());
             return true;
         });

@@ -36,7 +36,6 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
         @Override
         public void relay() throws Exception {
             try {
-                Log.i("BCOMFY_STUDY", "CHANGE_COLOR: " + serviceConfig.getUnitId());
                 HSBColorType.HSBColor hsbColor =
                         HSBColorToRGBColorTransformer.transform(
                                 RGBColor.newBuilder().setRed(Color.red(getLastValue())).setGreen(Color.green(getLastValue())).setBlue(Color.blue(getLastValue())).build());

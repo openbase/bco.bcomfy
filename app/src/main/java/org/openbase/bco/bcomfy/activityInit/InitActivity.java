@@ -52,8 +52,6 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
         setContentView(R.layout.activity_init);
         super.onCreate(savedInstanceState);
 
-        Log.i("BCOMFY_STUDY", "START_INIT_ACTIVITY");
-
         recalcTransform = getIntent().getBooleanExtra("recalcTransform", false);
         scanContinue = getIntent().getBooleanExtra("scanContinue", false);
         adfUuid = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_MISC_ADF, "INVALID!");
@@ -126,13 +124,11 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                     Measurer.MeasureType lastMeasureType = measurer.addPlaneMeasurement(planeFit, currentPose.translation);
 
                     if (lastMeasureType == Measurer.MeasureType.INVALID) {
-                        Log.i("BCOMFY_STUDY", "ERROR_NOT_PERPENDICULAR");
                         runOnUiThread(() -> instructionTextView.animateNegative());
                         AndroidUtils.showLongToastTop(getApplicationContext(), R.string.init_invalid_wall);
                         Log.w(TAG, getString(R.string.init_invalid_wall), new CouldNotPerformException(getString(R.string.init_invalid_wall)));
                     }
                     else if (lastMeasureType == Measurer.MeasureType.TOO_CLOSE) {
-                        Log.i("BCOMFY_STUDY", "ERROR_TOO_CLOSE");
                         runOnUiThread(() -> instructionTextView.animateNegative());
                         AndroidUtils.showLongToastTop(getApplicationContext(), R.string.init_too_close);
                         Log.w(TAG, getString(R.string.init_too_close), new CouldNotPerformException(getString(R.string.init_too_close)));
@@ -145,7 +141,6 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
                 }
 
             } catch (TangoException t) {
-                Log.i("BCOMFY_STUDY", "ERROR_TANGO_EXCEPTION");
                 runOnUiThread(() -> instructionTextView.animateNegative());
                 AndroidUtils.showLongToastTop(getApplicationContext(), R.string.tango_error);
                 Log.w(TAG, getString(R.string.tango_error), t);
@@ -304,7 +299,6 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     public void onAddRoomClicked(View v) {
-        Log.i("BCOMFY_STUDY", "START_NEW_ROOM");
         measurer.startNewRoom();
         updateGuiButtons();
     }
@@ -339,7 +333,6 @@ public class InitActivity extends TangoActivity implements View.OnTouchListener,
 
     @Override
     public void onLocationSelected(final String locationId) {
-        Log.i("BCOMFY_STUDY", "FINISH_ROOM: " + locationId);
         updateGuiButtons();
         updateLocalData();
 

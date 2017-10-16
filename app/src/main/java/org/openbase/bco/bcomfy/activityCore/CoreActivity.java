@@ -118,8 +118,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         currentUnitSetting = SettingValue.ALL;
         currentLocationSetting = SettingValue.LOCATED;
 
-        Log.i("BCOMFY_STUDY", "START_CORE_ACTIVITY");
-
         super.onCreate(savedInstanceState);
 
         adfUuid = PreferenceManager.getDefaultSharedPreferences(this).getString(SettingsActivity.KEY_PREF_MISC_ADF, "INVALID!");
@@ -191,7 +189,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                 }
 
             } catch (TangoException t) {
-                Log.i("BCOMFY_STUDY", "ERROR_TANGO_EXCEPTION");
                 AndroidUtils.showLongToastTop(getApplicationContext(), R.string.tango_error);
                 Log.w(TAG, getString(R.string.tango_error), t);
             } catch (SecurityException t) {
@@ -415,7 +412,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     public void onLocationLabelButtonClicked(View view) {
         if (currentLocation != null) {
-            Log.i("BCOMFY_STUDY", "OPEN_LOCATION: " + currentLocation.getLabel());
             onDeviceSelected(currentLocation);
         }
     }
@@ -433,17 +429,14 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void showHelpView() {
-        Log.i("BCOMFY_STUDY", "OPENING_HELP_VIEW");
         helpView.setVisibility(View.VISIBLE);
     }
 
     private void hideHelpView() {
-        Log.i("BCOMFY_STUDY", "CLOSING_HELP_VIEW");
         helpView.setVisibility(View.INVISIBLE);
     }
 
     private void enterEditMode() {
-        Log.i("BCOMFY_STUDY", "ENTER_EDIT_MODE");
         inEditMode = true;
         drawerLayout.closeDrawers();
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, leftDrawer);
@@ -456,7 +449,6 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private void leaveEditMode() {
-        Log.i("BCOMFY_STUDY", "LEAVE_EDIT_MODE");
         inEditMode = false;
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, leftDrawer);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, rightDrawer);

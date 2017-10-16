@@ -17,13 +17,9 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.MetaConfigVariableProvider;
 import org.rajawali3d.math.Matrix4;
 
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.StreamSupport;
 import rst.domotic.state.EnablingStateType;

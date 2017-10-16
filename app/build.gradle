@@ -1,4 +1,9 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+
+}
 
 android {
     compileSdkVersion 26
@@ -69,4 +74,8 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-android', version: '1.7.25'
 
     compile "org.rajawali3d:rajawali:1.1.970"
+
+    compile('com.crashlytics.sdk.android:crashlytics:2.7.0@aar') {
+        transitive = true
+    }
 }

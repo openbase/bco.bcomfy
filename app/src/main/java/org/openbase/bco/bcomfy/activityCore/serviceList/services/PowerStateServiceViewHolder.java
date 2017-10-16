@@ -42,12 +42,10 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
             powerStateSwitch.setOnClickListener(v -> {
                 try {
                     if (((Switch) v).isChecked()) {
-                        Log.i("BCOMFY_STUDY", "TURN_POWER_STATE_ON: " + this.unitRemote.getId());
                         Service$.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
                                 PowerState.newBuilder().setValue(PowerState.State.ON).build());
                     }
                     else {
-                        Log.i("BCOMFY_STUDY", "TURN_POWER_STATE_OFF: " + this.unitRemote.getId());
                         Service$.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
                                 PowerState.newBuilder().setValue(PowerState.State.OFF).build());
                     }
