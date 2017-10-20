@@ -72,6 +72,7 @@
     <string name="list_settings_units_unlocated">Show only unlocated units</string>
     <string name="list_settings_locations_all">Show all locations</string>
     <string name="list_settings_locations_located">Show only located locations</string>
+    <string name="list_settings_visualize_distant_blobs">Visualize devices that are not located in the current room</string>
     <string name="toast_permission_not_granted">Necessary permission was denied. Closing BComfy…</string>
     <string name="toast_loading_error">Error while loading local dataset for selected adf!</string>
     <string name="toast_position_update_error">Error while updating position of unit!</string>

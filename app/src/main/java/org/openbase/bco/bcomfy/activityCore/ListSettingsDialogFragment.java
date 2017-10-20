@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -24,7 +25,7 @@ public class ListSettingsDialogFragment extends DialogFragment {
     }
 
     public interface OnSettingsChosenListener {
-        void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting);
+        void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting, boolean distantBlobsSetting);
     }
 
     private OnSettingsChosenListener onSettingsChosenListener;
@@ -34,6 +35,7 @@ public class ListSettingsDialogFragment extends DialogFragment {
     private RadioButton radioButtonUnitsUnlocated;
     private RadioButton radioButtonLocationsAll;
     private RadioButton radioButtonLocationsLocated;
+    private CheckBox checkBoxVisualizeDistantBlobs;
 
     @Override
     public void onAttach(Context context) {
@@ -63,6 +65,8 @@ public class ListSettingsDialogFragment extends DialogFragment {
         radioButtonUnitsUnlocated = dialogView.findViewById(R.id.radioButtonUnitsUnlocated);
         radioButtonLocationsAll = dialogView.findViewById(R.id.radioButtonLocationsAll);
         radioButtonLocationsLocated = dialogView.findViewById(R.id.radioButtonLocationsLocated);
+        checkBoxVisualizeDistantBlobs = dialogView.findViewById(R.id.checkBoxVisualizeDistantBlobs);
+
 
         switch (((CoreActivity) getActivity()).getCurrentUnitSetting()) {
             case ALL:
@@ -82,6 +86,8 @@ public class ListSettingsDialogFragment extends DialogFragment {
             case LOCATED:
                 radioButtonLocationsLocated.setChecked(true);
         }
+
+        checkBoxVisualizeDistantBlobs.setChecked(((CoreActivity) getActivity()).getCurrentDistantBlobsSetting());
 
         builder.setView(dialogView)
                 .setIcon(new IconicsDrawable(getContext(), GoogleMaterial.Icon.gmd_settings).color(Color.WHITE).sizeDp(24))
@@ -104,7 +110,7 @@ public class ListSettingsDialogFragment extends DialogFragment {
                         locationSetting = SettingValue.LOCATED;
                     }
 
-                    onSettingsChosenListener.onSettingsChosen(unitSetting, locationSetting);
+                    onSettingsChosenListener.onSettingsChosen(unitSetting, locationSetting, checkBoxVisualizeDistantBlobs.isChecked());
                 })
                 .setNegativeButton(R.string.gui_cancel, (dialog, id) -> {});
 

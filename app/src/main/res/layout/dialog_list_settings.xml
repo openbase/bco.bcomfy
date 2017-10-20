@@ -71,4 +71,17 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
+
+    <CheckBox
+        android:id="@+id/checkBoxVisualizeDistantBlobs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:text="@string/list_settings_visualize_distant_blobs" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
 </LinearLayout>

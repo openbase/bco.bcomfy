@@ -79,6 +79,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     private SettingValue currentUnitSetting;
     private SettingValue currentLocationSetting;
+    private boolean currentDistantBlobsSetting;
 
     private ListSettingsDialogFragment listSettings;
 
@@ -117,6 +118,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         setContentView(R.layout.activity_core);
         currentUnitSetting = SettingValue.ALL;
         currentLocationSetting = SettingValue.LOCATED;
+        currentDistantBlobsSetting = false;
 
         super.onCreate(savedInstanceState);
 
@@ -154,14 +156,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     public void onPause() {
         super.onPause();
-//        sch.remove(fetchLocationLabelTask);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        sch.scheduleWithFixedDelay(fetchLocationLabelTask, 1, 1, TimeUnit.SECONDS);
-        uiOverlayHolder.showAllDevices();
+        uiOverlayHolder.updateUiOverlay();
     }
 
 
@@ -367,6 +367,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                         .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
 
                 if (unitConfigs.size() > 0) {
+                    if (currentLocation != null) {
+                        if (currentLocation.getId().equals(unitConfigs.get(0).getId())) {
+                            return;
+                        }
+                    }
+                    uiOverlayHolder.updateBlobVisibility(currentDistantBlobsSetting, unitConfigs.get(0));
                     currentLocation = unitConfigs.get(0);
                     runOnUiThread(() -> locationLabelButton.setText(unitConfigs.get(0).getLabel()));
                     runOnUiThread(() -> locationLabelButton.setVisibility(View.VISIBLE));
@@ -417,10 +423,12 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     @Override
-    public void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting) {
+    public void onSettingsChosen(SettingValue unitSetting, SettingValue locationSetting, boolean distantBlobsSetting) {
         currentUnitSetting = unitSetting;
         currentLocationSetting = locationSetting;
+        currentDistantBlobsSetting = distantBlobsSetting;
 
+        uiOverlayHolder.updateBlobVisibility(distantBlobsSetting, currentLocation);
         updateLeftDrawer();
     }
 
@@ -571,5 +579,9 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
     public SettingValue getCurrentLocationSetting() {
         return currentLocationSetting;
+    }
+
+    public boolean getCurrentDistantBlobsSetting() {
+        return currentDistantBlobsSetting;
     }
 }

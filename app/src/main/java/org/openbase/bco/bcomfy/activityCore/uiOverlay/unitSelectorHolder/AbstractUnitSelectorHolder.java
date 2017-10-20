@@ -46,6 +46,7 @@ public abstract class AbstractUnitSelectorHolder {
     private int parentHeight;
 
     private boolean selected;
+    private boolean visible;
 
     private UnitConfigType.UnitConfig unitConfig;
     private UnitRemote unitRemote;
@@ -75,7 +76,7 @@ public abstract class AbstractUnitSelectorHolder {
         }
     }
 
-    public String getUnitHostId() {
+    public String getCorrespondingUnitId() {
         if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
             return unitConfig.getId();
         }
@@ -135,8 +136,12 @@ public abstract class AbstractUnitSelectorHolder {
     }
 
     public void alignViewToPixel(Context context, Matrix4 bcoToPixelTransform) {
-        Vector3 pixelVector = bcoToPixelTransform.projectAndCreateVector(positionFromRoot);
+        if (!visible) {
+            view.setVisibility(View.INVISIBLE);
+            return;
+        }
 
+        Vector3 pixelVector = bcoToPixelTransform.projectAndCreateVector(positionFromRoot);
         if (pixelVector.x > -1 &&
                 pixelVector.x < 1 &&
                 pixelVector.y > -1 &&
@@ -203,5 +208,9 @@ public abstract class AbstractUnitSelectorHolder {
             throw new CouldNotPerformException("Could not update position from root!", ex);
         }
 
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

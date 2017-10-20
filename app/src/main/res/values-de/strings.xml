@@ -76,4 +76,5 @@
     <string name="gui_new_transform">Rekalibrierung</string>
     <string name="pref_misc_use_meta_filter">Aktiviere das Filtern von Geräten und Orten nach Meta Tag</string>
     <string name="pref_misc_meta_filter">Meta Tag Filter</string>
+    <string name="list_settings_visualize_distant_blobs">Visualisiere auch Geräte außerhalb des aktuellen Raumes</string>
 </resources>
