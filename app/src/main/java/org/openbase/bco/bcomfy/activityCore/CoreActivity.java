@@ -36,6 +36,7 @@ import org.openbase.bco.bcomfy.activityCore.deviceList.FetchDeviceListTask;
 import org.openbase.bco.bcomfy.activityCore.deviceList.Location;
 import org.openbase.bco.bcomfy.activityCore.deviceList.LocationAdapter;
 import org.openbase.bco.bcomfy.activityCore.serviceList.UnitListViewHolder;
+import org.openbase.bco.bcomfy.activityCore.uiOverlay.OnUiOverlayInitiatedListener;
 import org.openbase.bco.bcomfy.activityCore.uiOverlay.UiOverlayHolder;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
@@ -60,7 +61,7 @@ import rst.domotic.unit.location.LocationConfigType;
 import rst.math.Vec3DDoubleType;
 import rst.spatial.PlacementConfigType;
 
-public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, OnSettingsChosenListener, OnTaskFinishedListener<Boolean> {
+public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, OnSettingsChosenListener, OnTaskFinishedListener<Boolean>, OnUiOverlayInitiatedListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
 
     private DrawerLayout drawerLayout;
@@ -161,7 +162,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     @Override
     public void onResume() {
         super.onResume();
-        uiOverlayHolder.updateUiOverlay();
+        uiOverlayHolder.initUiOverlay();
     }
 
 
@@ -323,7 +324,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         getSurfaceView().setOnTouchListener(this);
         setRenderer(new TangoRenderer(this));
 
-        uiOverlayHolder = new UiOverlayHolder(this, this);
+        uiOverlayHolder = new UiOverlayHolder(this, this, this);
         listSettings = new ListSettingsDialogFragment();
     }
 
@@ -505,6 +506,11 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             AndroidUtils.showShortToastTop(this, R.string.toast_position_update_error);
         }
+    }
+
+    @Override
+    public void onUiOverlayInitiated() {
+        uiOverlayHolder.updateBlobVisibility(currentDistantBlobsSetting, currentLocation);
     }
 
     private void clearUnitLocation() {

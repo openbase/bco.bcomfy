@@ -36,14 +36,16 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
     private RelativeLayout uiOverlay;
     private Context context;
     private OnDeviceSelectedListener onDeviceSelectedListener;
+    private OnUiOverlayInitiatedListener onUiOverlayInitiatedListener;
 
     private HashMap<String, AbstractUnitSelectorHolder> holderMap;
     private AbstractUnitSelectorHolder selectedHolder;
 
-    public UiOverlayHolder(Context context, OnDeviceSelectedListener onDeviceSelectedListener) {
-        this.uiOverlay                = ((Activity) context).findViewById(R.id.ui_container);
-        this.context                  = context;
-        this.onDeviceSelectedListener = onDeviceSelectedListener;
+    public UiOverlayHolder(Context context, OnDeviceSelectedListener onDeviceSelectedListener, OnUiOverlayInitiatedListener onUiOverlayInitiatedListener) {
+        this.uiOverlay                    = ((Activity) context).findViewById(R.id.ui_container);
+        this.context                      = context;
+        this.onDeviceSelectedListener     = onDeviceSelectedListener;
+        this.onUiOverlayInitiatedListener = onUiOverlayInitiatedListener;
 
         holderMap = new HashMap<>();
         selectedHolder = null;
@@ -54,13 +56,12 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
                 unit.alignViewToPixel(context, bcoToPixelTransform));
     }
 
-    public void updateUiOverlay() {
+    public void initUiOverlay() {
         new fetchNewUnitMapTask(returnObject -> {
             clearUiOverlay();
-
             holderMap = returnObject;
-
             StreamSupport.stream(holderMap.values()).forEach(this::initUnitSelector);
+            onUiOverlayInitiatedListener.onUiOverlayInitiated();
         }).execute();
     }
 
