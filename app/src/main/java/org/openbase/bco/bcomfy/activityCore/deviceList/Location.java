@@ -6,6 +6,7 @@ import com.bignerdranch.expandablerecyclerview.model.Parent;
 
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
+import org.openbase.bco.registry.unit.remote.UnitRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.extension.rst.processing.LabelProcessor;
@@ -27,7 +28,7 @@ public class Location implements Parent<Device> {
     private UnitConfigType.UnitConfig locationConfig;
     private List<Device> deviceList;
 
-    public Location(UnitConfigType.UnitConfig locationConfig, LocationRegistryRemote remote, SettingValue unitSetting) {
+    public Location(UnitConfigType.UnitConfig locationConfig, UnitRegistryRemote remote, SettingValue unitSetting) {
         this.locationConfig = locationConfig;
         this.deviceList = new ArrayList<>();
 
@@ -39,7 +40,13 @@ public class Location implements Parent<Device> {
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||
                                           (unitSetting == SettingValue.UNLOCATED && !unitConfig.getPlacementConfig().hasPosition())))
                     .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
-                    .sorted(Comparators.thenComparing(Comparators.comparing(UnitConfigType.UnitConfig::getType), UnitConfigType.UnitConfig::getLabel))
+                    .sorted(Comparators.thenComparing(Comparators.comparing(UnitConfigType.UnitConfig::getUnitType), (unitConfig1) -> {
+                        try {
+                            return LabelProcessor.getBestMatch(Locale.getDefault(), unitConfig1.getLabel());
+                        } catch (NotAvailableException e) {
+                            return "?";
+                        }
+                    }))
                     .forEachOrdered(unitConfig -> deviceList.add(new Device(unitConfig)));
         } catch (CouldNotPerformException e) {
             Log.e(TAG, "Could not fetch units of Location: " + locationConfig.getId() + "\n" + Log.getStackTraceString(e));
