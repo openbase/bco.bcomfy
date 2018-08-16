@@ -11,12 +11,9 @@ import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.serviceList.units.AbstractUnitViewHolder;
-import org.openbase.bco.bcomfy.activityCore.serviceList.units.GenericUnitViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.units.UnitViewHolderFactory;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
-import org.openbase.bco.registry.device.lib.DeviceRegistry;
 import org.openbase.bco.registry.remote.Registries;
-import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.extension.rst.processing.LabelProcessor;
@@ -27,7 +24,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
 import rst.domotic.unit.UnitTemplateType;
 
@@ -45,7 +41,6 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
 
     private List<AbstractUnitViewHolder> unitViewHolderList;
 
-    private DeviceRegistry deviceRegistry;
     private UnitConfigType.UnitConfig deviceConfig;
 
     public UnitListViewHolder(LinearLayout serviceList) {
@@ -86,18 +81,17 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
             unitListViewHolder = unitListViewHolders[0];
 
             try {
-                unitListViewHolder.deviceRegistry = Registries.getDeviceRegistry();
 
                 // Distinguish whether to display a device or a single unit
                 if (unitListViewHolder.unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
                     // Display a device
                     unitListViewHolder.deviceConfig =
-                            unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.unitConfig.getId());
+                            Registries.getUnitRegistry().getUnitConfigById(unitListViewHolder.unitConfig.getId());
 
                     // Get label and device class
                     String labelText = LabelProcessor.getBestMatch(Locale.getDefault(), unitListViewHolder.deviceConfig.getLabel());
-                    String typeText = unitListViewHolder.deviceRegistry.getDeviceClassById(
-                            unitListViewHolder.deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel();
+                    String typeText = LabelProcessor.getBestMatch(Locale.getDefault(), Registries.getClassRegistry().getDeviceClassById(
+                            unitListViewHolder.deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel());
                     unitListViewHolder.activity.runOnUiThread(() -> {
                         unitListViewHolder.labelText.setText(labelText);
                         unitListViewHolder.typeText.setText(typeText);
