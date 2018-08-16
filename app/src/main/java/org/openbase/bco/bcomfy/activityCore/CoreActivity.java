@@ -364,8 +364,8 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             try {
                 Registries.waitForData();
-                List<UnitConfig> unitConfigs = Registries.getLocationRegistry()
-                        .getLocationConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
+                List<UnitConfig> unitConfigs = Registries.getUnitRegistry()
+                        .getLocationUnitConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
 
                 if (unitConfigs.size() > 0) {
                     if (currentLocation != null) {

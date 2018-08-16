@@ -9,7 +9,7 @@ import android.widget.Switch;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -39,11 +39,11 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
             activationStateSwitch.setOnClickListener(v -> {
                 try {
                     if (((Switch) v).isChecked()) {
-                        Service$.invokeOperationServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote,
+                        Services.invokeOperationServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote,
                                 ActivationState.newBuilder().setValue(ActivationState.State.ACTIVE).build());
                     }
                     else {
-                        Service$.invokeOperationServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote,
+                        Services.invokeOperationServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote,
                                 ActivationState.newBuilder().setValue(ActivationState.State.DEACTIVE).build());
                     }
                 } catch (CouldNotPerformException e) {
@@ -58,7 +58,7 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
     @Override
     public void updateDynamicContent() {
         try {
-            ActivationState activationState = (ActivationState) Service$.invokeProviderServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote);
+            ActivationState activationState = (ActivationState) Services.invokeProviderServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote);
 
             switch (activationState.getValue()) {
                 case ACTIVE:

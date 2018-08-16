@@ -176,7 +176,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         List<UnitConfig> unitsInCurrentLocation;
         List<String> unitIdsInCurrentLocation;
         try {
-            unitsInCurrentLocation = Registries.getLocationRegistry().getUnitConfigsByLocation(location.getId(), true);
+            unitsInCurrentLocation = Registries.getUnitRegistry().getUnitConfigsByLocation(location.getId(), true);
             unitIdsInCurrentLocation = StreamSupport.stream(unitsInCurrentLocation).map(UnitConfig::getId).collect(Collectors.toList());
         } catch (CouldNotPerformException | InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(new CouldNotPerformException("Error while fetching units of location " + location.getId() + "!\nDrawing all blobs regardless of the current location...", e)));

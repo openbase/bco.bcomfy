@@ -16,7 +16,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -58,7 +58,7 @@ public class MotionStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            MotionState motionState = (MotionState) Service$.invokeProviderServiceMethod(ServiceType.MOTION_STATE_SERVICE, unitRemote);
+            MotionState motionState = (MotionState) Services.invokeProviderServiceMethod(ServiceType.MOTION_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
                 switch (motionState.getValue()) {

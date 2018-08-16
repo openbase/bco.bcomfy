@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import java8.util.stream.StreamSupport;
+import rst.domotic.unit.UnitTemplateType;
 import rst.domotic.unit.location.LocationConfigType;
 
 public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
@@ -35,15 +36,14 @@ public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
         locationList = new ArrayList<>();
 
         try {
-            LocationRegistryRemote remote = Registries.getLocationRegistry();
-            remote.waitForData(10, TimeUnit.SECONDS);
+            Registries.getUnitRegistry().waitForData(10, TimeUnit.SECONDS);
 
-            StreamSupport.stream(remote.getLocationConfigs())
+            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
                     .filter(locationConfig -> locationConfig.getLocationConfig().getType().equals(LocationConfigType.LocationConfig.LocationType.TILE) &&
                             ((locationSetting == SettingValue.ALL) ||
                             (locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)))
                     .sorted((o1, o2) -> o1.getLabel().compareTo(o2.getLabel()))
-                    .forEach(locationConfig -> locationList.add(new Location(locationConfig, remote, unitSetting)));
+                    .forEach(locationConfig -> locationList.add(new Location(locationConfig, Registries.getUnitRegistry(), unitSetting)));
 
             for (Iterator<Location> it = locationList.iterator(); it.hasNext();) {
                 Location location = it.next();

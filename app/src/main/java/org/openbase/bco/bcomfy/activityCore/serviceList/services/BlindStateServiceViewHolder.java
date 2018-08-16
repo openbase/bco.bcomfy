@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -57,7 +57,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
         if (operation) {
             blindStateButtonDown.setOnClickListener(v -> {
                 try {
-                    Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
+                    Services.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.DOWN).build());
                 } catch (CouldNotPerformException e) {
                     Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -66,7 +66,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
 
             blindStateButtonStop.setOnClickListener(v -> {
                 try {
-                    Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
+                    Services.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.STOP).build());
                 } catch (CouldNotPerformException e) {
                     Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -75,7 +75,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
 
             blindStateButtonUp.setOnClickListener(v -> {
                 try {
-                    Service$.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
+                    Services.invokeOperationServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote,
                             BlindState.newBuilder().setMovementState(BlindState.MovementState.UP).build());
                 } catch (CouldNotPerformException e) {
                     Log.e(TAG, "Error while invoking BlindStateOperation on unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -91,7 +91,7 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            BlindState blindState = (BlindState) Service$.invokeProviderServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote);
+            BlindState blindState = (BlindState) Services.invokeProviderServiceMethod(ServiceType.BLIND_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
                 if (blindState.hasOpeningRatio()) {

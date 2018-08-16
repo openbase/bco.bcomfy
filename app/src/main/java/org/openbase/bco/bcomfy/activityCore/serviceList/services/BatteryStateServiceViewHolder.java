@@ -11,7 +11,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -49,7 +49,7 @@ public class BatteryStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            BatteryState batteryState = (BatteryState) Service$.invokeProviderServiceMethod(ServiceType.BATTERY_STATE_SERVICE, unitRemote);
+            BatteryState batteryState = (BatteryState) Services.invokeProviderServiceMethod(ServiceType.BATTERY_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
                 seekBar.setProgress((int) batteryState.getLevel());
