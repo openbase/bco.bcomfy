@@ -18,9 +18,12 @@ import org.openbase.bco.registry.device.lib.DeviceRegistry;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -92,7 +95,7 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
                             unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.unitConfig.getId());
 
                     // Get label and device class
-                    String labelText = unitListViewHolder.deviceConfig.getLabel();
+                    String labelText = LabelProcessor.getBestMatch(Locale.getDefault(), unitListViewHolder.deviceConfig.getLabel());
                     String typeText = unitListViewHolder.deviceRegistry.getDeviceClassById(
                             unitListViewHolder.deviceConfig.getDeviceConfig().getDeviceClassId()).getLabel();
                     unitListViewHolder.activity.runOnUiThread(() -> {
@@ -116,7 +119,11 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
                     unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
                     unitListViewHolder.activity.runOnUiThread(() -> {
-                        unitListViewHolder.labelText.setText(unitListViewHolder.unitConfig.getLabel());
+                        try {
+                            unitListViewHolder.labelText.setText(LabelProcessor.getBestMatch(Locale.getDefault(), unitListViewHolder.unitConfig.getLabel()));
+                        } catch (NotAvailableException e) {
+                            unitListViewHolder.labelText.setText("?");
+                        }
                         unitListViewHolder.typeText.setText(unitListViewHolder.unitConfig.getDescription());
                         unitListViewHolder.unitList.addView(unitViewHolder.getCardView());
                     });
