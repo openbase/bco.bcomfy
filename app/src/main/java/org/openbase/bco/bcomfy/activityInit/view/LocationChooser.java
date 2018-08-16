@@ -16,6 +16,7 @@ import java8.util.Comparators;
 import java8.util.J8Arrays;
 import java8.util.stream.StreamSupport;
 import rst.domotic.unit.UnitConfigType;
+import rst.domotic.unit.UnitTemplateType;
 
 public class LocationChooser extends DialogFragment {
 
@@ -46,8 +47,8 @@ public class LocationChooser extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         try {
-            Registries.getLocationRegistry().waitForData();
-            locations = StreamSupport.stream(Registries.getLocationRegistry().getLocationConfigs())
+            Registries.getUnitRegistry().waitForData();
+            locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION)
                     .filter(BcoUtils::filterByMetaTag)
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
                     .toArray(UnitConfigType.UnitConfig[]::new);

@@ -87,13 +87,13 @@ public final class BcoUtils {
 
                 // Get location for that specific coordinate
                 List<UnitConfig> locations =
-                        Registries.getLocationRegistry().getLocationConfigsByCoordinate(
+                        Registries.getUnitRegistry().getLocationUnitConfigsByCoordinate(
                                 Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
 
                 UnitConfig[] location = new UnitConfig[1];
 
                 if (locations.size() == 0) {
-                    location[0] = Registries.getLocationRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                    location[0] = Registries.getUnitRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
                     Log.w(TAG, "No location found for current unit position! Retaining old location information...");
                 }
                 else {
@@ -111,15 +111,15 @@ public final class BcoUtils {
                     }
                     // Otherwise return... Unknown LocationType...
                     if (location[0] == null) {
-                        location[0] = Registries.getLocationRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                        location[0] = Registries.getUnitRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
                         Log.w(TAG, "No valid location found for selected position! Retaining old location information...");
                     }
                 }
 
                 // Transform BCO-Root position to BCO-Location-of-selected-point position
                 Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
-                Registries.getLocationRegistry().waitForData();
-                Registries.getLocationRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+                Registries.getUnitRegistry().waitForData();
+                Registries.getUnitRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
                 // Generate new protobuf unitConfig
                 TranslationType.Translation translation =
@@ -197,7 +197,7 @@ public final class BcoUtils {
             // Publish the result to the locationRegistry
             try {
                 // Fetch the UnitConfig of the target location
-                UnitConfig locationConfig = Registries.getLocationRegistry().getLocationConfigById(locationId);
+                UnitConfig locationConfig = Registries.getUnitRegistry().getLocationConfigById(locationId);
 
                 // Build the pose
                 TranslationType.Translation.Builder translationBuilder = TranslationType.Translation.getDefaultInstance().toBuilder();
@@ -220,7 +220,7 @@ public final class BcoUtils {
                 UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
                 // Update the locationConfig
-                Registries.getLocationRegistry().updateLocationConfig(newLocationConfig);
+                Registries.getUnitRegistry().updateLocationConfig(newLocationConfig);
             } catch (InterruptedException | CouldNotPerformException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {

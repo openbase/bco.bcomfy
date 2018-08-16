@@ -9,7 +9,7 @@ import android.widget.Switch;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.extension.rst.processing.TimestampProcessor;
@@ -42,11 +42,11 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
             powerStateSwitch.setOnClickListener(v -> {
                 try {
                     if (((Switch) v).isChecked()) {
-                        Service$.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
+                        Services.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
                                 PowerState.newBuilder().setValue(PowerState.State.ON).build());
                     }
                     else {
-                        Service$.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
+                        Services.invokeOperationServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote,
                                 PowerState.newBuilder().setValue(PowerState.State.OFF).build());
                     }
                 } catch (CouldNotPerformException e) {
@@ -61,7 +61,7 @@ public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            PowerState powerStateData = (PowerState) Service$.invokeProviderServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote);
+            PowerState powerStateData = (PowerState) Services.invokeProviderServiceMethod(ServiceType.POWER_STATE_SERVICE, unitRemote);
 
             if (powerStateData.getValue().equals(PowerState.State.ON)) {
                 activity.runOnUiThread(() -> powerStateSwitch.setChecked(true));

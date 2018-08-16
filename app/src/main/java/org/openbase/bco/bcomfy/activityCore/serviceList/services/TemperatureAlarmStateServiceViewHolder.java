@@ -18,7 +18,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -60,7 +60,7 @@ public class TemperatureAlarmStateServiceViewHolder extends AbstractServiceViewH
     @Override
     public void updateDynamicContent() {
         try {
-            AlarmState alarmState = (AlarmState) Service$.invokeProviderServiceMethod(ServiceType.TEMPERATURE_ALARM_STATE_SERVICE, unitRemote);
+            AlarmState alarmState = (AlarmState) Services.invokeProviderServiceMethod(ServiceType.TEMPERATURE_ALARM_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
 

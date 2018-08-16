@@ -14,7 +14,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
 import org.openbase.bco.bcomfy.R;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
@@ -46,7 +46,7 @@ public class HandleStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            HandleStateType.HandleState handleState = (HandleStateType.HandleState) Service$.invokeProviderServiceMethod(ServiceType.HANDLE_STATE_SERVICE, unitRemote);
+            HandleStateType.HandleState handleState = (HandleStateType.HandleState) Services.invokeProviderServiceMethod(ServiceType.HANDLE_STATE_SERVICE, unitRemote);
 
             if (handleState.hasPosition()) {
                 activity.runOnUiThread(() -> {

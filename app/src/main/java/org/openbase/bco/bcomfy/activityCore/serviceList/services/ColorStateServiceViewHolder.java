@@ -12,7 +12,7 @@ import com.flask.colorpicker.slider.LightnessSlider;
 
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
-import org.openbase.bco.dal.lib.layer.service.Service$;
+import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.extension.rst.transform.HSBColorToRGBColorTransformer;
@@ -40,7 +40,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
                         HSBColorToRGBColorTransformer.transform(
                                 RGBColor.newBuilder().setRed(Color.red(getLastValue())).setGreen(Color.green(getLastValue())).setBlue(Color.blue(getLastValue())).build());
 
-                ((Future)Service$.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
+                ((Future)Services.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
                         ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build())).get();
             } catch (CouldNotPerformException | ExecutionException e) {
                 Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -79,7 +79,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
     @Override
     public void updateDynamicContent() {
         try {
-            ColorState colorState = (ColorState) Service$.invokeProviderServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote);
+            ColorState colorState = (ColorState) Services.invokeProviderServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote);
             RGBColor rgbColor;
 
             if (colorState.getColor().getType().equals(ColorType.Color.Type.HSB)) {
