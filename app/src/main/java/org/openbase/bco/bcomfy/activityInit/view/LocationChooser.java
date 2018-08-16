@@ -11,6 +11,10 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
+
+import java.util.Locale;
 
 import java8.util.Comparators;
 import java8.util.J8Arrays;
@@ -48,10 +52,16 @@ public class LocationChooser extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         try {
             Registries.getUnitRegistry().waitForData();
-            locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION)
+            locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
                     .filter(BcoUtils::filterByMetaTag)
-                    .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
-                    .toArray(UnitConfigType.UnitConfig[]::new));
+                    .sorted(Comparators.comparing((unitConfig1) -> {
+                        try {
+                            return LabelProcessor.getBestMatch(Locale.getDefault(), unitConfig1.getLabel());
+                        } catch (NotAvailableException e) {
+                            return "?";
+                        }
+                    }))
+                    .toArray(UnitConfigType.UnitConfig[]::new);
 
             String[] locationStrings = J8Arrays.stream(locations)
                     .map(UnitConfigType.UnitConfig::getLabel)
