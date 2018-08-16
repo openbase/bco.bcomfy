@@ -17,7 +17,7 @@ public class UnitViewHolderFactory {
     private static final String TAG = UnitViewHolderFactory.class.getSimpleName();
 
     public static AbstractUnitViewHolder createUnitViewHolder(Activity activity, UnitConfig unitConfig, ViewGroup parent) throws CouldNotPerformException, InterruptedException, TimeoutException, ExecutionException {
-        switch (unitConfig.getType()) {
+        switch (unitConfig.getUnitType()) {
             case COLORABLE_LIGHT:
             default:
                 return new GenericUnitViewHolder(activity, unitConfig, parent);

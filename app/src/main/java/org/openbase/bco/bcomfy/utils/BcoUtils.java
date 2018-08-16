@@ -250,7 +250,7 @@ public final class BcoUtils {
         protected Void doInBackground(Void... voids) {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
-                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE)
+                        .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
                         .forEach(unitConfig -> {
                             try {
@@ -294,8 +294,8 @@ public final class BcoUtils {
         protected Void doInBackground(Void... voids) {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
-                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION ||
-                                                unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.CONNECTION)
+                        .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION ||
+                                                unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.CONNECTION)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().getShape().getFloorCount() > 0)
                         .forEach(unitConfig -> {
                             try {

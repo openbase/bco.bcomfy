@@ -86,7 +86,7 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
                 unitListViewHolder.deviceRegistry = Registries.getDeviceRegistry();
 
                 // Distinguish whether to display a device or a single unit
-                if (unitListViewHolder.unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+                if (unitListViewHolder.unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
                     // Display a device
                     unitListViewHolder.deviceConfig =
                             unitListViewHolder.deviceRegistry.getDeviceConfigById(unitListViewHolder.unitConfig.getId());

@@ -31,7 +31,7 @@ public class Location implements Parent<Device> {
         try {
             StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), true))
                     .filter(BcoUtils::filterByMetaTag)
-                    .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
+                    .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||
                                           (unitSetting == SettingValue.UNLOCATED && !unitConfig.getPlacementConfig().hasPosition())))

@@ -569,7 +569,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
     }
 
     private boolean isUnitLocationEditable(UnitConfig unitConfig) {
-        switch (unitConfig.getType()) {
+        switch (unitConfig.getUnitType()) {
             case DEVICE:
                 return true;
             case LOCATION:

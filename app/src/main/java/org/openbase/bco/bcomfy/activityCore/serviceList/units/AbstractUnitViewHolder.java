@@ -36,7 +36,7 @@ public abstract class AbstractUnitViewHolder<URC extends AbstractUnitRemote> {
 
             cardView = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.unit_card, parent, false);
             unitLabel = cardView.findViewById(R.id.unit_title);
-            unitLabel.setText(unitConfig.getType().toString());
+            unitLabel.setText(unitConfig.getUnitType().toString());
 
             abstractUnitRemote = Units.getUnit(unitConfig, false, unitRemoteClass);
             abstractUnitRemote.waitForData(1, TimeUnit.SECONDS);

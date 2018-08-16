@@ -20,7 +20,7 @@ public class SelectorHolderFactory {
     public static AbstractUnitSelectorHolder createUnitSelectorHolder(UnitConfigType.UnitConfig unitConfig) throws CouldNotPerformException, InterruptedException {
         AbstractUnitSelectorHolder unitSelectorHolder;
 
-        switch (unitConfig.getType()) {
+        switch (unitConfig.getUnitType()) {
             case DEVICE:
                 if (unitConfig.getDeviceConfig().getUnitIdCount() > 1) {
                     unitSelectorHolder = createUnitSelectorHolderGroup(unitConfig);

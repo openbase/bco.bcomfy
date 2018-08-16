@@ -139,10 +139,10 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
                         .filter(BcoUtils::filterByMetaTag)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
-                        .filter(unitConfig -> unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
+                        .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
                                 (!unitConfig.getBoundToUnitHost() &&
-                                        unitConfig.getType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION &&
-                                        unitConfig.getType() != UnitTemplateType.UnitTemplate.UnitType.CONNECTION))
+                                        unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION &&
+                                        unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.CONNECTION))
                         .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
                         .forEach(unitConfig -> {
                             try {

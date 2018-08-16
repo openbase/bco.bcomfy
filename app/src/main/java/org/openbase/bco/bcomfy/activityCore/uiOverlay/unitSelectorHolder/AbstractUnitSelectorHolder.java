@@ -77,7 +77,7 @@ public abstract class AbstractUnitSelectorHolder {
     }
 
     public String getCorrespondingUnitId() {
-        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
+        if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE) {
             return unitConfig.getId();
         }
         else {
@@ -86,7 +86,7 @@ public abstract class AbstractUnitSelectorHolder {
     }
 
     public UnitConfigType.UnitConfig getCorrespondingUnitConfig() throws CouldNotPerformException, InterruptedException {
-        if (unitConfig.getType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost()) {
+        if (unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost()) {
             return unitConfig;
         }
         else {
