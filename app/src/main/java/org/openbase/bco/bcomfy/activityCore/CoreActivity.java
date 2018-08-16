@@ -46,11 +46,14 @@ import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -375,7 +378,13 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     }
                     uiOverlayHolder.updateBlobVisibility(currentDistantBlobsSetting, unitConfigs.get(0));
                     currentLocation = unitConfigs.get(0);
-                    runOnUiThread(() -> locationLabelButton.setText(unitConfigs.get(0).getLabel()));
+                    runOnUiThread(() -> {
+                        try {
+                            locationLabelButton.setText(LabelProcessor.getBestMatch(Locale.getDefault(), unitConfigs.get(0).getLabel()));
+                        } catch (NotAvailableException e) {
+                            locationLabelButton.setText("?");
+                        }
+                    });
                     runOnUiThread(() -> locationLabelButton.setVisibility(View.VISIBLE));
                 }
                 else {
@@ -526,7 +535,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
             uiOverlayHolder.removeUnit(unitConfig);
             leaveEditMode();
-        } catch (CouldNotPerformException | InterruptedException  e) {
+        } catch (CouldNotPerformException e) {
             Log.e(TAG, "Error while updating locationConfig of unit: " + currentDevice + "\n" + Log.getStackTraceString(e));
         }
     }
