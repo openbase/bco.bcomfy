@@ -61,7 +61,7 @@ dependencies {
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.github.QuadFlask:colorpicker:0.0.13'
 
-    compile(group: 'org.openbase.bco', name: 'dal.remote', version: '1.4-SNAPSHOT') {
+    compile(group: 'org.openbase', name: 'bco.dal.remote', version: '2.0-SNAPSHOT') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.objenesis.objenisis'
         exclude group: 'org.fusesource.jansi'
@@ -69,7 +69,7 @@ dependencies {
         exclude group: 'org.slf4j'
     }
 
-    compile group: 'org.openbase', name: 'jul.extension.rst.transform', version: '1.4-SNAPSHOT'
+    compile group: 'org.openbase', name: 'jul.extension.rst.transform', version: '2.0-SNAPSHOT'
 
     compile group: 'org.slf4j', name: 'slf4j-android', version: '1.7.25'
 
