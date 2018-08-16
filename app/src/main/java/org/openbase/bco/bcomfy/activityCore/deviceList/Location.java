@@ -8,9 +8,12 @@ import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingVa
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import java8.util.Comparators;
 import java8.util.stream.StreamSupport;
@@ -55,7 +58,11 @@ public class Location implements Parent<Device> {
     }
 
     public String getLabel() {
-        return locationConfig.getLabel();
+        try {
+            return LabelProcessor.getBestMatch(Locale.getDefault(), locationConfig.getLabel());
+        } catch (NotAvailableException e) {
+            return "?";
+        }
     }
 
     public String getId() {
