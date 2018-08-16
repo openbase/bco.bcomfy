@@ -17,6 +17,7 @@ import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.unit.Units;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
     }
 
     public void bind(Device device, OnDeviceSelectedListener onDeviceSelectedListener) {
-        deviceTextView.setText(device.getUnitConfig().getLabel());
+        deviceTextView.setText(LabelProcessor.getBestMatch(device.getUnitConfig().getLabel(), "?"));
         deviceView.setOnClickListener(v -> onDeviceSelectedListener.onDeviceSelected(device.getUnitConfig()));
         updateNoPositionIcon(device.getUnitConfig());
 

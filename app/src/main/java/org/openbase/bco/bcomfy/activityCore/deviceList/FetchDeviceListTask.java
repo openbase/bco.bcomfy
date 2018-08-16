@@ -8,6 +8,7 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,7 +43,9 @@ public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
                     .filter(locationConfig -> locationConfig.getLocationConfig().getType().equals(LocationConfigType.LocationConfig.LocationType.TILE) &&
                             ((locationSetting == SettingValue.ALL) ||
                             (locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)))
-                    .sorted((o1, o2) -> o1.getLabel().compareTo(o2.getLabel()))
+                    .sorted((o1, o2) ->
+                            LabelProcessor.getBestMatch(o1.getLabel(), "?")
+                                    .compareTo(LabelProcessor.getBestMatch(o2.getLabel(), "?")))
                     .forEach(locationConfig -> locationList.add(new Location(locationConfig, unitSetting)));
 
             for (Iterator<Location> it = locationList.iterator(); it.hasNext();) {
