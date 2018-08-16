@@ -5,9 +5,9 @@ import android.util.Log;
 
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
-import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
                             ((locationSetting == SettingValue.ALL) ||
                             (locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)))
                     .sorted((o1, o2) -> o1.getLabel().compareTo(o2.getLabel()))
-                    .forEach(locationConfig -> locationList.add(new Location(locationConfig, Registries.getUnitRegistry(), unitSetting)));
+                    .forEach(locationConfig -> locationList.add(new Location(locationConfig, unitSetting)));
 
             for (Iterator<Location> it = locationList.iterator(); it.hasNext();) {
                 Location location = it.next();

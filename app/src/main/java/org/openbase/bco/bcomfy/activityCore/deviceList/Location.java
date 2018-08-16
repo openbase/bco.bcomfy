@@ -6,6 +6,7 @@ import com.bignerdranch.expandablerecyclerview.model.Parent;
 
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
+import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.remote.UnitRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
@@ -28,12 +29,12 @@ public class Location implements Parent<Device> {
     private UnitConfigType.UnitConfig locationConfig;
     private List<Device> deviceList;
 
-    public Location(UnitConfigType.UnitConfig locationConfig, UnitRegistryRemote remote, SettingValue unitSetting) {
+    public Location(UnitConfigType.UnitConfig locationConfig, SettingValue unitSetting) {
         this.locationConfig = locationConfig;
         this.deviceList = new ArrayList<>();
 
         try {
-            StreamSupport.stream(remote.getUnitConfigsByLocation(locationConfig.getId(), true))
+            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigsByLocation(locationConfig.getId(), true))
                     .filter(BcoUtils::filterByMetaTag)
                     .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
