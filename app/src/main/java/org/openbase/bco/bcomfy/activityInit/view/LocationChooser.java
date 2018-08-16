@@ -51,7 +51,7 @@ public class LocationChooser extends DialogFragment {
             locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION)
                     .filter(BcoUtils::filterByMetaTag)
                     .sorted(Comparators.comparing(UnitConfigType.UnitConfig::getLabel))
-                    .toArray(UnitConfigType.UnitConfig[]::new);
+                    .toArray(UnitConfigType.UnitConfig[]::new));
 
             String[] locationStrings = J8Arrays.stream(locations)
                     .map(UnitConfigType.UnitConfig::getLabel)

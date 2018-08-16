@@ -6,7 +6,6 @@ import com.bignerdranch.expandablerecyclerview.model.Parent;
 
 import org.openbase.bco.bcomfy.activityCore.ListSettingsDialogFragment.SettingValue;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
-import org.openbase.bco.registry.location.remote.LocationRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
 import java.util.ArrayList;
