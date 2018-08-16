@@ -1,7 +1,5 @@
 package org.openbase.bco.bcomfy.utils;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -93,7 +91,7 @@ public final class BcoUtils {
                 UnitConfig[] location = new UnitConfig[1];
 
                 if (locations.size() == 0) {
-                    location[0] = Registries.getUnitRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                    location[0] = Registries.getUnitRegistry().getUnitConfigById(unitConfig.getPlacementConfig().getLocationId());
                     Log.w(TAG, "No location found for current unit position! Retaining old location information...");
                 }
                 else {
@@ -111,7 +109,7 @@ public final class BcoUtils {
                     }
                     // Otherwise return... Unknown LocationType...
                     if (location[0] == null) {
-                        location[0] = Registries.getUnitRegistry().getLocationConfigById(unitConfig.getPlacementConfig().getLocationId());
+                        location[0] = Registries.getUnitRegistry().getUnitConfigById(unitConfig.getPlacementConfig().getLocationId());
                         Log.w(TAG, "No valid location found for selected position! Retaining old location information...");
                     }
                 }
@@ -119,7 +117,7 @@ public final class BcoUtils {
                 // Transform BCO-Root position to BCO-Location-of-selected-point position
                 Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
                 Registries.getUnitRegistry().waitForData();
-                Registries.getUnitRegistry().getUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+                Registries.getUnitRegistry().getRootToUnitTransformationFuture(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
                 // Generate new protobuf unitConfig
                 TranslationType.Translation translation =
@@ -197,7 +195,7 @@ public final class BcoUtils {
             // Publish the result to the locationRegistry
             try {
                 // Fetch the UnitConfig of the target location
-                UnitConfig locationConfig = Registries.getUnitRegistry().getLocationConfigById(locationId);
+                UnitConfig locationConfig = Registries.getUnitRegistry().getUnitConfigById(locationId);
 
                 // Build the pose
                 TranslationType.Translation.Builder translationBuilder = TranslationType.Translation.getDefaultInstance().toBuilder();
@@ -220,8 +218,8 @@ public final class BcoUtils {
                 UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
                 // Update the locationConfig
-                Registries.getUnitRegistry().updateLocationConfig(newLocationConfig);
-            } catch (InterruptedException | CouldNotPerformException e) {
+                Registries.getUnitRegistry().updateUnitConfig(newLocationConfig);
+            } catch (CouldNotPerformException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
                 Log.w(TAG, "No PID information available.");
@@ -261,13 +259,13 @@ public final class BcoUtils {
                                     unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
-                            } catch (CouldNotPerformException | InterruptedException e) {
+                            } catch (CouldNotPerformException e) {
                                 Log.e(TAG, "Error while updating unitConfig!", e);
                             }
                         });
 
                 successful = Boolean.TRUE;
-            } catch (CouldNotPerformException | InterruptedException e) {
+            } catch (CouldNotPerformException e) {
                 Log.e(TAG, "Error while fetching unitConfigs!", e);
             }
 
@@ -306,13 +304,13 @@ public final class BcoUtils {
                                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
                                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
-                            } catch (CouldNotPerformException | InterruptedException e) {
+                            } catch (CouldNotPerformException e) {
                                 Log.e(TAG, "Error while updating unitConfig!", e);
                             }
                         });
 
                 successful = Boolean.TRUE;
-            } catch (CouldNotPerformException | InterruptedException e) {
+            } catch (CouldNotPerformException e) {
                 Log.e(TAG, "Error while fetching unitConfigs!", e);
             }
 
