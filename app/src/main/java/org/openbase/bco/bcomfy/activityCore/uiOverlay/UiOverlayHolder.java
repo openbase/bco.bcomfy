@@ -152,7 +152,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
                                 Log.e(TAG, Log.getStackTraceString(e));
                             }
                         });
-            } catch (CouldNotPerformException | InterruptedException e) {
+            } catch (CouldNotPerformException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
 
@@ -178,7 +178,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         try {
             unitsInCurrentLocation = Registries.getUnitRegistry().getUnitConfigsByLocation(location.getId(), true);
             unitIdsInCurrentLocation = StreamSupport.stream(unitsInCurrentLocation).map(UnitConfig::getId).collect(Collectors.toList());
-        } catch (CouldNotPerformException | InterruptedException e) {
+        } catch (CouldNotPerformException e) {
             Log.e(TAG, Log.getStackTraceString(new CouldNotPerformException("Error while fetching units of location " + location.getId() + "!\nDrawing all blobs regardless of the current location...", e)));
             updateBlobVisibilityAllToTrue();
             return;

@@ -199,12 +199,12 @@ public abstract class AbstractUnitSelectorHolder {
         try {
             Point3d unitVector = new Point3d(0, 0, 0);
 
-            Transform3D transform3D = Units.getUnitTransformation(unitConfig).get(10, TimeUnit.SECONDS).getTransform();
+            Transform3D transform3D = Units.getRootToUnitTransformationFuture(unitConfig).get(10, TimeUnit.SECONDS).getTransform();
             transform3D.invert();
             transform3D.transform(unitVector);
 
             positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
-        } catch (CancellationException | NotAvailableException | ExecutionException ex) {
+        } catch (CancellationException | ExecutionException ex) {
             throw new CouldNotPerformException("Could not update position from root!", ex);
         }
 

@@ -68,7 +68,13 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
         lightnessSlider.setOnTouchListener(new DrawerDisablingOnTouchListener());
 
         if (operation) {
-            colorPickerView.addOnColorChangedListener(value -> recurrenceEventFilter.trigger(value));
+            colorPickerView.addOnColorChangedListener(value -> {
+                try {
+                    recurrenceEventFilter.trigger(value);
+                } catch (CouldNotPerformException e) {
+                    Log.w(TAG, "Could not set color state", e);
+                }
+            });
         }
         else {
             colorPickerView.setClickable(false);

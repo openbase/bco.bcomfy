@@ -58,7 +58,11 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (!fromUser) return;
 
-                    recurrenceEventFilter.trigger(progress);
+                    try {
+                        recurrenceEventFilter.trigger(progress);
+                    } catch (CouldNotPerformException e) {
+                        Log.w(TAG, "Could not update brightness state", e);
+                    }
                 }
 
                 @Override
