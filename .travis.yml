@@ -11,10 +11,10 @@ android:
     - tools
 
     # The BuildTools version used by your project
-    - build-tools-26.0.2
+    - build-tools-28.0.2
 
     # The SDK version used to compile your project
-    - android-26
+    - android-28
 
     # Additional components
     - extra-android-m2repository
@@ -39,23 +39,23 @@ notifications:
   on_failure: change
   on_success: change
 
-before_install:
-  - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
-  - cd jps
-  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
-  - cd ..
-  - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jul.git
-  - cd jul
-  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
-  - cd ..
-  - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.registry.git
-  - cd bco.registry
-  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
-  - cd ..
-  - git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.dal.git
-  - cd bco.dal
-  - mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
-  - cd ..
+#before_install:
+    #- git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
+    #- cd jps
+    #- mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+    #- cd ..
+    #- git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jul.git
+    #- cd jul
+    #- mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+    #- cd ..
+    #- git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.registry.git
+    #- cd bco.registry
+    #- mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+    #- cd ..
+    #- git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/bco.dal.git
+    #- cd bco.dal
+    #- mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
+    #- cd ..
 #  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
 #  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
