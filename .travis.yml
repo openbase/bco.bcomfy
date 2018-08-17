@@ -1,7 +1,7 @@
 language: android
 #sudo: required
 #dist: precise
-#jdk: oraclejdk8
+jdk: oraclejdk8
 
 android:
   components:
@@ -28,8 +28,6 @@ android:
     # - sys-img-armeabi-v7a-android-25
     # - sys-img-armeabi-v7a-android-23
 
-
-
 branches:
   except:
   #- /^(?i:feature)-.*$/
@@ -42,7 +40,9 @@ notifications:
   on_failure: change
   on_success: change
 
-#before_install:
+before_install:
+    - yes | sdkmanager "platforms;android-28"
+
     #- git clone -b feature-marshmallow-support --single-branch https://github.com/openbase/jps.git
     #- cd jps
     #- mvn install -DskipTests=true -Dmaven.test.skip=true -Dlicense.skipAddThirdParty=true -Dlicense.skipUpdateProjectLicense=true -Dlicense.skipDownloadLicenses=true -Dlicense.skipCheckLicense=true -Dmaven.license.skip=true
