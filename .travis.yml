@@ -1,7 +1,7 @@
 language: android
-sudo: required
-dist: precise
-jdk: oraclejdk8
+#sudo: required
+#dist: precise
+#jdk: oraclejdk8
 
 android:
   components:
@@ -27,6 +27,8 @@ android:
     # if you need to run emulator(s) during your tests
     # - sys-img-armeabi-v7a-android-25
     # - sys-img-armeabi-v7a-android-23
+
+
 
 branches:
   except:
