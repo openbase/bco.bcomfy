@@ -82,8 +82,8 @@ dependencies {
 
     compile "org.rajawali3d:rajawali:1.1.970"
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.7.0@aar') {
-        transitive = true
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.6@aar') {
+        transitive = true;
     }
 
     compile 'net.sourceforge.streamsupport:streamsupport:1.6.0'

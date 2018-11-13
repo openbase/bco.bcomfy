@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.AbstractServiceViewHolder;
 import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHolderFactory;
-import org.openbase.bco.dal.remote.unit.AbstractUnitRemote;
+import org.openbase.bco.dal.remote.layer.unit.AbstractUnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.pattern.Remote;

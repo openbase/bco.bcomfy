@@ -379,11 +379,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     uiOverlayHolder.updateBlobVisibility(currentDistantBlobsSetting, unitConfigs.get(0));
                     currentLocation = unitConfigs.get(0);
                     runOnUiThread(() -> {
-                        try {
-                            locationLabelButton.setText(LabelProcessor.getBestMatch(Locale.getDefault(), unitConfigs.get(0).getLabel()));
-                        } catch (NotAvailableException e) {
-                            locationLabelButton.setText("?");
-                        }
+                            locationLabelButton.setText(LabelProcessor.getBestMatch(unitConfigs.get(0).getLabel(), "?"));
                     });
                     runOnUiThread(() -> locationLabelButton.setVisibility(View.VISIBLE));
                 }
@@ -391,7 +387,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     runOnUiThread(() -> locationLabelButton.setVisibility(View.GONE));
                 }
 
-            } catch (CouldNotPerformException | InterruptedException | ExecutionException | ConcurrentModificationException e) {
+            } catch (CouldNotPerformException | InterruptedException | ConcurrentModificationException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         };

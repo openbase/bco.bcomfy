@@ -16,6 +16,7 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.extension.rst.processing.MultiLanguageTextProcessor;
 import org.openbase.jul.extension.rst.processing.LabelProcessor;
 
 import java.util.ArrayList;
@@ -113,12 +114,8 @@ public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
                     unitListViewHolder.unitViewHolderList.add(unitViewHolder);
 
                     unitListViewHolder.activity.runOnUiThread(() -> {
-                        try {
-                            unitListViewHolder.labelText.setText(LabelProcessor.getBestMatch(Locale.getDefault(), unitListViewHolder.unitConfig.getLabel()));
-                        } catch (NotAvailableException e) {
-                            unitListViewHolder.labelText.setText("?");
-                        }
-                        unitListViewHolder.typeText.setText(unitListViewHolder.unitConfig.getDescription());
+                            unitListViewHolder.labelText.setText(LabelProcessor.getBestMatch(unitListViewHolder.unitConfig.getLabel(),"?"));
+                        unitListViewHolder.typeText.setText(MultiLanguageTextProcessor.getBestMatch(unitListViewHolder.unitConfig.getDescription(), "?"));
                         unitListViewHolder.unitList.addView(unitViewHolder.getCardView());
                     });
                 }
