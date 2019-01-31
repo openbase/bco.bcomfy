@@ -17,9 +17,9 @@ import org.openbase.jul.schedule.RecurrenceEventFilter;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import rst.domotic.state.BrightnessStateType.BrightnessState;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.BrightnessStateType.BrightnessState;
 
 public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder {
 

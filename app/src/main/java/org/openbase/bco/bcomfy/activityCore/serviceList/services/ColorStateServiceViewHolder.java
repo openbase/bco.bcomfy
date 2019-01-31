@@ -15,18 +15,18 @@ import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.extension.rst.transform.HSBColorToRGBColorTransformer;
+import org.openbase.jul.extension.type.transform.HSBColorToRGBColorTransformer;
 import org.openbase.jul.schedule.RecurrenceEventFilter;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import rst.domotic.state.ColorStateType.ColorState;
-import rst.vision.ColorType;
-import rst.vision.HSBColorType;
-import rst.vision.RGBColorType.RGBColor;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.ColorStateType.ColorState;
+import org.openbase.type.vision.ColorType;
+import org.openbase.type.vision.HSBColorType;
+import org.openbase.type.vision.RGBColorType.RGBColor;
 
 public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
 

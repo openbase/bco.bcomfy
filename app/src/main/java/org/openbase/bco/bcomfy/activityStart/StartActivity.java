@@ -31,7 +31,7 @@ import org.openbase.bco.bcomfy.activityCore.CoreActivity;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
-import org.openbase.bco.registry.lib.BCO;
+import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 

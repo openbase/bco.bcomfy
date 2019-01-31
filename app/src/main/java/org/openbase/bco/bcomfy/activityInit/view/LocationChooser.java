@@ -12,15 +12,15 @@ import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 
 import java.util.Locale;
 
 import java8.util.Comparators;
 import java8.util.J8Arrays;
 import java8.util.stream.StreamSupport;
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 public class LocationChooser extends DialogFragment {
 

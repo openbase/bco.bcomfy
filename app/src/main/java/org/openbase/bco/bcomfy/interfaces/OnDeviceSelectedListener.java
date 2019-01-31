@@ -1,6 +1,6 @@
 package org.openbase.bco.bcomfy.interfaces;
 
-import rst.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType;
 
 public interface OnDeviceSelectedListener {
 

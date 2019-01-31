@@ -12,7 +12,8 @@ import org.openbase.bco.bcomfy.activityCore.serviceList.services.ServiceViewHold
 import org.openbase.bco.dal.remote.layer.unit.AbstractUnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
-import org.openbase.jul.pattern.Remote;
+
+import static org.openbase.type.domotic.state.ConnectionStateType.ConnectionState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,8 @@ import java.util.concurrent.TimeoutException;
 
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 
 public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRemote> {
 
@@ -91,7 +92,7 @@ public class GenericUnitViewHolder extends AbstractUnitViewHolder<AbstractUnitRe
     }
 
     @Override
-    protected void onConnectionStateChanged(Remote.ConnectionState connectionState) {
+    protected void onConnectionStateChanged(ConnectionState.State connectionState) {
         Log.i(TAG, this.unitConfig.getLabel() + " -> onConnectionStateChanged");
     }
 

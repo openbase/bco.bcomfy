@@ -8,7 +8,7 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import java8.util.stream.StreamSupport;
-import rst.domotic.unit.UnitTemplateType;
-import rst.domotic.unit.location.LocationConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.location.LocationConfigType;
 
 public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = FetchDeviceListTask.class.getSimpleName();

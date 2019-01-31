@@ -1,7 +1,14 @@
 language: android
-#sudo: required
-#dist: precise
-jdk: oraclejdk8
+
+branches:
+  except:
+      #- /^(?i:feature)-.*$/
+      #- /^(?i:release)-.*$/
+
+jdk:
+  - openjdk8
+  - openjdk11
+  - openjdk-ea
 
 android:
   components:
@@ -27,18 +34,16 @@ android:
     # if you need to run emulator(s) during your tests
     # - sys-img-armeabi-v7a-android-25
     # - sys-img-armeabi-v7a-android-23
-
-branches:
-  except:
-  #- /^(?i:feature)-.*$/
-  #- /^(?i:release)-.*$/
-
 notifications:
-  slack:
-    rooms:
-      - openbase-org:vGz7LO4CvGoGMneYkEm3ON7E#bco-bcomfy
-  on_failure: change
-  on_success: change
+    email:
+        on_success: never
+        on_failure: never
+    slack:
+        on_failure: change
+        on_success: change
+        rooms:
+            - openbase-org:vGz7LO4CvGoGMneYkEm3ON7E#build
+            #- openbase-org:vGz7LO4CvGoGMneYkEm3ON7E#bco-bcomfy
 
 before_install:
     - yes | sdkmanager "platforms;android-27"

@@ -19,7 +19,7 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.pattern.Remote;
+import static org.openbase.type.domotic.state.ConnectionStateType.ConnectionState;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -31,8 +31,8 @@ import java.util.concurrent.TimeoutException;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 public abstract class AbstractUnitSelectorHolder {
     private static final String TAG = AbstractUnitSelectorHolder.class.getSimpleName();
@@ -70,7 +70,7 @@ public abstract class AbstractUnitSelectorHolder {
                 this.updatePositionFromRoot();
             });
             unitRemote.addConnectionStateObserver((observable, connectionState) ->
-                    updateConnectionState((Remote.ConnectionState) connectionState));
+                    updateConnectionState((ConnectionState.State) connectionState));
         } catch (CancellationException | ExecutionException | TimeoutException | CouldNotPerformException ex) {
             throw new InstantiationException(this, ex);
         }
@@ -184,7 +184,7 @@ public abstract class AbstractUnitSelectorHolder {
         return selected;
     }
 
-    private void updateConnectionState(Remote.ConnectionState connectionState) {
+    private void updateConnectionState(ConnectionState.State connectionState) {
         switch (connectionState) {
             case CONNECTED:
                 Log.i(TAG, "Connection to unit " + unitConfig.getId() + " established.");

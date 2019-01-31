@@ -8,8 +8,8 @@ import android.widget.RelativeLayout;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 
-import rst.domotic.service.ServiceConfigType;
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.service.ServiceConfigType;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
 
 public abstract class AbstractServiceViewHolder {
 

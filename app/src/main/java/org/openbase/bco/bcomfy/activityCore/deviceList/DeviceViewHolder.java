@@ -17,13 +17,13 @@ import org.openbase.bco.bcomfy.interfaces.OnDeviceSelectedListener;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.layer.unit.Units;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import rst.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType;
 
 
 public class DeviceViewHolder extends ChildViewHolder<Device> {
@@ -51,7 +51,7 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
     }
 
     private void updateNoPositionIcon(UnitConfigType.UnitConfig unitConfig) {
-        if (unitConfig.getPlacementConfig().hasPosition()) {
+        if (unitConfig.getPlacementConfig().hasPose()) {
             ((Activity) itemView.getContext()).runOnUiThread(() -> noPositionIcon.setVisibility(View.INVISIBLE));
         }
         else {
@@ -75,7 +75,7 @@ public class DeviceViewHolder extends ChildViewHolder<Device> {
             try {
                 UnitRemote remote = Units.getFutureUnit(device.getUnitConfig().getId(), true).get(1, TimeUnit.SECONDS);
                 remote.addConfigObserver((observable, unitConfig) -> deviceViewHolder.updateNoPositionIcon((UnitConfigType.UnitConfig) unitConfig));
-            } catch (InterruptedException | ExecutionException | TimeoutException | NotAvailableException e) {
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Log.e(TAG, "Unable to get unitRemote of unit " + device.getUnitConfig().getId() + "\n" + Log.getStackTraceString(e));
             }
 

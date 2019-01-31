@@ -8,7 +8,7 @@ import org.openbase.jul.exception.NotAvailableException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import rst.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType;
 
 public class GenericSelectorHolder extends AbstractUnitSelectorHolder {
 

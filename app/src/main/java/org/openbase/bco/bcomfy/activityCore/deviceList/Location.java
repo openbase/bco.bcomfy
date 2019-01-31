@@ -10,7 +10,7 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.remote.UnitRegistryRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.Locale;
 
 import java8.util.Comparators;
 import java8.util.stream.StreamSupport;
-import rst.domotic.state.EnablingStateType;
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.state.EnablingStateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 public class Location implements Parent<Device> {
 
@@ -38,8 +38,8 @@ public class Location implements Parent<Device> {
                     .filter(BcoUtils::filterByMetaTag)
                     .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
-                                          (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPosition()) ||
-                                          (unitSetting == SettingValue.UNLOCATED && !unitConfig.getPlacementConfig().hasPosition())))
+                                          (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPose()) ||
+                                          (unitSetting == SettingValue.UNLOCATED && !unitConfig.getPlacementConfig().hasPose())))
                     .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
                     .sorted(Comparators.thenComparing(Comparators.comparing(UnitConfigType.UnitConfig::getUnitType), (unitConfig1) -> {
                         try {

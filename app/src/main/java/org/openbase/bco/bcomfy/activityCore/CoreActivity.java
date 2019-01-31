@@ -47,7 +47,7 @@ import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
@@ -59,10 +59,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.domotic.unit.location.LocationConfigType;
-import rst.math.Vec3DDoubleType;
-import rst.spatial.PlacementConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.location.LocationConfigType;
+import org.openbase.type.math.Vec3DDoubleType;
+import org.openbase.type.spatial.PlacementConfigType;
 
 public class CoreActivity extends TangoActivity implements View.OnTouchListener, OnDeviceSelectedListener, OnSettingsChosenListener, OnTaskFinishedListener<Boolean>, OnUiOverlayInitiatedListener {
     private static final String TAG = CoreActivity.class.getSimpleName();
@@ -405,7 +405,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
 
         if (isUnitLocationEditable(unitConfig)) {
             fabEditLocation.setVisibility(View.VISIBLE);
-            if (!unitConfig.getPlacementConfig().hasPosition()) {
+            if (!unitConfig.getPlacementConfig().hasPose()) {
                 fabEditLocation.startAnimation(shakeAnimation);
                 locationEditHelpText.setVisibility(View.VISIBLE);
             }
@@ -522,7 +522,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
         try {
             // Generate new protobuf unitConfig
             PlacementConfigType.PlacementConfig placementConfig =
-                    currentDevice.getPlacementConfig().toBuilder().clearPosition().build();
+                    currentDevice.getPlacementConfig().toBuilder().clearPose().build();
             UnitConfig unitConfig =
                     currentDevice.toBuilder().setPlacementConfig(placementConfig).build();
 

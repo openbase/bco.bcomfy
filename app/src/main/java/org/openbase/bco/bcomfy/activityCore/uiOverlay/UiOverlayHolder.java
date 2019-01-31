@@ -25,10 +25,10 @@ import java.util.List;
 
 import java8.util.stream.Collectors;
 import java8.util.stream.StreamSupport;
-import rst.domotic.state.EnablingStateType;
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.state.EnablingStateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 public class UiOverlayHolder implements OnDeviceSelectedListener {
     private static final String TAG = UiOverlayHolder.class.getSimpleName();
@@ -138,7 +138,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
                         .filter(BcoUtils::filterByMetaTag)
-                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
+                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPose())
                         .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
                                 (!unitConfig.getBoundToUnitHost() &&
                                         unitConfig.getUnitType() != UnitTemplateType.UnitTemplate.UnitType.LOCATION &&

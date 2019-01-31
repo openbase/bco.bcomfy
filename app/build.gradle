@@ -70,7 +70,7 @@ dependencies {
         exclude group: 'org.slf4j'
     }
 
-    implementation(group: 'org.openbase', name: 'jul.extension.rst.transform', version: '2.0-SNAPSHOT') {
+    implementation(group: 'org.openbase', name: 'jul.extension.type.transform', version: '2.0-SNAPSHOT') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.objenesis.objenisis'
         exclude group: 'org.fusesource.jansi'

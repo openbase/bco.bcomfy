@@ -13,11 +13,11 @@ import org.openbase.bco.registry.remote.Registries;
 import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
-import org.openbase.jul.pattern.Remote.ConnectionState;
 
 import java.util.concurrent.TimeUnit;
 
-import rst.domotic.unit.UnitConfigType.UnitConfig;
+import static org.openbase.type.domotic.state.ConnectionStateType.ConnectionState;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 
 public abstract class AbstractUnitViewHolder<URC extends AbstractUnitRemote> {
 
@@ -42,7 +42,7 @@ public abstract class AbstractUnitViewHolder<URC extends AbstractUnitRemote> {
             abstractUnitRemote.waitForData(1, TimeUnit.SECONDS);
 
             abstractUnitRemote.addConfigObserver((observable, config) -> onConfigChanged((UnitConfig) config));
-            abstractUnitRemote.addConnectionStateObserver((observable, connectionState) -> onConnectionStateChanged((ConnectionState) connectionState));
+            abstractUnitRemote.addConnectionStateObserver((observable, connectionState) -> onConnectionStateChanged((ConnectionState.State) connectionState));
             abstractUnitRemote.addDataObserver((observable, data) -> onDataChanged(data));
         } catch (CouldNotPerformException | InterruptedException e) {
             throw new InstantiationException(AbstractUnitViewHolder.class, e);
@@ -55,7 +55,7 @@ public abstract class AbstractUnitViewHolder<URC extends AbstractUnitRemote> {
 
     abstract protected void onConfigChanged(UnitConfig unitConfig);
 
-    abstract protected void onConnectionStateChanged(ConnectionState connectionState);
+    abstract protected void onConnectionStateChanged(ConnectionState.State connectionState);
 
     abstract protected void onDataChanged(Object data);
 }

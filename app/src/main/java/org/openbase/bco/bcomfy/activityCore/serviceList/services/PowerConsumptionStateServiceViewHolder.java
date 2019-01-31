@@ -18,9 +18,9 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import rst.domotic.state.PowerConsumptionStateType;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.PowerConsumptionStateType;
 
 public class PowerConsumptionStateServiceViewHolder extends AbstractServiceViewHolder {
 

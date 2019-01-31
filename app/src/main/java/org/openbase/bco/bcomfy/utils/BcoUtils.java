@@ -12,7 +12,7 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.MetaConfigVariableProvider;
+import org.openbase.jul.extension.type.processing.MetaConfigVariableProvider;
 import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
@@ -26,15 +26,15 @@ import javax.vecmath.Point3d;
 import java8.util.stream.StreamSupport;
 import rsb.introspection.LacksOsInformationException;
 import rsb.util.os.RuntimeOsUtilities;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.domotic.unit.UnitTemplateType;
-import rst.domotic.unit.location.LocationConfigType;
-import rst.geometry.PoseType;
-import rst.geometry.RotationType;
-import rst.geometry.TranslationType;
-import rst.math.Vec3DDoubleType;
-import rst.spatial.PlacementConfigType;
-import rst.spatial.ShapeType;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.location.LocationConfigType;
+import org.openbase.type.geometry.PoseType;
+import org.openbase.type.geometry.RotationType;
+import org.openbase.type.geometry.TranslationType;
+import org.openbase.type.math.Vec3DDoubleType;
+import org.openbase.type.spatial.PlacementConfigType;
+import org.openbase.type.spatial.ShapeType;
 
 public final class BcoUtils {
 
@@ -121,18 +121,18 @@ public final class BcoUtils {
 
                 // Generate new protobuf unitConfig
                 TranslationType.Translation translation =
-                        unitConfig.getPlacementConfig().getPosition().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
+                        unitConfig.getPlacementConfig().getPose().getTranslation().toBuilder().setX(transformedBcoPosition.x).setY(transformedBcoPosition.y).setZ(transformedBcoPosition.z).build();
                 RotationType.Rotation rotation;
-                if (unitConfig.getPlacementConfig().hasPosition()) {
-                    rotation = unitConfig.getPlacementConfig().getPosition().getRotation();
+                if (unitConfig.getPlacementConfig().hasPose()) {
+                    rotation = unitConfig.getPlacementConfig().getPose().getRotation();
                 }
                 else {
                     rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
                 }
                 PoseType.Pose pose  =
-                        unitConfig.getPlacementConfig().getPosition().toBuilder().setTranslation(translation).setRotation(rotation).build();
+                        unitConfig.getPlacementConfig().getPose().toBuilder().setTranslation(translation).setRotation(rotation).build();
                 PlacementConfigType.PlacementConfig placementConfig =
-                        unitConfig.getPlacementConfig().toBuilder().setPosition(pose).setLocationId(location[0].getId()).build();
+                        unitConfig.getPlacementConfig().toBuilder().setPose(pose).setLocationId(location[0].getId()).build();
                 UnitConfig newUnitConfig =
                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
@@ -203,7 +203,7 @@ public final class BcoUtils {
                 RotationType.Rotation.Builder rotationBuilder = RotationType.Rotation.getDefaultInstance().toBuilder();
                 rotationBuilder.setQw(1.0).setQx(0.0).setQy(0.0).setQz(0.0);
 
-                PoseType.Pose pose = locationConfig.getPlacementConfig().getPosition().toBuilder()
+                PoseType.Pose pose = locationConfig.getPlacementConfig().getPose().toBuilder()
                         .setRotation(rotationBuilder.build()).setTranslation(translationBuilder.build()).build();
 
                 // Build the shape
@@ -214,7 +214,7 @@ public final class BcoUtils {
                 }
 
                 // Build the locationConfig
-                PlacementConfigType.PlacementConfig placementConfig = locationConfig.getPlacementConfig().toBuilder().clearShape().setShape(shapeBuilder.build()).setPosition(pose).build();
+                PlacementConfigType.PlacementConfig placementConfig = locationConfig.getPlacementConfig().toBuilder().clearShape().setShape(shapeBuilder.build()).setPose(pose).build();
                 UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
                 // Update the locationConfig
@@ -249,11 +249,11 @@ public final class BcoUtils {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
                         .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE)
-                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPosition())
+                        .filter(unitConfig -> unitConfig.getPlacementConfig().hasPose())
                         .forEach(unitConfig -> {
                             try {
                                 PlacementConfigType.PlacementConfig placementConfig =
-                                    unitConfig.getPlacementConfig().toBuilder().clearPosition().build();
+                                    unitConfig.getPlacementConfig().toBuilder().clearPose().build();
 
                                 UnitConfig newUnitConfig =
                                     unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
@@ -298,7 +298,7 @@ public final class BcoUtils {
                         .forEach(unitConfig -> {
                             try {
                                 PlacementConfigType.PlacementConfig placementConfig =
-                                        unitConfig.getPlacementConfig().toBuilder().clearShape().clearPosition().build();
+                                        unitConfig.getPlacementConfig().toBuilder().clearShape().clearPose().build();
 
                                 UnitConfig newUnitConfig =
                                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();

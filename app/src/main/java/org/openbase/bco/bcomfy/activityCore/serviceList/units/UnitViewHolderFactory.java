@@ -10,7 +10,7 @@ import org.openbase.jul.exception.NotAvailableException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import rst.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 
 public class UnitViewHolderFactory {
 

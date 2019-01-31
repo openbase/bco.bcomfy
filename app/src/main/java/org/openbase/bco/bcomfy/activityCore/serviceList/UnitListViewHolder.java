@@ -16,8 +16,8 @@ import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
-import org.openbase.jul.extension.rst.processing.MultiLanguageTextProcessor;
-import org.openbase.jul.extension.rst.processing.LabelProcessor;
+import org.openbase.jul.extension.type.processing.MultiLanguageTextProcessor;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +25,8 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import rst.domotic.unit.UnitConfigType;
-import rst.domotic.unit.UnitTemplateType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 public class UnitListViewHolder implements OnTaskFinishedListener<Void> {
 

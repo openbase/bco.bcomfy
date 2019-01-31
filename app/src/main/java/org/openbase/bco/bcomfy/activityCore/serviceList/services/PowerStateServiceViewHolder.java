@@ -12,15 +12,15 @@ import org.openbase.bco.bcomfy.activityCore.DrawerDisablingOnTouchListener;
 import org.openbase.bco.dal.lib.layer.service.Services;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.jul.exception.CouldNotPerformException;
-import org.openbase.jul.extension.rst.processing.TimestampProcessor;
+import org.openbase.jul.extension.type.processing.TimestampProcessor;
 
-import rst.domotic.service.ServiceConfigType.ServiceConfig;
-import rst.domotic.service.ServiceTemplateType;
-import rst.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
-import rst.domotic.state.PowerStateType;
-import rst.domotic.state.PowerStateType.PowerState;
-import rst.domotic.unit.UnitConfigType.UnitConfig;
-import rst.timing.TimestampType;
+import org.openbase.type.domotic.service.ServiceConfigType.ServiceConfig;
+import org.openbase.type.domotic.service.ServiceTemplateType;
+import org.openbase.type.domotic.service.ServiceTemplateType.ServiceTemplate.ServiceType;
+import org.openbase.type.domotic.state.PowerStateType;
+import org.openbase.type.domotic.state.PowerStateType.PowerState;
+import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
+import org.openbase.type.timing.TimestampType;
 
 public class PowerStateServiceViewHolder extends AbstractServiceViewHolder {
 
