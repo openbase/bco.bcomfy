@@ -97,13 +97,13 @@ public final class BcoUtils {
                 else {
                     // Get Region if there is any
                     StreamSupport.stream(locations)
-                            .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.REGION)
+                            .filter(unitConfig -> unitConfig.getLocationConfig().getLocationType() == LocationConfigType.LocationConfig.LocationType.REGION)
                             .findAny()
                             .ifPresent(unitConfig -> location[0] = unitConfig);
                     // Otherwise use tile if there is any
                     if (location[0] == null) {
                         StreamSupport.stream(locations)
-                                .filter(unitConfig -> unitConfig.getLocationConfig().getType() == LocationConfigType.LocationConfig.LocationType.TILE)
+                                .filter(unitConfig -> unitConfig.getLocationConfig().getLocationType() == LocationConfigType.LocationConfig.LocationType.TILE)
                                 .findAny()
                                 .ifPresent(unitConfig -> location[0] = unitConfig);
                     }

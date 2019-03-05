@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.openbase.bco.authentication.lib.jp.JPBCOVarDirectory;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
@@ -24,6 +25,8 @@ import org.openbase.jps.exception.JPNotAvailableException;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
+
+import java.io.File;
 
 public class SettingsActivity extends Activity {
 
@@ -209,15 +212,25 @@ public class SettingsActivity extends Activity {
             });
         }
     }
+    public static void setupJPDefaultValues(Context context) {
+        try {
+            JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
+            JPService.registerProperty(JPRSBHost.class, "bco");
+            JPService.registerProperty(JPBCOVarDirectory.class, new File(context.getApplicationInfo().dataDir));
+            Log.i(TAG, "detect store at:" + context.getApplicationInfo().dataDir);
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+    }
 
     public static void updateJPServiceProperties(Context context) {
         try {
             JPService.getProperty(JPRSBHost.class).update(
-                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, "0.0.0.0"));
+                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, JPService.getValue(JPRSBHost.class)));
             JPService.getProperty(JPRSBPort.class).update(
-                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, "80")));
-            JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
-        } catch (JPNotAvailableException e) {
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, JPService.getValue(JPRSBPort.class).toString())));
+
+        } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
     }
