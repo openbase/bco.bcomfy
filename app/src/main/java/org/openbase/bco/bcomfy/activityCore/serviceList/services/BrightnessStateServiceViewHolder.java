@@ -46,7 +46,6 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
         super(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
     }
 
-    @Overrides
     protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_brightness_state, viewParent, false);
         seekBar = serviceView.findViewById(R.id.seek_bar);
