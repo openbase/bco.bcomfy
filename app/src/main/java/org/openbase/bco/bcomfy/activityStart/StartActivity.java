@@ -26,6 +26,7 @@ import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.openbase.bco.authentication.lib.SessionManager;
 import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.bcomfy.activityCore.CoreActivity;
 import org.openbase.bco.bcomfy.activityInit.InitActivity;
@@ -33,12 +34,22 @@ import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.authentication.lib.BCO;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.remote.login.BCOLogin;
 import org.openbase.jul.exception.CouldNotPerformException;
+import org.openbase.jul.exception.NotAvailableException;
+import org.openbase.jul.exception.TimeoutException;
+import org.openbase.type.domotic.registry.TemplateRegistryDataType;
+import org.openbase.type.domotic.unit.UnitConfigType;
+import org.openbase.type.domotic.unit.UnitTemplateType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import io.fabric.sdk.android.Fabric;
+import rsb.converter.DefaultConverterRepository;
+import rsb.converter.ProtocolBufferConverter;
 
 public class StartActivity extends Activity {
 
@@ -382,12 +393,43 @@ public class StartActivity extends Activity {
                 // Set JPS values used by BCO API.
                 SettingsActivity.updateJPServiceProperties(applicationContext);
 
+
+                Registries.getUnitRegistry().addDataObserver((templateRegistryDataDataProvider, templateRegistryData) -> {
+                    Log.i(TAG, "DataObserver triggered!");
+
+                    int size = Registries.getUnitRegistry().getUserUnitConfigRemoteRegistry().getEntries().size();
+                    Log.i(TAG, "Sizes "+size+" = "+templateRegistryData.getUserUnitConfigCount()+" ?");
+                });
+
                 // Initiate registries
-                Registries.waitForData();
+                while (!Registries.isDataAvailable()) {
+                    Log.i(TAG, "Calling data...");
+                    try {
+                        Registries.waitForData(1, TimeUnit.SECONDS);
+                    } catch (NotAvailableException ex) {
+                        Log.i(TAG, "TIMEOUT!");
+                    }
+                }
+
+                SessionManager.getInstance().loginUser(this.getAdminUserId(), "admin", true);
             } catch (CouldNotPerformException | InterruptedException e) {
                 Log.e(TAG, "Error while initializing BCO!" + "\n" + Log.getStackTraceString(e));
             }
             return null;
+        }
+
+        private String getAdminUserId() {
+            try {
+                return Registries.getUnitRegistry().getUserUnitIdByUserName("admin");
+            } catch (Exception ex) {
+                Log.i(TAG, "Try again...");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex2) {
+                    return "";
+                }
+                return this.getAdminUserId();
+            }
         }
 
         @Override

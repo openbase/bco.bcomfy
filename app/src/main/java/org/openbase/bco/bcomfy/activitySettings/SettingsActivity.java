@@ -2,6 +2,7 @@ package org.openbase.bco.bcomfy.activitySettings;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -22,6 +23,7 @@ import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.registry.remote.Registries;
 import org.openbase.jps.core.JPService;
 import org.openbase.jps.exception.JPNotAvailableException;
+import org.openbase.jps.preset.JPVerbose;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBHost;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBPort;
 import org.openbase.jul.extension.rsb.com.jp.JPRSBTransport;
@@ -214,8 +216,9 @@ public class SettingsActivity extends Activity {
     }
     public static void setupJPDefaultValues(Context context) {
         try {
+            JPService.registerProperty(JPVerbose.class, true);
             JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
-            JPService.registerProperty(JPRSBHost.class, "bco");
+            JPService.registerProperty(JPRSBHost.class, "192.168.80.5");
             JPService.registerProperty(JPBCOVarDirectory.class, new File(context.getApplicationInfo().dataDir));
             Log.i(TAG, "detect store at:" + context.getApplicationInfo().dataDir);
         } catch (Exception e) {
@@ -224,15 +227,15 @@ public class SettingsActivity extends Activity {
     }
 
     public static void updateJPServiceProperties(Context context) {
-        try {
-            JPService.getProperty(JPRSBHost.class).update(
-                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, JPService.getValue(JPRSBHost.class)));
-            JPService.getProperty(JPRSBPort.class).update(
-                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, JPService.getValue(JPRSBPort.class).toString())));
-
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
+//        try {
+//            JPService.getProperty(JPRSBHost.class).update(
+//                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, JPService.getValue(JPRSBHost.class)));
+//            JPService.getProperty(JPRSBPort.class).update(
+//                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, JPService.getValue(JPRSBPort.class).toString())));
+//
+//        } catch (Exception e) {
+//            Log.e(TAG, Log.getStackTraceString(e));
+//        }
     }
 
     @Override
