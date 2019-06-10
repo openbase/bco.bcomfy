@@ -38,7 +38,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
             try {
                 HSBColorType.HSBColor hsbColor =
                         HSBColorToRGBColorTransformer.transform(
-                                RGBColor.newBuilder().setRed(Color.red(getLastValue())).setGreen(Color.green(getLastValue())).setBlue(Color.blue(getLastValue())).build());
+                                RGBColor.newBuilder().setRed(Color.red(getLatestValue())).setGreen(Color.green(getLatestValue())).setBlue(Color.blue(getLatestValue())).build());
 
                 ((Future)Services.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
                         ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build())).get();

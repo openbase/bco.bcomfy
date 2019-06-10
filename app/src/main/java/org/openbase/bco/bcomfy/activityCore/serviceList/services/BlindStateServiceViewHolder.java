@@ -91,8 +91,8 @@ public class BlindStateServiceViewHolder extends AbstractServiceViewHolder {
 
             activity.runOnUiThread(() -> {
                 if (blindState.hasOpeningRatio()) {
-                    blindStateSeekBar.setProgress((int) blindState.getOpeningRatio());
-                    blindStateTextView.setText(((int) blindState.getOpeningRatio()) + "%");
+                    blindStateSeekBar.setProgress((int) blindState.getOpeningRatio() * 100);
+                    blindStateTextView.setText(((int) blindState.getOpeningRatio() * 100) + "%");
                 }
 
                 switch (blindState.getValue()) {

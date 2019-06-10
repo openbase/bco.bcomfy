@@ -25,12 +25,12 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
 
     private static final String TAG = BrightnessStateServiceViewHolder.class.getSimpleName();
 
-    private RecurrenceEventFilter<Integer> recurrenceEventFilter = new RecurrenceEventFilter<Integer>(500) {
+    private RecurrenceEventFilter<Double> recurrenceEventFilter = new RecurrenceEventFilter<Double>(500) {
         @Override
         public void relay() throws Exception {
             try {
                 ((Future)Services.invokeOperationServiceMethod(ServiceType.BRIGHTNESS_STATE_SERVICE, unitRemote,
-                        BrightnessState.newBuilder().setBrightness(getLastValue()).build())).get();
+                        BrightnessState.newBuilder().setBrightness(getLatestValue()).build())).get();
             } catch (CouldNotPerformException | ExecutionException e) {
                 Log.e(TAG, "Error while changing the brightness state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
             } catch (InterruptedException e) {
@@ -46,7 +46,6 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
         super(activity, parent, unitRemote, serviceConfig, operation, provider, consumer);
     }
 
-    @Override
     protected void initServiceView() {
         serviceView = (RelativeLayout) LayoutInflater.from(activity).inflate(R.layout.service_brightness_state, viewParent, false);
         seekBar = serviceView.findViewById(R.id.seek_bar);
@@ -59,7 +58,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
                     if (!fromUser) return;
 
                     try {
-                        recurrenceEventFilter.trigger(progress);
+                        recurrenceEventFilter.trigger(progress / 100d);
                     } catch (CouldNotPerformException e) {
                         Log.w(TAG, "Could not update brightness state", e);
                     }
@@ -86,7 +85,7 @@ public class BrightnessStateServiceViewHolder extends AbstractServiceViewHolder 
         try {
             BrightnessState brightnessState = (BrightnessState) Services.invokeProviderServiceMethod(ServiceType.BRIGHTNESS_STATE_SERVICE, unitRemote);
 
-            activity.runOnUiThread(() -> seekBar.setProgress((int) brightnessState.getBrightness()));
+            activity.runOnUiThread(() -> seekBar.setProgress((int) brightnessState.getBrightness() * 100));
 
         } catch (CouldNotPerformException | NullPointerException e) {
             Log.e(TAG, Log.getStackTraceString(e));

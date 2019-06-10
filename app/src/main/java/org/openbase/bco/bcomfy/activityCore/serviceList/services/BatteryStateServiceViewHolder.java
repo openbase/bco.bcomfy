@@ -52,8 +52,8 @@ public class BatteryStateServiceViewHolder extends AbstractServiceViewHolder {
             BatteryState batteryState = (BatteryState) Services.invokeProviderServiceMethod(ServiceType.BATTERY_STATE_SERVICE, unitRemote);
 
             activity.runOnUiThread(() -> {
-                seekBar.setProgress((int) batteryState.getLevel());
-                batteryStateTextView.setText((int) batteryState.getLevel() + "%");
+                seekBar.setProgress((int) batteryState.getLevel() * 100);
+                batteryStateTextView.setText((int) batteryState.getLevel() * 100 + "%");
             });
 
         } catch (CouldNotPerformException | NullPointerException e) {
