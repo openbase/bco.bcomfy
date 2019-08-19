@@ -218,7 +218,8 @@ public class SettingsActivity extends Activity {
         try {
             JPService.registerProperty(JPVerbose.class, true);
             JPService.registerProperty(JPRSBTransport.class, JPRSBTransport.TransportType.SPREAD);
-            JPService.registerProperty(JPRSBHost.class, "192.168.80.5");
+            JPService.registerProperty(JPRSBHost.class, "192.168.76.100");
+            JPService.registerProperty(JPRSBPort.class, 4814);
             JPService.registerProperty(JPBCOVarDirectory.class, new File(context.getApplicationInfo().dataDir));
             Log.i(TAG, "detect store at:" + context.getApplicationInfo().dataDir);
         } catch (Exception e) {
@@ -227,15 +228,15 @@ public class SettingsActivity extends Activity {
     }
 
     public static void updateJPServiceProperties(Context context) {
-//        try {
-//            JPService.getProperty(JPRSBHost.class).update(
-//                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, JPService.getValue(JPRSBHost.class)));
-//            JPService.getProperty(JPRSBPort.class).update(
-//                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, JPService.getValue(JPRSBPort.class).toString())));
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, Log.getStackTraceString(e));
-//        }
+        try {
+            JPService.getProperty(JPRSBHost.class).update(
+                    PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_IP, JPService.getValue(JPRSBHost.class)));
+            JPService.getProperty(JPRSBPort.class).update(
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(SettingsActivity.KEY_PREF_PORT, JPService.getValue(JPRSBPort.class).toString())));
+
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
     }
 
     @Override

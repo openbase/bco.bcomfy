@@ -166,6 +166,12 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
     }
 
     public void updateBlobVisibility(boolean distantBlobsSetting, UnitConfig location) {
+
+        if(location == null) {
+            Log.i(TAG, "Could not update blob visibility because the target location is unknown!");
+            return;
+        }
+
         // Set all blob visibilites to true if the distantBlobsSetting is enabled
         if (distantBlobsSetting) {
             updateBlobVisibilityAllToTrue();
@@ -176,7 +182,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         List<UnitConfig> unitsInCurrentLocation;
         List<String> unitIdsInCurrentLocation;
         try {
-            unitsInCurrentLocation = Registries.getUnitRegistry().getUnitConfigsByLocation(location.getId(), true);
+            unitsInCurrentLocation = Registries.getUnitRegistry().getUnitConfigsByLocationIdRecursive(location.getId(), true);
             unitIdsInCurrentLocation = StreamSupport.stream(unitsInCurrentLocation).map(UnitConfig::getId).collect(Collectors.toList());
         } catch (CouldNotPerformException e) {
             Log.e(TAG, Log.getStackTraceString(new CouldNotPerformException("Error while fetching units of location " + location.getId() + "!\nDrawing all blobs regardless of the current location...", e)));
