@@ -34,8 +34,8 @@ public class Location implements Parent<Device> {
         this.deviceList = new ArrayList<>();
 
         try {
-            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigsByLocation(locationConfig.getId(), true))
-                    .filter(BcoUtils::filterByMetaTag)
+            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigsByLocationIdRecursive(locationConfig.getId(), true))
+//                    .filter(BcoUtils::filterByMetaTag)
                     .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE || !unitConfig.getBoundToUnitHost())
                     .filter(unitConfig -> (unitSetting == SettingValue.ALL ||
                                           (unitSetting == SettingValue.LOCATED && unitConfig.getPlacementConfig().hasPose()) ||

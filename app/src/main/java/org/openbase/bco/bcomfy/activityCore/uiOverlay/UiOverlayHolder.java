@@ -137,7 +137,7 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
         protected Void doInBackground(Void... voids) {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
-                        .filter(BcoUtils::filterByMetaTag)
+//                        .filter(BcoUtils::filterByMetaTag)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().hasPose())
                         .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.DEVICE ||
                                 (!unitConfig.getBoundToUnitHost() &&
@@ -146,12 +146,13 @@ public class UiOverlayHolder implements OnDeviceSelectedListener {
                         .filter(unitConfig -> unitConfig.getEnablingState().getValue() == EnablingStateType.EnablingState.State.ENABLED)
                         .forEach(unitConfig -> {
                             try {
-                                Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
+                                //Log.i(TAG, "fetched unit: " + unitConfig.getLabel() + " -> [" + unitConfig.getId() + "]");
                                 newUnitMap.put(unitConfig.getId(), SelectorHolderFactory.createUnitSelectorHolder(unitConfig));
                             } catch (InterruptedException | CouldNotPerformException e) {
                                 Log.e(TAG, Log.getStackTraceString(e));
                             }
                         });
+                Log.i(TAG, "fetching units done.");
             } catch (CouldNotPerformException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }

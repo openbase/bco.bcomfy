@@ -405,7 +405,7 @@ public class StartActivity extends Activity {
                 while (!Registries.isDataAvailable()) {
                     Log.i(TAG, "Calling data...");
                     try {
-                        Registries.waitForData(1, TimeUnit.SECONDS);
+                        Registries.waitForData(20, TimeUnit.SECONDS);
                     } catch (NotAvailableException ex) {
                         Log.i(TAG, "TIMEOUT!");
                     }

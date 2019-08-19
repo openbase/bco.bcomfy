@@ -20,9 +20,13 @@ import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
 import static org.openbase.type.domotic.state.ConnectionStateType.ConnectionState;
+
+import org.openbase.jul.exception.printer.ExceptionPrinter;
+import org.openbase.jul.extension.type.processing.LabelProcessor;
 import org.rajawali3d.math.Matrix4;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.sql.Time;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +53,7 @@ public abstract class AbstractUnitSelectorHolder {
     private boolean visible;
 
     private UnitConfigType.UnitConfig unitConfig;
-    private UnitRemote unitRemote;
+    private UnitRemote<?> unitRemote;
 
     public AbstractUnitSelectorHolder(IIcon icon, UnitConfigType.UnitConfig unitConfig, boolean isMainSelector) throws InstantiationException, InterruptedException {
         try {
@@ -57,21 +61,33 @@ public abstract class AbstractUnitSelectorHolder {
             this.unitConfig = unitConfig;
             this.isMainSelector = isMainSelector;
 
-            if (isMainSelector) {
-                updatePositionFromRoot();
-            }
-
             this.parentWidth = 0;
             this.parentHeight = 0;
 
-            unitRemote = Units.getFutureUnit(unitConfig, true).get(10, TimeUnit.SECONDS);
+            unitRemote = Units.getUnit(unitConfig, false);
             unitRemote.addConfigObserver((observable, newUnitConfig) -> {
-                this.unitConfig = (UnitConfigType.UnitConfig) newUnitConfig;
-                this.updatePositionFromRoot();
+                this.unitConfig = newUnitConfig;
+                if (isMainSelector) {
+                    try {
+                        updatePositionFromRoot();
+                    } catch (TimeoutException | CouldNotPerformException ex) {
+                        ExceptionPrinter.printHistory(ex, System.err);
+                    }
+                }
             });
             unitRemote.addConnectionStateObserver((observable, connectionState) ->
-                    updateConnectionState((ConnectionState.State) connectionState));
-        } catch (CancellationException | ExecutionException | TimeoutException | CouldNotPerformException ex) {
+                    updateConnectionState( connectionState));
+
+            if (unitRemote.isConfigAvailable()) {
+                if (isMainSelector) {
+                    try {
+                        updatePositionFromRoot();
+                    } catch (TimeoutException | CouldNotPerformException ex) {
+                        ExceptionPrinter.printHistory(ex, System.err);
+                    }
+                }
+            }
+        } catch (CancellationException | CouldNotPerformException ex) {
             throw new InstantiationException(this, ex);
         }
     }
@@ -136,6 +152,12 @@ public abstract class AbstractUnitSelectorHolder {
     }
 
     public void alignViewToPixel(Context context, Matrix4 bcoToPixelTransform) {
+
+        // if view not ready yet than skip alignment
+        if(view == null) {
+            return;
+        }
+
         if (!visible) {
             view.setVisibility(View.INVISIBLE);
             return;
@@ -158,10 +180,6 @@ public abstract class AbstractUnitSelectorHolder {
                 view.setVisibility(View.INVISIBLE);
             });
         }
-    }
-
-    public void alignViewToParent(float x, float y) {
-        throw new UnsupportedOperationException();
     }
 
     public void initIcon() {
@@ -187,10 +205,10 @@ public abstract class AbstractUnitSelectorHolder {
     private void updateConnectionState(ConnectionState.State connectionState) {
         switch (connectionState) {
             case CONNECTED:
-                Log.i(TAG, "Connection to unit " + unitConfig.getId() + " established.");
+                Log.i(TAG, "Connection to unit " + LabelProcessor.getBestMatch(unitConfig.getLabel(),"?") + " established.");
                 break;
             default:
-                Log.i(TAG, "Connection to unit " + unitConfig.getId() + " lost.");
+                Log.i(TAG, "Connection to unit " + LabelProcessor.getBestMatch(unitConfig.getLabel(),"?") + " lost.");
                 break;
         }
     }

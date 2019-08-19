@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.projecttango.tangosupport.TangoSupport;
 
+import org.junit.rules.Timeout;
 import org.openbase.bco.bcomfy.BComfy;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
@@ -26,6 +27,7 @@ import javax.vecmath.Point3d;
 import java8.util.stream.StreamSupport;
 import rsb.introspection.LacksOsInformationException;
 import rsb.util.os.RuntimeOsUtilities;
+
 import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 import org.openbase.type.domotic.unit.UnitTemplateType;
 import org.openbase.type.domotic.unit.location.LocationConfigType;
@@ -40,25 +42,24 @@ public final class BcoUtils {
 
     private static final String TAG = BcoUtils.class.getSimpleName();
 
-    public static boolean filterByMetaTag(UnitConfig unitConfig) {
-        boolean preferenceUseFilter = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
-                .getBoolean(SettingsActivity.KEY_PREF_MISC_USE_META_FILTER, false);
-
-        String preferenceFilterValue = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
-                .getString(SettingsActivity.KEY_PREF_MISC_META_FILTER, "CUSTOM_META_FILTER");
-
-        if (preferenceUseFilter) {
-            try {
-                MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
-                return Boolean.parseBoolean(mcvp.getValue(preferenceFilterValue));
-            } catch (NotAvailableException ex) {
-                return false;
-            }
-        }
-        else {
-            return true;
-        }
-    }
+//    public static boolean filterByMetaTag(UnitConfig unitConfig) {
+//        boolean preferenceUseFilter = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
+//                .getBoolean(SettingsActivity.KEY_PREF_MISC_USE_META_FILTER, false);
+//
+//        String preferenceFilterValue = PreferenceManager.getDefaultSharedPreferences(BComfy.getAppContext())
+//                .getString(SettingsActivity.KEY_PREF_MISC_META_FILTER, "CUSTOM_META_FILTER");
+//
+//        if (preferenceUseFilter) {
+//            try {
+//                MetaConfigVariableProvider mcvp = new MetaConfigVariableProvider("UnitConfig", unitConfig.getMetaConfig());
+//                return Boolean.parseBoolean(mcvp.getValue(preferenceFilterValue));
+//            } catch (NotAvailableException ex) {
+//                return false;
+//            }
+//        } else {
+//            return true;
+//        }
+//    }
 
     public static class UpdateUnitPositionTask extends AsyncTask<Void, Void, Void> {
         private static final String TAG = UpdateLocationShapeTask.class.getSimpleName();
@@ -93,8 +94,7 @@ public final class BcoUtils {
                 if (locations.size() == 0) {
                     location[0] = Registries.getUnitRegistry().getUnitConfigById(unitConfig.getPlacementConfig().getLocationId());
                     Log.w(TAG, "No location found for current unit position! Retaining old location information...");
-                }
-                else {
+                } else {
                     // Get Region if there is any
                     StreamSupport.stream(locations)
                             .filter(unitConfig -> unitConfig.getLocationConfig().getLocationType() == LocationConfigType.LocationConfig.LocationType.REGION)
@@ -125,11 +125,10 @@ public final class BcoUtils {
                 RotationType.Rotation rotation;
                 if (unitConfig.getPlacementConfig().hasPose()) {
                     rotation = unitConfig.getPlacementConfig().getPose().getRotation();
-                }
-                else {
+                } else {
                     rotation = RotationType.Rotation.newBuilder().setQw(1).setQx(0).setQy(0).setQz(0).build();
                 }
-                PoseType.Pose pose  =
+                PoseType.Pose pose =
                         unitConfig.getPlacementConfig().getPose().toBuilder().setTranslation(translation).setRotation(rotation).build();
                 PlacementConfigType.PlacementConfig placementConfig =
                         unitConfig.getPlacementConfig().toBuilder().setPose(pose).setLocationId(location[0].getId()).build();
@@ -137,11 +136,13 @@ public final class BcoUtils {
                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
                 // Update unitConfig
-                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get();
+                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get(30, TimeUnit.SECONDS);
 
                 updateSuccessful = true;
-            } catch (TimeoutException | CouldNotPerformException | InterruptedException | ExecutionException e) {
+            } catch (TimeoutException | CouldNotPerformException | ExecutionException e) {
                 Log.e(TAG, "Error while updating locationConfig of unit: " + unitConfig, e);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
             }
 
             return null;
@@ -218,11 +219,13 @@ public final class BcoUtils {
                 UnitConfig newLocationConfig = locationConfig.toBuilder().clearPlacementConfig().setPlacementConfig(placementConfig).build();
 
                 // Update the locationConfig
-                Registries.getUnitRegistry().updateUnitConfig(newLocationConfig);
-            } catch (CouldNotPerformException e) {
+                Registries.getUnitRegistry().updateUnitConfig(newLocationConfig).get(30, TimeUnit.SECONDS);
+            } catch (TimeoutException | CouldNotPerformException | ExecutionException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             } catch (LacksOsInformationException | RuntimeOsUtilities.RuntimeNotAvailableException e) {
                 Log.w(TAG, "No PID information available.");
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
             }
 
             return null;
@@ -253,14 +256,16 @@ public final class BcoUtils {
                         .forEach(unitConfig -> {
                             try {
                                 PlacementConfigType.PlacementConfig placementConfig =
-                                    unitConfig.getPlacementConfig().toBuilder().clearPose().build();
+                                        unitConfig.getPlacementConfig().toBuilder().clearPose().build();
 
                                 UnitConfig newUnitConfig =
-                                    unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
+                                        unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
-                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
-                            } catch (CouldNotPerformException e) {
+                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get(30, TimeUnit.SECONDS);
+                            } catch (TimeoutException | CouldNotPerformException | ExecutionException e) {
                                 Log.e(TAG, "Error while updating unitConfig!", e);
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
                             }
                         });
 
@@ -293,7 +298,7 @@ public final class BcoUtils {
             try {
                 StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs())
                         .filter(unitConfig -> unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.LOCATION ||
-                                                unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.CONNECTION)
+                                unitConfig.getUnitType() == UnitTemplateType.UnitTemplate.UnitType.CONNECTION)
                         .filter(unitConfig -> unitConfig.getPlacementConfig().getShape().getFloorCount() > 0)
                         .forEach(unitConfig -> {
                             try {
@@ -303,9 +308,11 @@ public final class BcoUtils {
                                 UnitConfig newUnitConfig =
                                         unitConfig.toBuilder().setPlacementConfig(placementConfig).build();
 
-                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig);
-                            } catch (CouldNotPerformException e) {
+                                Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get();
+                            } catch (CouldNotPerformException | ExecutionException e) {
                                 Log.e(TAG, "Error while updating unitConfig!", e);
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
                             }
                         });
 

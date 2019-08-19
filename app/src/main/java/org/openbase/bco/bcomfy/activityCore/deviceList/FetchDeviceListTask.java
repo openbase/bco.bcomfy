@@ -37,9 +37,9 @@ public final class FetchDeviceListTask extends AsyncTask<Void, Void, Void> {
         locationList = new ArrayList<>();
 
         try {
-            Registries.getUnitRegistry().waitForData(10, TimeUnit.SECONDS);
+            Registries.getUnitRegistry().waitForData(30, TimeUnit.SECONDS);
 
-            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
+            StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigsByUnitType(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
                     .filter(locationConfig -> locationConfig.getLocationConfig().getLocationType().equals(LocationConfigType.LocationConfig.LocationType.TILE) &&
                             ((locationSetting == SettingValue.ALL) ||
                             (locationConfig.getPlacementConfig().getShape().getFloorCount() > 0)))

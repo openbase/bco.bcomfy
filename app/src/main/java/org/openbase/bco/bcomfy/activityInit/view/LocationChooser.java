@@ -52,8 +52,8 @@ public class LocationChooser extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         try {
             Registries.getUnitRegistry().waitForData();
-            locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigs(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
-                    .filter(BcoUtils::filterByMetaTag)
+            locations = StreamSupport.stream(Registries.getUnitRegistry().getUnitConfigsByUnitType(UnitTemplateType.UnitTemplate.UnitType.LOCATION))
+//                    .filter(BcoUtils::filterByMetaTag)
                     .sorted(Comparators.comparing((unitConfig1) -> {
                         try {
                             return LabelProcessor.getBestMatch(Locale.getDefault(), unitConfig1.getLabel());
