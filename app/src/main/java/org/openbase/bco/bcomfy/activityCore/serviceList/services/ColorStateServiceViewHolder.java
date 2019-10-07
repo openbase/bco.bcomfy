@@ -40,7 +40,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
                         HSBColorToRGBColorTransformer.transform(
                                 RGBColor.newBuilder().setRed(Color.red(getLatestValue())).setGreen(Color.green(getLatestValue())).setBlue(Color.blue(getLatestValue())).build());
 
-                ((Future)Services.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
+                ((Future) Services.invokeOperationServiceMethod(ServiceType.COLOR_STATE_SERVICE, unitRemote,
                         ColorState.newBuilder().setColor(ColorType.Color.newBuilder().setType(ColorType.Color.Type.HSB).setHsbColor(hsbColor).build()).build())).get();
             } catch (CouldNotPerformException | ExecutionException e) {
                 Log.e(TAG, "Error while changing the color state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -75,8 +75,7 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
                     Log.w(TAG, "Could not set color state", e);
                 }
             });
-        }
-        else {
+        } else {
             colorPickerView.setClickable(false);
             lightnessSlider.setClickable(false);
         }
@@ -90,12 +89,12 @@ public class ColorStateServiceViewHolder extends AbstractServiceViewHolder {
 
             if (colorState.getColor().getType().equals(ColorType.Color.Type.HSB)) {
                 rgbColor = HSBColorToRGBColorTransformer.transform(colorState.getColor().getHsbColor());
-            }
-            else {
+            } else {
                 rgbColor = colorState.getColor().getRgbColor();
             }
 
-            activity.runOnUiThread(() -> colorPickerView.setColor(Color.rgb(rgbColor.getRed(), rgbColor.getGreen(), rgbColor.getBlue()), false));
+            activity.runOnUiThread(() -> colorPickerView.setColor(Color.rgb(((int) (rgbColor.getRed() * 255d)), ((int) (rgbColor.getGreen() * 255d)), ((int) (rgbColor.getBlue() * 255d))), false));
+            // android 26 api only: activity.runOnUiThread(() -> colorPickerView.setColor(Color.rgb(((float) rgbColor.getRed()), ((float) rgbColor.getGreen()), ((float) rgbColor.getBlue())), false));
 
         } catch (CouldNotPerformException | NullPointerException e) {
             Log.e(TAG, Log.getStackTraceString(e));
