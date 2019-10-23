@@ -16,6 +16,7 @@ import org.openbase.bco.bcomfy.R;
 import org.openbase.bco.dal.lib.layer.unit.UnitRemote;
 import org.openbase.bco.dal.remote.layer.unit.Units;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.InstantiationException;
 import org.openbase.jul.exception.NotAvailableException;
@@ -217,12 +218,12 @@ public abstract class AbstractUnitSelectorHolder {
         try {
             Point3d unitVector = new Point3d(0, 0, 0);
 
-            Transform3D transform3D = Units.getRootToUnitTransformationFuture(unitConfig).get(5, TimeUnit.SECONDS).getTransform();
+            Transform3D transform3D = Units.getRootToUnitTransformation(unitConfig).get(5, TimeUnit.SECONDS).getTransform();
             transform3D.invert();
             transform3D.transform(unitVector);
 
             positionFromRoot = new Vector3(unitVector.x, unitVector.y, unitVector.z);
-        } catch (CancellationException | ExecutionException ex) {
+        } catch (ExecutionException | CancellationException ex) {
             throw new CouldNotPerformException("Could not update position from root!", ex);
         }
 

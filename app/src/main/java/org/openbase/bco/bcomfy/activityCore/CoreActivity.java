@@ -45,6 +45,7 @@ import org.openbase.bco.bcomfy.utils.AndroidUtils;
 import org.openbase.bco.bcomfy.utils.BcoUtils;
 import org.openbase.bco.bcomfy.utils.TangoUtils;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.extension.type.processing.LabelProcessor;
@@ -54,10 +55,12 @@ import org.rajawali3d.math.vector.Vector3;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.openbase.type.domotic.unit.UnitConfigType.UnitConfig;
 import org.openbase.type.domotic.unit.location.LocationConfigType;
@@ -368,7 +371,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
             try {
                 Registries.waitForData();
                 List<UnitConfig> unitConfigs = Registries.getUnitRegistry()
-                        .getLocationUnitConfigsByCoordinate(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE);
+                        .getLocationUnitConfigsByCoordinateAndLocationType(vec3DDouble, LocationConfigType.LocationConfig.LocationType.TILE).get(UnitRegistry.RCT_TIMEOUT, TimeUnit.MILLISECONDS);
 
                 if (unitConfigs.size() > 0) {
                     if (currentLocation != null) {
@@ -387,7 +390,7 @@ public class CoreActivity extends TangoActivity implements View.OnTouchListener,
                     runOnUiThread(() -> locationLabelButton.setVisibility(View.GONE));
                 }
 
-            } catch (CouldNotPerformException | InterruptedException | ConcurrentModificationException e) {
+            } catch (CouldNotPerformException | InterruptedException | ConcurrentModificationException  | TimeoutException | ExecutionException | CancellationException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         };

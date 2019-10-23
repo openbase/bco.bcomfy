@@ -11,6 +11,7 @@ import org.openbase.bco.bcomfy.BComfy;
 import org.openbase.bco.bcomfy.activitySettings.SettingsActivity;
 import org.openbase.bco.bcomfy.interfaces.OnTaskFinishedListener;
 import org.openbase.bco.registry.remote.Registries;
+import org.openbase.bco.registry.unit.lib.UnitRegistry;
 import org.openbase.jul.exception.CouldNotPerformException;
 import org.openbase.jul.exception.NotAvailableException;
 import org.openbase.jul.extension.type.processing.MetaConfigVariableProvider;
@@ -18,6 +19,7 @@ import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -87,7 +89,7 @@ public final class BcoUtils {
                 // Get location for that specific coordinate
                 List<UnitConfig> locations =
                         Registries.getUnitRegistry().getLocationUnitConfigsByCoordinate(
-                                Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build());
+                                Vec3DDoubleType.Vec3DDouble.newBuilder().setX(bcoPosition[0]).setY(bcoPosition[1]).setZ(bcoPosition[2]).build()).get(UnitRegistry.RCT_TIMEOUT, TimeUnit.MILLISECONDS);
 
                 UnitConfig[] location = new UnitConfig[1];
 
@@ -117,7 +119,7 @@ public final class BcoUtils {
                 // Transform BCO-Root position to BCO-Location-of-selected-point position
                 Point3d transformedBcoPosition = new Point3d(bcoPosition[0], bcoPosition[1], bcoPosition[2]);
                 Registries.getUnitRegistry().waitForData();
-                Registries.getUnitRegistry().getRootToUnitTransformationFuture(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
+                Registries.getUnitRegistry().getRootToUnitTransformation(location[0]).get(3, TimeUnit.SECONDS).getTransform().transform(transformedBcoPosition);
 
                 // Generate new protobuf unitConfig
                 TranslationType.Translation translation =
@@ -139,7 +141,7 @@ public final class BcoUtils {
                 Registries.getUnitRegistry().updateUnitConfig(newUnitConfig).get(30, TimeUnit.SECONDS);
 
                 updateSuccessful = true;
-            } catch (TimeoutException | CouldNotPerformException | ExecutionException e) {
+            } catch (TimeoutException | CouldNotPerformException | ExecutionException | CancellationException e) {
                 Log.e(TAG, "Error while updating locationConfig of unit: " + unitConfig, e);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
