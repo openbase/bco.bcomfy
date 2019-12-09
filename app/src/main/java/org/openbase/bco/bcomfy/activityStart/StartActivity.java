@@ -397,7 +397,7 @@ public class StartActivity extends Activity {
                 Registries.getUnitRegistry().addDataObserver((templateRegistryDataDataProvider, templateRegistryData) -> {
                     Log.i(TAG, "DataObserver triggered!");
 
-                    int size = Registries.getUnitRegistry().getUserUnitConfigRemoteRegistry().getEntries().size();
+                    int size = Registries.getUnitRegistry(true).getUserUnitConfigRemoteRegistry(true).getEntries().size();
                     Log.i(TAG, "Sizes "+size+" = "+templateRegistryData.getUserUnitConfigCount()+" ?");
                 });
 
