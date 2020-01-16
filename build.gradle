@@ -2,11 +2,19 @@
 
 buildscript {
     repositories {
-        maven { url "https://maven.google.com" }
-        maven { url 'https://maven.fabric.io/public' }
-        mavenLocal()
-        jcenter()
         google()
+        jcenter()
+        maven { url 'https://maven.fabric.io/public' }
+        maven { url 'https://jitpack.io' }
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://maven.fabric.io/public' }
+        maven { url "https://maven.google.com"  }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/groups/public/" }
+        maven { url "https://repo.maven.apache.org/maven2" }
+        maven { url "https://mvn.cit-ec.de/nexus/content/repositories/releases"}
+        maven { url "https://mvn.cit-ec.de/nexus/content/repositories/snapshots"}
     }
 
     dependencies {
@@ -19,18 +27,19 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://maven.google.com' }
+        google()
         jcenter()
+        maven { url 'https://maven.fabric.io/public' }
+        maven { url 'https://jitpack.io' }
         mavenLocal()
         mavenCentral()
+        maven { url 'https://maven.fabric.io/public' }
+        maven { url "https://maven.google.com"  }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
-        maven { url "http://repo.maven.apache.org/maven2" }
+        maven { url "https://repo.maven.apache.org/maven2" }
         maven { url "https://mvn.cit-ec.de/nexus/content/repositories/releases"}
         maven { url "https://mvn.cit-ec.de/nexus/content/repositories/snapshots"}
-        maven { url "https://jitpack.io" }
-        maven { url 'https://maven.fabric.io/public' }
-        google()
     }
 }
 
