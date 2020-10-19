@@ -394,7 +394,7 @@ public class StartActivity extends Activity {
                 SettingsActivity.updateJPServiceProperties(applicationContext);
 
 
-                Registries.getUnitRegistry().addDataObserver((templateRegistryDataDataProvider, templateRegistryData) -> {
+                Registries.getUnitRegistry(true).addDataObserver((templateRegistryDataDataProvider, templateRegistryData) -> {
                     Log.i(TAG, "DataObserver triggered!");
 
                     int size = Registries.getUnitRegistry(true).getUserUnitConfigRemoteRegistry(true).getEntries().size();
@@ -406,7 +406,7 @@ public class StartActivity extends Activity {
                     Log.i(TAG, "Calling data...");
                     try {
                         Registries.waitForData(20, TimeUnit.SECONDS);
-                    } catch (NotAvailableException ex) {
+                    } catch (TimeoutException | NotAvailableException ex) {
                         Log.i(TAG, "TIMEOUT!");
                     }
                 }

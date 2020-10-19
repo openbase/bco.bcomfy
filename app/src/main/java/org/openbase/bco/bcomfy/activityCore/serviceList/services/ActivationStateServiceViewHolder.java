@@ -44,7 +44,7 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
                     }
                     else {
                         Services.invokeOperationServiceMethod(ServiceType.ACTIVATION_STATE_SERVICE, unitRemote,
-                                ActivationState.newBuilder().setValue(ActivationState.State.DEACTIVE).build());
+                                ActivationState.newBuilder().setValue(ActivationState.State.INACTIVE).build());
                     }
                 } catch (CouldNotPerformException e) {
                     Log.e(TAG, "Error while changing the activation state of unit: " + serviceConfig.getUnitId() + "\n" + Log.getStackTraceString(e));
@@ -64,7 +64,7 @@ public class ActivationStateServiceViewHolder extends AbstractServiceViewHolder 
                 case ACTIVE:
                     activity.runOnUiThread(() -> activationStateSwitch.setChecked(true));
                     break;
-                case DEACTIVE:
+                case INACTIVE:
                     activity.runOnUiThread(() -> activationStateSwitch.setChecked(false));
                     break;
             }

@@ -19,6 +19,7 @@ import java.util.Locale;
 import java8.util.Comparators;
 import java8.util.J8Arrays;
 import java8.util.stream.StreamSupport;
+
 import org.openbase.type.domotic.unit.UnitConfigType;
 import org.openbase.type.domotic.unit.UnitTemplateType;
 
@@ -64,8 +65,8 @@ public class LocationChooser extends DialogFragment {
                     .toArray(UnitConfigType.UnitConfig[]::new);
 
             String[] locationStrings = J8Arrays.stream(locations)
-                    .map(UnitConfigType.UnitConfig::getLabel)
-                    .toArray(String[]::new);
+                    .map(unitConfig -> LabelProcessor.getBestMatch(unitConfig.getLabel(),"?"))
+                    .toArray(value -> new String[value]);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.choose_location)
